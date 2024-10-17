@@ -24,8 +24,6 @@ getFinalSizeAnalytic <- function(Rinit, Iinit, Vinit, N, R0, a, eps, q) {
   opt$par + Iinit + Rinit
 }
 
-
-
 exposure.SIR <- function(Time, state, Pars) {
   with(as.list(c(Time, state, Pars)), {
 
