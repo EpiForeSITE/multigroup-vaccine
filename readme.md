@@ -1,6 +1,6 @@
-# Project Title
+# Vaccine Equity Model
 
-One Paragraph of the project description
+Vaccine Equity Model
 
 Initially appeared on
 [gist](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2). But the page cannot open anymore so that is why I have moved it here.
@@ -13,9 +13,6 @@ for notes on deploying the project on a live system.
 
 ### Prerequisites
 
-Requirements for the software and other tools to build, test and push
-- [Example 1](https://www.example.com)
-- [Example 2](https://www.example.com)
 
 ### Installing
 
