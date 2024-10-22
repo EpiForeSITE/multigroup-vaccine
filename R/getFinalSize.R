@@ -34,7 +34,8 @@ exposure.SIR <- function(Time, state, Pars) {
     N <- c(N1, N2)
 
     # beta is a 2x2 transmission matrix
-    beta <- (1 - epsilon) * outer(activities, activities) / sum(c(N1, N2) * activities) +
+    beta <- (1 - epsilon) *
+      outer(activities, activities) / sum(c(N1, N2) * activities) +
       epsilon * activities / c(N1, N2) * diag(2)
 
     beta <- beta / scaling.factor
@@ -64,7 +65,8 @@ sim.exposure.SIR <- function(Rinit, Iinit, Vinit, tm, N, R0, gam, a, eps, q) {
   beta <- (1 - eps) * outer(a, a) / sum(N * a) +
     eps * a / (N) * diag(2)
 
-  scaling.factor <- rescale.R0(beta = beta, gam = gam, pop.p = N / Ntot, N = Ntot,
+  scaling.factor <- rescale.R0(beta = beta, gam = gam,
+    pop.p = N / Ntot, N = Ntot,
     R0.value = R0)
 
   pars <- list(N = Ntot, N1 = N[1], N2 = N[2],
@@ -117,7 +119,8 @@ getFinalSize <- function(vacTime, vacPortion, popSize, R0, recoveryRate,
     Isim1 <- as.numeric(sim1[nrow(sim1), c("I1", "I2")])
     Rsim1 <- as.numeric(sim1[nrow(sim1), c("R1", "R2")])
   }
-  getFinalSizeAnalytic(Rinit = Rsim1, Iinit = Isim1, Vinit = popSize * vacPortion, N = popSize, R0 = R0,
+  getFinalSizeAnalytic(Rinit = Rsim1, Iinit = Isim1,
+    Vinit = popSize * vacPortion, N = popSize, R0 = R0,
     a = c(1, contactRatio), eps = contactWithinGroup, q = c(1, suscRatio))
 
 }
