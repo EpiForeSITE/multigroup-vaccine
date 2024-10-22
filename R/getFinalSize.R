@@ -1,5 +1,6 @@
 library(deSolve)
 
+#' @export
 getFinalSizeAnalytic <- function(Rinit, Iinit, Vinit, N, R0, a, eps, q) {
 
   if (sum(Iinit) == 0) Iinit <- N / sum(N)
@@ -24,6 +25,7 @@ getFinalSizeAnalytic <- function(Rinit, Iinit, Vinit, N, R0, a, eps, q) {
   opt$par + Iinit + Rinit
 }
 
+#' @export
 exposure.SIR <- function(Time, state, Pars) {
   with(as.list(c(Time, state, Pars)), {
 
@@ -48,6 +50,7 @@ exposure.SIR <- function(Time, state, Pars) {
   })
 }
 
+#' @export
 rescale.R0 <- function(beta, gam, pop.p, N, R0.value) {
   NGM.unscaled <- N * pop.p * beta * 1 / gam
   dom.eigen <- as.numeric(eigen(NGM.unscaled)$values[1])
@@ -57,6 +60,7 @@ rescale.R0 <- function(beta, gam, pop.p, N, R0.value) {
   return(scaling.factor)
 }
 
+#' @export
 sim.exposure.SIR <- function(Rinit, Iinit, Vinit, tm, N, R0, gam, a, eps, q) {
 
   Ntot <- sum(N)
@@ -96,7 +100,7 @@ sim.exposure.SIR <- function(Rinit, Iinit, Vinit, tm, N, R0, gam, a, eps, q) {
   simulation
 }
 
-
+#' @export
 getFinalSize <- function(vacTime, vacPortion, popSize, R0, recoveryRate,
                          contactRatio, contactWithinGroup, suscRatio) {
   # vacTime: time after first case at which all vaccinations are delivered
@@ -125,6 +129,7 @@ getFinalSize <- function(vacTime, vacPortion, popSize, R0, recoveryRate,
 
 }
 
+#' @export
 finalSizeExample <- getFinalSize(vacTime = 100, vacPortion = c(0.1, 0.1),
   popSize = c(800000, 200000), R0 = 1.5, recoveryRate = 1 / 7,
   contactRatio = 1.7, contactWithinGroup = c(0.4, 0.4), suscRatio = 1)
