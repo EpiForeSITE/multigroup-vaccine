@@ -1,6 +1,7 @@
-library(deSolve)
+# library(deSolve)
 
 #' @export
+#' @importFrom deSolve ode
 getFinalSizeAnalytic <- function(Rinit, Iinit, Vinit, N, R0, a, eps, q) {
 
   if (sum(Iinit) == 0) Iinit <- N / sum(N)
@@ -95,7 +96,7 @@ sim.exposure.SIR <- function(Rinit, Iinit, Vinit, tm, N, R0, gam, a, eps, q) {
 
   # the ode() command solves the ODEs, and stores the data in a dataframe called
   # "simulation"
-  simulation <- as.data.frame(ode(y0, times, exposure.SIR, pars))
+  simulation <- as.data.frame(deSolve::ode(y0, times, exposure.SIR, pars))
 
   simulation
 }
