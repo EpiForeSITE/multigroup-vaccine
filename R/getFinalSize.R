@@ -1,7 +1,9 @@
 # library(deSolve)
 
+
 #' @export
 #' @importFrom deSolve ode
+#' @importFrom stats optim runif
 getFinalSizeAnalytic <- function(Rinit, Iinit, Vinit, N, R0, a, eps, q) {
 
   if (sum(Iinit) == 0) Iinit <- N / sum(N)
