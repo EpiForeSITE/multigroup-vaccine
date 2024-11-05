@@ -191,6 +191,8 @@ ui <- fixedPage(
 
   plotOutput("plot", click = "plot_click", )
 )
+
+
 server <- function(input, output, session) {
   # output$infs<-renderText(round(SIRV.model(t=input$time,V1=input$V1,I1=as.numeric(input$Iinit),b=input$beta,g=input$gamma,m=input$mu)$R[
   #   length(SIRV.model(t=input$time,V1=input$V1,I1=as.numeric(input$Iinit),b=input$beta,g=input$gamma,m=input$mu)$R)]
@@ -320,4 +322,8 @@ server <- function(input, output, session) {
     res = 96)
 }
 
-shinyApp(ui, server)
+#' Runs the vaccine model
+#' @export
+run_model <- function() {
+  shinyApp(ui, server)
+}
