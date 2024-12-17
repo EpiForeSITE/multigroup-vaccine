@@ -1,0 +1,26 @@
+---
+title: "How to run the model"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{How to run the model}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+runtime: shiny
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(vaccine.equity)
+```
+To run the model, first install the vaccine.equity model, then in the console
+type:
+
+```{r }
+vaccine.equity::run_model()
+```
