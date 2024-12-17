@@ -3,9 +3,11 @@ require(deSolve)
 require(shiny)
 ## dependent functions
 
-#' @export
+
 #' @import shiny
 getFinalSizeAnalytic <- function(Rinit, Iinit, Vinit, N, R0, a, eps, q) {
+
+  if (sum(Iinit) == 0) Iinit <- N / sum(N)
 
   Sinit <- N - Rinit - Iinit - Vinit
   fn <- (1 - eps) * a * N
@@ -17,21 +19,16 @@ getFinalSizeAnalytic <- function(Rinit, Iinit, Vinit, N, R0, a, eps, q) {
 
   Zrhs <- function(Z) c(Sinit * (1 - exp(-R0i * cij %*% ((Z + Iinit) / N))))
 
-  optfn <- function(x) ifelse(all(x / N > 0.001), max(abs(x - Zrhs(x))), Inf)
+  optfn <- function(x) ifelse(all(x > 0), max(abs(x - Zrhs(x))), Inf)
 
   optVal <- Inf
-  counter <- 0
-  while (optVal > 1 & counter < 5000) {
-    opt <- optim((0.1 + 0.8 * runif(length(N))) * N, optfn)
+  while (optVal > 1) {
+    opt <- optim((0.01 + 0.98 * runif(length(N))) * N, optfn)
     optVal <- opt$value
-    counter <- counter + 1
   }
-  if (counter >= 5000) {
-    return("Error")
-  } else {
-    opt$par + Iinit + Rinit
-  }
+  opt$par + Iinit + Rinit
 }
+
 
 exposure.SIR <- function(Time, state, Pars) {
   with(as.list(c(Time, state, Pars)), {
@@ -43,7 +40,8 @@ exposure.SIR <- function(Time, state, Pars) {
     N <- c(N1, N2)
 
     # beta is a 2x2 transmission matrix
-    beta <- (1 - epsilon) * outer(activities, activities) / sum(c(N1, N2) * activities) +
+    beta <- (1 - epsilon) *
+      outer(activities, activities) / sum(c(N1, N2) * activities) +
       epsilon * activities / c(N1, N2) * diag(2)
 
     beta <- beta / scaling.factor
@@ -56,6 +54,7 @@ exposure.SIR <- function(Time, state, Pars) {
   })
 }
 
+
 rescale.R0 <- function(beta, gam, pop.p, N, R0.value) {
   NGM.unscaled <- N * pop.p * beta * 1 / gam
   dom.eigen <- as.numeric(eigen(NGM.unscaled)$values[1])
@@ -65,6 +64,7 @@ rescale.R0 <- function(beta, gam, pop.p, N, R0.value) {
   return(scaling.factor)
 }
 
+
 sim.exposure.SIR <- function(Rinit, Iinit, Vinit, tm, N, R0, gam, a, eps, q) {
 
   Ntot <- sum(N)
@@ -73,7 +73,8 @@ sim.exposure.SIR <- function(Rinit, Iinit, Vinit, tm, N, R0, gam, a, eps, q) {
   beta <- (1 - eps) * outer(a, a) / sum(N * a) +
     eps * a / (N) * diag(2)
 
-  scaling.factor <- rescale.R0(beta = beta, gam = gam, pop.p = N / Ntot, N = Ntot,
+  scaling.factor <- rescale.R0(beta = beta, gam = gam,
+    pop.p = N / Ntot, N = Ntot,
     R0.value = R0)
 
   pars <- list(N = Ntot, N1 = N[1], N2 = N[2],
@@ -98,11 +99,24 @@ sim.exposure.SIR <- function(Rinit, Iinit, Vinit, tm, N, R0, gam, a, eps, q) {
 
   # the ode() command solves the ODEs, and stores the data in a dataframe called
   # "simulation"
-  simulation <- as.data.frame(ode(y0, times, exposure.SIR, pars))
+  simulation <- as.data.frame(deSolve::ode(y0, times, exposure.SIR, pars))
 
   simulation
 }
 
+
+#' Run the model
+#'
+#' @param vacTime time after first case at which all vaccines are delivered.
+#' @param vacPortion  fraction of each population vaccinat
+#' @param popSize size of each population
+#' @param R0 overall basic reproduction number
+#' @param recoveryRate inverse of mean infectious period (same time units as vacTime)
+#' @param contactRatio ratio of 2nd group's : 1st group's overall contact rate
+#' @param contactWithinGroup fraction of each group's contacts that are exclusively within group
+#' @param suscRatio ratio of 2nd group's : 1st group's susceptibility to infection per contact
+#' @returns A numeric vector.
+#' @export
 getFinalSize <- function(vacTime, vacPortion, popSize, R0, recoveryRate,
                          contactRatio, contactWithinGroup, suscRatio) {
   # vacTime: time after first case at which all vaccinations are delivered
@@ -111,13 +125,13 @@ getFinalSize <- function(vacTime, vacPortion, popSize, R0, recoveryRate,
   # R0: overall basic reproduction number
   # recoveryRate: inverse of mean infectious period (same time units as vacTime)
   # contactRatio: ratio of 2nd group's : 1st group's overall contact rate
-  # contactWithinGroup: fraction of each group's contacts that are exlusively within group
+  # contactWithinGroup: fraction of each group's contacts that are exclusively within group
   # suscRatio: ratio of 2nd group's : 1st group's susceptibility to infection per contact
 
   Isim1 <- c(0, 0)
   Rsim1 <- c(0, 0)
 
-  if (vacTime >= 0) {
+  if (vacTime > 0) {
     sim1 <- sim.exposure.SIR(Rinit = c(0, 0), Iinit = c(0, 0), Vinit = c(0, 0), tm = vacTime,
       N = popSize, R0 = R0, gam = recoveryRate, a = c(1, contactRatio),
       eps = contactWithinGroup, q = c(1, suscRatio))
@@ -125,17 +139,10 @@ getFinalSize <- function(vacTime, vacPortion, popSize, R0, recoveryRate,
     Isim1 <- as.numeric(sim1[nrow(sim1), c("I1", "I2")])
     Rsim1 <- as.numeric(sim1[nrow(sim1), c("R1", "R2")])
   }
-  if (any(is.na(c(Isim1, Rsim1)))) {
-    return("Error")
-  } else {
-    fsout <- try(getFinalSizeAnalytic(Rinit = Rsim1, Iinit = Isim1, Vinit = popSize * vacPortion, N = popSize, R0 = R0,
-      a = c(1, contactRatio), eps = contactWithinGroup, q = c(1, suscRatio)))
-    if (any(grepl("Error", fsout))) {
-      return("Error")
-    } else {
-      return(fsout)
-    }
-  }
+  getFinalSizeAnalytic(Rinit = Rsim1, Iinit = Isim1,
+    Vinit = popSize * vacPortion, N = popSize, R0 = R0,
+    a = c(1, contactRatio), eps = contactWithinGroup, q = c(1, suscRatio))
+
 }
 
 
