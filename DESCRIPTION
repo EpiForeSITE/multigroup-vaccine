@@ -13,7 +13,8 @@ Imports:
     deSolve,
     graphics,
     shiny,
-    stats
+    stats,
+    bslib (>= 0.8.0)
 Suggests:
     knitr,
     rmarkdown,
