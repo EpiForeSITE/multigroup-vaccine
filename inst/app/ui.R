@@ -18,6 +18,7 @@ textInput2 <- function(inputId, label, value = "", ...) {
 ## shiny app
 ui <- fixedPage(
   titlePanel("Model Title"),
+  img(src = "figs/logo.jpg", align = "right", height = 100, width = 100),
 
   fluidRow(
     textInput2("vacPortion_a", label = "fraction vaccinated a = ", value = "0.1", class = "input-small"),
@@ -59,4 +60,5 @@ ui <- fixedPage(
   # ", and vaccine doses given = ", textOutput("vaxs",inline=T),
 
   plotOutput("plot", click = "plot_click", )
+
 )
