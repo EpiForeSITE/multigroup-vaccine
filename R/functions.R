@@ -2,12 +2,14 @@ require(deSolve)
 
 getFinalSizeAnalytic <- function(Rinit, Iinit, Vinit, N, R0, a, eps, q) {
 
+
   if (sum(Iinit) == 0) Iinit <- N / sum(N)
 
   Sinit <- N - Rinit - Iinit - Vinit
   fn <- (1 - eps) * a * N
   f <- fn / sum(fn)
-
+  print(diag(eps))
+  print(outer((1 - eps), f))
   cij <- diag(eps) + outer((1 - eps), f)
 
   R0i <- R0 / eigen(a * q * cij)$values[1] * a * q
@@ -110,6 +112,8 @@ getFinalSize <- function(vacTime, vacPortion, popSize, R0, recoveryRate,
   # contactRatio: ratio of 2nd group's : 1st group's overall contact rate
   # contactWithinGroup: fraction of each group's contacts that are exclusively within group
   # suscRatio: ratio of 2nd group's : 1st group's susceptibility to infection per contact
+  print("getFinalSize")
+
 
   Isim1 <- c(0, 0)
   Rsim1 <- c(0, 0)
@@ -122,6 +126,7 @@ getFinalSize <- function(vacTime, vacPortion, popSize, R0, recoveryRate,
     Isim1 <- as.numeric(sim1[nrow(sim1), c("I1", "I2")])
     Rsim1 <- as.numeric(sim1[nrow(sim1), c("R1", "R2")])
   }
+
   getFinalSizeAnalytic(Rinit = Rsim1, Iinit = Isim1,
     Vinit = popSize * vacPortion, N = popSize, R0 = R0,
     a = c(1, contactRatio), eps = contactWithinGroup, q = c(1, suscRatio))

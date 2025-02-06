@@ -3,13 +3,7 @@ library(shiny)
 
 
 server <- function(input, output, session) {
-  # output$infs<-renderText(round(SIRV.model(t=input$time,V1=input$V1,I1=as.numeric(input$Iinit),b=input$beta,g=input$gamma,m=input$mu)$R[
-  #   length(SIRV.model(t=input$time,V1=input$V1,I1=as.numeric(input$Iinit),b=input$beta,g=input$gamma,m=input$mu)$R)]
-  #   * 1726765)) ## the big number is the population size
-  # output$r0<-renderText(as.character(round(as.numeric(input$beta)/as.numeric(input$gamma),2)))
-  # output$vaxs<-renderText(as.character(round(round(max(SIRV.model(t=input$time,V1=input$V1,I1=as.numeric(input$Iinit),b=input$beta,g=input$gamma,m=input$mu)$V)* 1726765 )-
-  #                                              round(min(SIRV.model(t=input$time,V1=input$V1,I1=as.numeric(input$Iinit),b=input$beta,g=input$gamma,m=input$mu)$V)* 1726765))
-  # ))
+
   output$plot <- renderPlot(
     {
       popSize <- c(as.numeric(input$popSize_a), as.numeric(input$popSize_b))
