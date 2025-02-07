@@ -14,7 +14,8 @@ Imports:
     graphics,
     shiny,
     stats,
-    bslib (>= 0.8.0)
+    bslib (>= 0.8.0),
+    htmltools
 Suggests:
     knitr,
     rmarkdown,
