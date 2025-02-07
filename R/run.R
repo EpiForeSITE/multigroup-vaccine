@@ -20,6 +20,8 @@
 #' @importFrom graphics hist
 #' @importFrom utils data
 #' @export
+#'
+#'
 run_my_app <- function(...) {
   shinyAppDir(
     system.file("app/", package = "vaccine.equity")
