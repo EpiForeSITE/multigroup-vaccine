@@ -10,7 +10,8 @@ server <- function(input, output, session) {
       R0 <- as.numeric(input$R0)
       recoveryRate <- as.numeric(input$recoveryRate)
       contactRatio <- as.numeric(input$contactRatio)
-      contactWithinGroup <- c(as.numeric(input$contactWithinGroup_a), as.numeric(input$contactWithinGroup_b))
+      contactWithinGroup <- c(as.numeric(input$contactWithinGroup_a),
+        as.numeric(input$contactWithinGroup_b))
       suscRatio <- as.numeric(input$suscRatio)
       vacP <- c(as.numeric(input$vacPortion_a), as.numeric(input$vacPortion_b))
       vacTime <- as.numeric(input$vacTime)
@@ -18,26 +19,31 @@ server <- function(input, output, session) {
       vaccineCostRatio <- as.numeric(input$vaccineCostRatio)
 
       ## function using variables stored in environment
-      getFS0 <- function(vacP) getFinalSize(vacTime = vacTime, vacPortion = vacP, popSize = popSize, R0 = R0,
+      getFS0 <- function(vacP) getFinalSize(vacTime = vacTime,
+        vacPortion = vacP, popSize = popSize, R0 = R0,
         recoveryRate = recoveryRate, contactRatio = contactRatio,
         contactWithinGroup = contactWithinGroup, suscRatio = suscRatio)
 
-      ## get baseline (needed to be in environment for following functions to run?)
+      ## get baseline
+      # (needed to be in environment for following functions to run?)
       # fsNoVax <- getFS0(vacP = c(0,0))
       ## just embeded getFS0 in the getStats function below, instead
       getStats <- function(vacP) {
         fs <- getFS0(vacP)
         infPrev <- getFS0(vacP = c(0, 0)) - fs
 
-        list(finalSize = fs, finalSizeProportion = fs / popSize, infectionsPrevented = infPrev)
+        list(finalSize = fs, finalSizeProportion = fs / popSize,
+          infectionsPrevented = infPrev)
       }
+
+
 
       getstatsout <- try(getStats(vacP))
       # getstatsout<-""
-
       if (any(grepl("Error", getstatsout))) {
         plot(1, 1, main = "Error!")
       } else {
+
 
 
         plotStatsCost <- function(amountToSpend, vaxCosts) {
@@ -64,20 +70,37 @@ server <- function(input, output, session) {
             equityIndex[i] <- min(fsp[i, ]) / max(fsp[i, ])
           }
           par(mfrow = c(1, 2))
-          plot(spend2 / amountToSpend, ip[, 1] + ip[, 2], type = "l", ylim = c(0, max(ip[, 1] + ip[, 2])), lwd = 2,
+          plot(spend2 / amountToSpend, ip[, 1] + ip[, 2], type = "l",
+            ylim = c(0, max(ip[, 1] + ip[, 2])), lwd = 2,
             xlab = "Proportion of spending to minority group",
-            ylab = "Infections prevented (red maj, green min)")
+            ylab = "Infections prevented",
+            main = "Infections prevented")
           lines(spend2 / amountToSpend, ip[, 1], col = "red", lwd = 2)
           lines(spend2 / amountToSpend, ip[, 2], col = "green", lwd = 2)
+          par(xpd = TRUE)
+          legend("bottomright", legend = c("Majority", "Minority"),
+            col = c("red", "green"), lty = 1, lwd = 1, inset = c(0, -0.4))
 
-          plot(spend2 / amountToSpend, equityIndex, type = "l", xlab = "Proportion of spending to minority group",
-            ylim = c(0, 1), lwd = 2, ylab = "maj prev (red); min prev (green); equity (black)")
 
-          lines(spend2 / amountToSpend, fsp[, 1], col = "red", lty = 2, lwd = 2)
-          lines(spend2 / amountToSpend, fsp[, 2], col = "green", lty = 2, lwd = 2)
 
-          list(majFS = fs[, 1], minFS = fs[, 2], majSpend = spend1, minSpend = spend2)
+
+
+          plot(spend2 / amountToSpend, equityIndex, type = "l",
+            xlab = "Proportion of spending to minority group",
+            ylim = c(0, 1), lwd = 2,
+            ylab = "Prevalence",
+            main = "Prevalence")
+
+          lines(spend2 / amountToSpend, fsp[, 1],
+            col = "red", lty = 2, lwd = 2)
+          lines(spend2 / amountToSpend, fsp[, 2],
+            col = "green", lty = 2, lwd = 2)
+
+          list(majFS = fs[, 1], minFS = fs[, 2],
+            majSpend = spend1, minSpend = spend2)
           par(mfrow = c(1, 1))
+          legend("bottomright", legend = c("Majority", "Minority", "Equity"),
+            col = c("red", "green", "black"), lty = 2, lwd = 2, inset = c(0, -0.4))
 
         }
 

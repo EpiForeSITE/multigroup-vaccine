@@ -83,7 +83,8 @@ sim.exposure.SIR <- function(Rinit, Iinit, Vinit, tm, N, R0, gam, a, eps, q) {
   times <- c(0, tm)
 
   # define the initial conditions
-  S.init <- c(S1 = N[1] - Rinit[1] - Iinit[1] - Vinit[1], S2 = N[2] - Rinit[2] - Iinit[2] - Vinit[2])
+  S.init <- c(S1 = N[1] - Rinit[1] - Iinit[1] - Vinit[1],
+    S2 = N[2] - Rinit[2] - Iinit[2] - Vinit[2])
   I.init <- c(I1 = Iinit[1], I2 = Iinit[2])
   R.init <- c(R1 = Rinit[1], R2 = Rinit[2])
 
@@ -94,7 +95,8 @@ sim.exposure.SIR <- function(Rinit, Iinit, Vinit, tm, N, R0, gam, a, eps, q) {
 
   y0 <- c(S.init, I.init, R.init)
 
-  # the ode() command solves the ODEs, and stores the data in a dataframe called
+  # the ode() command solves the ODEs,
+  # and stores the data in a dataframe called
   # "simulation"
   simulation <- as.data.frame(deSolve::ode(y0, times, exposure.SIR, pars))
 
@@ -110,8 +112,10 @@ getFinalSize <- function(vacTime, vacPortion, popSize, R0, recoveryRate,
   # R0: overall basic reproduction number
   # recoveryRate: inverse of mean infectious period (same time units as vacTime)
   # contactRatio: ratio of 2nd group's : 1st group's overall contact rate
-  # contactWithinGroup: fraction of each group's contacts that are exclusively within group
-  # suscRatio: ratio of 2nd group's : 1st group's susceptibility to infection per contact
+  # contactWithinGroup: fraction of each group's contacts that are
+  # exclusively within group
+  # suscRatio: ratio of 2nd group's : 1st group's susceptibility to
+  # infection per contact
 
 
 
@@ -119,7 +123,8 @@ getFinalSize <- function(vacTime, vacPortion, popSize, R0, recoveryRate,
   Rsim1 <- c(0, 0)
 
   if (vacTime > 0) {
-    sim1 <- sim.exposure.SIR(Rinit = c(0, 0), Iinit = c(0, 0), Vinit = c(0, 0), tm = vacTime,
+    sim1 <- sim.exposure.SIR(Rinit = c(0, 0), Iinit = c(0, 0),
+      Vinit = c(0, 0), tm = vacTime,
       N = popSize, R0 = R0, gam = recoveryRate, a = c(1, contactRatio),
       eps = contactWithinGroup, q = c(1, suscRatio))
 

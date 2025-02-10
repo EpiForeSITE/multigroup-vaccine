@@ -9,6 +9,7 @@ library(bslib)
 
 library(bslib)
 
+
 myToolTip <- function(tipText = NULL) {
   if (!is.null(tipText)) {
     return(tooltip(img(
@@ -55,6 +56,55 @@ single_input_row <- function(input_id, label, value, tip = NULL) {
   ))
 }
 
+
+model2 <- nav_panel(
+  "Model 2",
+  layout_column_wrap(
+    width = "250px",
+    card(
+      card_title("Population Setup"),
+      tags$table(
+        tags$tr(tags$td(""), tags$th("Population A"),
+          tags$th("Population B")),
+
+        double_input_row("popsize_a", "popsize_b", "Population Size",
+          80000, 20000, tip = "Size of each population"),
+        double_input_row(
+          "vacPortion_a",
+          "vacPortion_b",
+          "Fraction Vaccinated",
+          0.1,
+          0.1,
+          tip = "Fraction of each population that is vaccinated at time zero."
+        ),
+        double_input_row(
+          "contactWithinGroup_a",
+          "contactWithinGroup_b",
+          "Fraction of contacts within-group",
+          0.4,
+          0.4,
+          tip = "This is the propotion of contacts made by
+          individuals in each population that are within their own group."
+        )
+      )
+    ),
+    card(
+      card_title("Parameters"),
+      tags$table(
+        single_input_row("vacTime", "Vaccination start time (days)", 0,
+          tip = "Time when vaccine will be started"),
+        single_input_row("recoveryRate", "Recovery Rate", 0.1,
+          tip = "Probability per day of a infected individual recovering"),
+        single_input_row("R0", "R0", 1.2,
+          tip = "Basic Reprodoctive Number"),
+        single_input_row("amountToSpend", "Amount to spend", 1e5,
+          tip = "Funds available for vacination ($)")
+      )
+    )
+  )
+)
+
+
 ui <- page_fluid(
   gap = 0,
   tags$head(
@@ -84,9 +134,11 @@ ui <- page_fluid(
         card(
           card_title("Population Setup"),
           tags$table(
-            tags$tr(tags$td(""), tags$th("Population A"), tags$th("Population B")),
+            tags$tr(tags$td(""), tags$th("Population A"),
+              tags$th("Population B")),
 
-            double_input_row("popsize_a", "popsize_b", "Population Size", 80000, 20000, tip = "Size of each population"),
+            double_input_row("popsize_a", "popsize_b", "Population Size",
+              80000, 20000, tip = "Size of each population"),
             double_input_row(
               "vacPortion_a",
               "vacPortion_b",
@@ -101,17 +153,22 @@ ui <- page_fluid(
               "Fraction of contacts within-group",
               0.4,
               0.4,
-              tip = "This is the propotion of contacts made by individuals in each population that are within their own group."
+              tip = "This is the propotion of contacts made by
+              individuals in each population that are within their own group."
             )
           )
         ),
         card(
           card_title("Parameters"),
           tags$table(
-            single_input_row("vacTime", "Vaccination start time (days)", 0, tip = "Time when vaccine will be started"),
-            single_input_row("recoveryRate", "Recovery Rate", 0.1, tip = "Probability per day of a infected individual recovering"),
-            single_input_row("R0", "R0", 1.2, tip = "Basic Reprodoctive Number"),
-            single_input_row("amountToSpend", "Amount to spend", 1e5, tip = "Funds available for vacination ($)")
+            single_input_row("vacTime", "Vaccination start time (days)", 0,
+              tip = "Time when vaccine will be started"),
+            single_input_row("recoveryRate", "Recovery Rate", 0.1,
+              tip = "Probability per day of a infected individual recovering"),
+            single_input_row("R0", "R0", 1.2,
+              tip = "Basic Reprodoctive Number"),
+            single_input_row("amountToSpend", "Amount to spend", 1e5,
+              tip = "Funds available for vacination ($)")
 
 
           )
@@ -119,25 +176,40 @@ ui <- page_fluid(
         card(
           card_title("Population Ratios"),
           tags$table(
-            single_input_row("contactRatio", "Contact Ratio", 1.1, tip = "The ratio of the contact rate of the second group to the first group"),
+            single_input_row("contactRatio", "Contact Ratio", 1.1,
+              tip = "The ratio of the contact rate of the second
+                group to the first group"),
+
             single_input_row("suscRatio", "Susceptibility Ratio", 1.2, tip =
-              "The ratio of the susceptibility of the second group to the first group"),
-            single_input_row("vaccineCostRatio", "Vaccine cost ratio", 1.3, tip =
-              "The ratio of the cost of the vaccine for the second group to the first group")
+              "The ratio of the susceptibility of the second group
+              to the first group"),
+            single_input_row("vaccineCostRatio", "Vaccine cost ratio", 1.3,
+              tip =
+                "The ratio of the cost of the vaccine for the second
+              group to the first group")
 
           )
         )
       ),
       plotOutput("plot", click = "plot_click", ),
     ),
+
     nav_panel(
       "About",
       h3("Abstract:"),
       p(
-        "Addressing disparities in vaccine uptake through equity-targeted outreach programs requires additional funding, but the cost and outcome trade-offs are not well-understood. This study compared the overall and distributional health and cost outcomes of different vaccination programs."
+        "Addressing disparities in vaccine uptake through equity-targeted
+        outreach programs requires additional funding, but the cost and
+        outcome trade-offs are not well-understood. This study compared
+        the overall and distributional health and cost outcomes of
+        different vaccination programs."
       ),
-      tags$i("D. Nguyen1 ∙ K. Duong2 ∙ E. Coates3 ∙ R.E. Nelson4 ∙ J. Love4 ∙ M.M. Jones4 ∙ M. Samore5 ∙ N. Chaiyakunapruk6 ∙ D. Toth"),
-      a("https://doi.org/10.1016/j.jval.2024.03.039", href = "https://doi.org/10.1016/j.jval.2024.03.039", class = "link-class", id = "paper_link")
+      tags$i("D. Nguyen1 ∙ K. Duong2 ∙ E. Coates3 ∙ R.E. Nelson4 ∙
+             J. Love4 ∙ M.M. Jones4 ∙ M. Samore5 ∙
+             N. Chaiyakunapruk6 ∙ D. Toth"),
+      p(a("https://doi.org/10.1016/j.jval.2024.03.039",
+        href = "https://doi.org/10.1016/j.jval.2024.03.039",
+        class = "link-class", id = "paper_link"))
     )
   ),
 
@@ -149,9 +221,9 @@ ui <- page_fluid(
     fixed = TRUE,
     img(
       src = "figs/logo.jpg",
-      align = "right",
-      height = 100,
-      width = 100
+      align = "left",
+      height = 150,
+      width = 150
     )
   )
 )
