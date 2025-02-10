@@ -48,6 +48,7 @@ server <- function(input, output, session) {
 
   output$table <- renderTable(getTable(input),rownames=TRUE,digits=2)
 }
+
 #  output$plot <- renderPlot(
 #    {
 #      popSize <- c(as.numeric(input$popsize_a), as.numeric(input$popsize_b))
@@ -60,14 +61,14 @@ server <- function(input, output, session) {
 #      vacTime <- as.numeric(input$vacTime)
 #      amountToSpend <- as.numeric(input$amountToSpend)
 #      vaccineCostRatio <- as.numeric(input$vaccineCostRatio)
-      ## function using variables stored in environment
+## function using variables stored in environment
 #      getFS0 <- function(vacP) getFinalSize(vacTime = vacTime, vacPortion = vacP, popSize = popSize, R0 = R0,
 #        recoveryRate = recoveryRate, contactRatio = contactRatio,
 #        contactWithinGroup = contactWithinGroup, suscRatio = suscRatio)
 
-      ## get baseline (needed to be in environment for following functions to run?)
-      # fsNoVax <- getFS0(vacP = c(0,0))
-      ## just embeded getFS0 in the getStats function below, instead
+## get baseline (needed to be in environment for following functions to run?)
+# fsNoVax <- getFS0(vacP = c(0,0))
+## just embeded getFS0 in the getStats function below, instead
 #      getStats <- function(vacP) {
 #        fs <- getFS0(vacP)
 #        infPrev <- getFS0(vacP = c(0, 0)) - fs
@@ -75,14 +76,12 @@ server <- function(input, output, session) {
 #        list(finalSize = fs, finalSizeProportion = fs / popSize, infectionsPrevented = infPrev)
 #      }
 
- #     getstatsout <- try(getStats(vacP))
-      # getstatsout<-""
+#     getstatsout <- try(getStats(vacP))
+# getstatsout<-""
 
 #      if (any(grepl("Error", getstatsout))) {
 #        plot(1, 1, main = "Error!")
 #      } else {
-
-
 #        plotStatsCost <- function(amountToSpend, vaxCosts) {
 
 #          spend2max <- min(amountToSpend, popSize[2] * vaxCosts[2])
@@ -123,8 +122,9 @@ server <- function(input, output, session) {
 #          par(mfrow = c(1, 1))
 
 #        }
-
         ## now run
+
+## now run
 
 #        plotStatsCost(amountToSpend,
 #          c(1,
@@ -133,8 +133,11 @@ server <- function(input, output, session) {
 #      }
       # ticks<-signif(seq(0,signif(max(getFSout),3),length.out=10),2)
       # axis(side = 2, at = ticks,las=1)
-
+# ticks<-signif(seq(0,signif(max(getFSout),3),length.out=10),2)
+# axis(side = 2, at = ticks,las=1)
 
 #    },
 #    res = 96)
 #}
+# }
+
