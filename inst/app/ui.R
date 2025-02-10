@@ -128,7 +128,8 @@ ui <- page_fluid(
           )
         )
       ),
-      plotOutput("plot", click = "plot_click", ),
+      #plotOutput("plot", click = "plot_click", ),
+      tableOutput("table"),
     ),
     nav_panel(
       "About",
