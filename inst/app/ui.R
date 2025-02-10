@@ -91,8 +91,8 @@ ui <- page_fluid(
               "vacPortion_a",
               "vacPortion_b",
               "Fraction Vaccinated",
-              0.1,
-              0.1,
+              0.3,
+              0.2,
               tip = "Fraction of each population that is vaccinated at time zero."
             ),
             double_input_row(
@@ -110,6 +110,22 @@ ui <- page_fluid(
               0.017,
               0.032,
               tip = "The fraction of infected individuals who are hospitilized due to the infection."
+            ),
+            double_input_row(
+              "hospDeathProb_a",
+              "hospDeathProb_b",
+              "Death probability among hospitalized",
+              0.25,
+              0.25,
+              tip = "The fraction of infected, hospitalilized individuals who die from the infection."
+            ),
+            double_input_row(
+              "nonHospDeathProb_a",
+              "nonHospDeathProb_b",
+              "Death probability among non-hospitalized",
+              0.00055,
+              0.00055,
+              tip = "The fraction of infected, non-hospitalilized individuals who die from the infection."
             )
           )
         ),
@@ -118,7 +134,7 @@ ui <- page_fluid(
           tags$table(
             single_input_row("vacTime", "Vaccination start time (days)", 0, tip = "Time when vaccine will be started"),
             single_input_row("recoveryRate", "Recovery Rate", 0.1, tip = "Probability per day of a infected individual recovering"),
-            single_input_row("R0", "R0", 1.2, tip = "Basic Reproduction Number")
+            single_input_row("R0", "R0", 2, tip = "Basic Reproduction Number")
             #,single_input_row("amountToSpend", "Amount to spend", 1e5, tip = "Funds available for vacination ($)")
 
 

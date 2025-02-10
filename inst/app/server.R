@@ -14,15 +14,15 @@ server <- function(input, output, session) {
     vacP <- c(as.numeric(input$vacPortion_a), as.numeric(input$vacPortion_b))
     vacTime <- as.numeric(input$vacTime)
     hospProb <- c(input$hospProb_a, input$hospProb_b)
-    #hospDeath <- c(input$hospDeathProb_a, input$hospDeathProb_b)
-    #nonHospDeath <- c(input$nonHospDeathProb_a, input$nonHospDeathProb_b)
+    hospDeath <- c(input$hospDeathProb_a, input$hospDeathProb_b)
+    nonHospDeath <- c(input$nonHospDeathProb_a, input$nonHospDeathProb_b)
 
     fs <- getFinalSize(vacTime = vacTime, vacPortion = vacP, popSize = popSize, R0 = R0,
                        recoveryRate = recoveryRate, contactRatio = contactRatio,
                        contactWithinGroup = contactWithinGroup, suscRatio = suscRatio)
 
     hosp <- hospProb * fs
-    #death <- hosp*hospDeath + (1-hosp)*nonHospDeath
+    death <- hosp*hospDeath + (1-hosp)*nonHospDeath
 
     numVax <- vacP*popSize
     tblVax <- c(sum(numVax),numVax)
@@ -31,15 +31,15 @@ server <- function(input, output, session) {
     tblInfPrev <- tblInf/c(sum(popSize),popSize)
     tblHosp <- c(sum(hosp),hosp)
     tblHospPrev <- tblHosp/c(sum(popSize),popSize)
-    #tblDeath <- c(sum(death),death)
-    #tblDeathPrev <- tblDeath/c(sum(popSize),popSize)
+    tblDeath <- c(sum(death),death)
+    tblDeathPrev <- tblDeath/c(sum(popSize),popSize)
 
     tbl <- rbind(vaccines = tblVax, vaccinationPercentage = 100*tblVaxCov,
                  infections = tblInf,
                  infectionPercentage = 100*tblInfPrev
                  ,hospitalizations = tblHosp,
                  hospitalizationPercentage = 100*tblHospPrev
-                 #,deaths = tblDeath, deathPrev = tblDeathPrev
+                 ,deaths = tblDeath, deathPercentage = 100*tblDeathPrev
     )
 
     colnames(tbl) <- c('Total','GroupA','GroupB')
