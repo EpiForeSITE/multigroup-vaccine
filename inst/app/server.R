@@ -13,7 +13,7 @@ server <- function(input, output, session) {
     suscRatio <- as.numeric(input$suscRatio)
     vacP <- c(as.numeric(input$vacPortion_a), as.numeric(input$vacPortion_b))
     vacTime <- as.numeric(input$vacTime)
-    #hospProb <- c(input$hospProb_a, input$hospProb_b)
+    hospProb <- c(input$hospProb_a, input$hospProb_b)
     #hospDeath <- c(input$hospDeathProb_a, input$hospDeathProb_b)
     #nonHospDeath <- c(input$nonHospDeathProb_a, input$nonHospDeathProb_b)
 
@@ -21,7 +21,7 @@ server <- function(input, output, session) {
                        recoveryRate = recoveryRate, contactRatio = contactRatio,
                        contactWithinGroup = contactWithinGroup, suscRatio = suscRatio)
 
-    #hosp <- hospProb * fs
+    hosp <- hospProb * fs
     #death <- hosp*hospDeath + (1-hosp)*nonHospDeath
 
     numVax <- vacP*popSize
@@ -29,15 +29,16 @@ server <- function(input, output, session) {
     tblVaxCov <- tblVax/c(sum(popSize),popSize)
     tblInf <- c(sum(fs),fs)
     tblInfPrev <- tblInf/c(sum(popSize),popSize)
-    #tblHosp <- c(sum(hosp),hosp)
-    #tblHospPrev <- tblHosp/c(sum(popSize),popSize)
+    tblHosp <- c(sum(hosp),hosp)
+    tblHospPrev <- tblHosp/c(sum(popSize),popSize)
     #tblDeath <- c(sum(death),death)
     #tblDeathPrev <- tblDeath/c(sum(popSize),popSize)
 
-    tbl <- rbind(vaccines = tblVax, vaccineCoverage = tblVaxCov,
+    tbl <- rbind(vaccines = tblVax, vaccinationPercentage = 100*tblVaxCov,
                  infections = tblInf,
-                 infectionPrevalence = tblInfPrev
-                 #,hospital = tblHosp, hospitalPrev = tblHospPrev
+                 infectionPercentage = 100*tblInfPrev
+                 ,hospitalizations = tblHosp,
+                 hospitalizationPercentage = 100*tblHospPrev
                  #,deaths = tblDeath, deathPrev = tblDeathPrev
     )
 
@@ -45,7 +46,7 @@ server <- function(input, output, session) {
     as.data.frame(tbl)
   }
 
-  output$table <- renderTable(getTable(input),rownames=TRUE)
+  output$table <- renderTable(getTable(input),rownames=TRUE,digits=2)
 }
 #  output$plot <- renderPlot(
 #    {

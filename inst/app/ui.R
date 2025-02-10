@@ -102,6 +102,14 @@ ui <- page_fluid(
               0.4,
               0.4,
               tip = "This is the propotion of contacts made by individuals in each population that are within their own group."
+            ),
+            double_input_row(
+              "hospProb_a",
+              "hospProb_b",
+              "Hospitilization probability",
+              0.017,
+              0.032,
+              tip = "The fraction of infected individuals who are hospitilized due to the infection."
             )
           )
         ),
