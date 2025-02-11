@@ -1,3 +1,4 @@
+
 ## dependencies
 require(deSolve)
 require(shiny)
@@ -26,22 +27,22 @@ double_input_row <- function(input_ida,
                              valueb,
                              tip = NULL) {
   tags$tr(tags$td(myToolTip(tip), label),
-    tags$td(
-      numericInput(
-        inputId = input_ida,
-        value = valuea,
-        label = NULL,
-        width = "100px"
-      )
-    ),
-    tags$td(
-      numericInput(
-        inputId = input_idb,
-        value = valueb,
-        label = NULL,
-        width = "100px"
-      )
-  ))
+          tags$td(
+            numericInput(
+              inputId = input_ida,
+              value = valuea,
+              label = NULL,
+              width = "100px"
+            )
+          ),
+          tags$td(
+            numericInput(
+              inputId = input_idb,
+              value = valueb,
+              label = NULL,
+              width = "100px"
+            )
+          ))
 }
 
 single_input_row <- function(input_id, label, value, tip = NULL) {
@@ -134,19 +135,24 @@ ui <- page_fluid(
           tags$table(
             single_input_row("vacTime", "Vaccination start time (days)", 0, tip = "Time when vaccine will be started"),
             single_input_row("recoveryRate", "Recovery Rate", 0.1, tip = "Probability per day of a infected individual recovering"),
-            single_input_row("R0", "R0", 2, tip = "Basic Reproduction Number")
+            single_input_row("R0", "R0", 2, tip = "Basic Reproduction Number"),
+            single_input_row("contactRatio", "Contact Ratio", 1.1, tip = "The ratio of the contact rate of the second group to the first group"),
+            single_input_row("suscRatio", "Susceptibility Ratio", 1.2, tip =
+                               "The ratio of the susceptibility of the second group to the first group")
+            # ,single_input_row("vaccineCostRatio", "Vaccine cost ratio", 1.3, tip =
+            #  "The ratio of the cost of the vaccine for the second group to the first group")
+            # ,single_input_row("amountToSpend", "Amount to spend", 1e5, tip = "Funds available for vacination ($)")
+
+
           )
         ),
         card(
-          card_title("Population Ratios"),
-          tags$table(
-            single_input_row("contactRatio", "Contact Ratio", 1.1, tip = "The ratio of the contact rate of the second group to the first group"),
-            single_input_row("suscRatio", "Susceptibility Ratio", 1.2, tip =
-              "The ratio of the susceptibility of the second group to the first group")
-          )
+          card_title("Output"),
+          tableOutput("table"),
         )
       ),
-      tableOutput("table"),
+      # plotOutput("plot", click = "plot_click", ),
+
     ),
     nav_panel(
       "About",
@@ -155,7 +161,10 @@ ui <- page_fluid(
         "Addressing disparities in vaccine uptake through equity-targeted outreach programs requires additional funding, but the cost and outcome trade-offs are not well-understood. This study compared the overall and distributional health and cost outcomes of different vaccination programs."
       ),
       tags$i("D. Nguyen1 ∙ K. Duong2 ∙ E. Coates3 ∙ R.E. Nelson4 ∙ J. Love4 ∙ M.M. Jones4 ∙ M. Samore5 ∙ N. Chaiyakunapruk6 ∙ D. Toth"),
-      a("https://doi.org/10.1016/j.jval.2024.03.039", href = "https://doi.org/10.1016/j.jval.2024.03.039", class = "link-class", id = "paper_link")
+      a("https://doi.org/10.1016/j.jval.2024.03.039", href = "https://doi.org/10.1016/j.jval.2024.03.039", class = "link-class", id = "paper_link"),
+      br(), br(),
+      p("This project was made possible by cooperative agreement CDC-RFA-FT-23-0069 from the CDC’s Center for Forecasting and Outbreak Analytics. Its contents are solely the responsibility of
+        the authors and do not necessarily represent the official views of the Centers for Disease Control and Prevention.")
     )
   ),
 
