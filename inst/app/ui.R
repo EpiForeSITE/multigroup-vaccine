@@ -175,7 +175,7 @@ ui <- page_fluid(
     fixed = TRUE,
     img(
       src = "figs/logo.jpg",
-      align = "right",
+      align = "left",
       height = 100,
       width = 100
     )

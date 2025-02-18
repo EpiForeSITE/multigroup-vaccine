@@ -17,6 +17,14 @@ server <- function(input, output, session) {
     hospDeath <- c(input$hospDeathProb_a, input$hospDeathProb_b)
     nonHospDeath <- c(input$nonHospDeathProb_a, input$nonHospDeathProb_b)
 
+    # input validation
+    validate(
+      need(all(vacP >= 0 & vacP <= 1), "Vaccination portion must be between 0 and 1"),
+      need(all(hospProb >= 0 & hospProb <= 1), "Hospitalization probability must be between 0 and 1"),
+      need(all(hospDeath >= 0 & hospDeath <= 1), "Hospitalization death probability must be between 0 and 1"),
+      need(all(nonHospDeath >= 0 & nonHospDeath <= 1), "Non-hospitalization death probability must be between 0 and 1")
+    )
+
     fs <- getFinalSize(vacTime = vacTime, vacPortion = vacP, popSize = popSize, R0 = R0,
       recoveryRate = recoveryRate, contactRatio = contactRatio,
       contactWithinGroup = contactWithinGroup, suscRatio = suscRatio)
