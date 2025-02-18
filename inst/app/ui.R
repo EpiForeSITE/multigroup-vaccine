@@ -1,3 +1,4 @@
+
 ## dependencies
 require(deSolve)
 require(shiny)
@@ -26,22 +27,22 @@ double_input_row <- function(input_ida,
                              valueb,
                              tip = NULL) {
   tags$tr(tags$td(myToolTip(tip), label),
-    tags$td(
-      numericInput(
-        inputId = input_ida,
-        value = valuea,
-        label = NULL,
-        width = "100px"
-      )
-    ),
-    tags$td(
-      numericInput(
-        inputId = input_idb,
-        value = valueb,
-        label = NULL,
-        width = "100px"
-      )
-  ))
+          tags$td(
+            numericInput(
+              inputId = input_ida,
+              value = valuea,
+              label = NULL,
+              width = "100px"
+            )
+          ),
+          tags$td(
+            numericInput(
+              inputId = input_idb,
+              value = valueb,
+              label = NULL,
+              width = "100px"
+            )
+          ))
 }
 
 single_input_row <- function(input_id, label, value, tip = NULL) {
@@ -137,7 +138,7 @@ ui <- page_fluid(
             single_input_row("R0", "R0", 2, tip = "Basic Reproduction Number"),
             single_input_row("contactRatio", "Contact Ratio", 1.1, tip = "The ratio of the contact rate of the second group to the first group"),
             single_input_row("suscRatio", "Susceptibility Ratio", 1.2, tip =
-              "The ratio of the susceptibility of the second group to the first group")
+                               "The ratio of the susceptibility of the second group to the first group")
             # ,single_input_row("vaccineCostRatio", "Vaccine cost ratio", 1.3, tip =
             #  "The ratio of the cost of the vaccine for the second group to the first group")
             # ,single_input_row("amountToSpend", "Amount to spend", 1e5, tip = "Funds available for vacination ($)")

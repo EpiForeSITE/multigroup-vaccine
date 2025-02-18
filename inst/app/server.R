@@ -4,7 +4,7 @@ source("global.R")
 
 server <- function(input, output, session) {
 
-  getTable <- function(input) {
+  getTable <- function(input){
     popSize <- c(as.numeric(input$popsize_a), as.numeric(input$popsize_b))
     R0 <- as.numeric(input$R0)
     recoveryRate <- as.numeric(input$recoveryRate)
@@ -26,36 +26,37 @@ server <- function(input, output, session) {
     )
 
     fs <- getFinalSize(vacTime = vacTime, vacPortion = vacP, popSize = popSize, R0 = R0,
-      recoveryRate = recoveryRate, contactRatio = contactRatio,
-      contactWithinGroup = contactWithinGroup, suscRatio = suscRatio)
+                       recoveryRate = recoveryRate, contactRatio = contactRatio,
+                       contactWithinGroup = contactWithinGroup, suscRatio = suscRatio)
 
     hosp <- hospProb * fs
-    death <- hosp * hospDeath + (1 - hosp) * nonHospDeath
+    death <- hosp*hospDeath + (1-hosp)*nonHospDeath
 
-    numVax <- vacP * popSize
-    tblVax <- c(sum(numVax), numVax)
-    tblVaxCov <- tblVax / c(sum(popSize), popSize)
-    tblInf <- c(sum(fs), fs)
-    tblInfPrev <- tblInf / c(sum(popSize), popSize)
-    tblHosp <- c(sum(hosp), hosp)
-    tblHospPrev <- tblHosp / c(sum(popSize), popSize)
-    tblDeath <- c(sum(death), death)
-    tblDeathPrev <- tblDeath / c(sum(popSize), popSize)
+    numVax <- vacP*popSize
+    tblVax <- c(sum(numVax),numVax)
+    tblVaxCov <- tblVax/c(sum(popSize),popSize)
+    tblInf <- c(sum(fs),fs)
+    tblInfPrev <- tblInf/c(sum(popSize),popSize)
+    tblHosp <- c(sum(hosp),hosp)
+    tblHospPrev <- tblHosp/c(sum(popSize),popSize)
+    tblDeath <- c(sum(death),death)
+    tblDeathPrev <- tblDeath/c(sum(popSize),popSize)
 
-    tbl <- rbind(vaccines = tblVax, vaccinationPercentage = 100 * tblVaxCov,
-      infections = tblInf,
-      infectionPercentage = 100 * tblInfPrev,
-      hospitalizations = tblHosp,
-      hospitalizationPercentage = 100 * tblHospPrev,
-      deaths = tblDeath, deathPercentage = 100 * tblDeathPrev
+    tbl <- rbind(vaccines = tblVax, vaccinationPercentage = 100*tblVaxCov,
+                 infections = tblInf,
+                 infectionPercentage = 100*tblInfPrev
+                 ,hospitalizations = tblHosp,
+                 hospitalizationPercentage = 100*tblHospPrev
+                 ,deaths = tblDeath, deathPercentage = 100*tblDeathPrev
     )
 
-    colnames(tbl) <- c("Total", "GroupA", "GroupB")
+    colnames(tbl) <- c('Total','GroupA','GroupB')
     as.data.frame(tbl)
   }
 
-  output$table <- renderTable(getTable(input), rownames = TRUE, digits = 2)
+  output$table <- renderTable(getTable(input),rownames=TRUE,digits=2)
 }
+
 #  output$plot <- renderPlot(
 #    {
 #      popSize <- c(as.numeric(input$popsize_a), as.numeric(input$popsize_b))
@@ -89,8 +90,6 @@ server <- function(input, output, session) {
 #      if (any(grepl("Error", getstatsout))) {
 #        plot(1, 1, main = "Error!")
 #      } else {
-
-
 #        plotStatsCost <- function(amountToSpend, vaxCosts) {
 
 #          spend2max <- min(amountToSpend, popSize[2] * vaxCosts[2])
@@ -131,6 +130,7 @@ server <- function(input, output, session) {
 #          par(mfrow = c(1, 1))
 
 #        }
+        ## now run
 
 ## now run
 
@@ -139,10 +139,13 @@ server <- function(input, output, session) {
 #            vaccineCostRatio))
 
 #      }
+      # ticks<-signif(seq(0,signif(max(getFSout),3),length.out=10),2)
+      # axis(side = 2, at = ticks,las=1)
 # ticks<-signif(seq(0,signif(max(getFSout),3),length.out=10),2)
 # axis(side = 2, at = ticks,las=1)
 
-
 #    },
 #    res = 96)
+#}
 # }
+
