@@ -3,3 +3,7 @@
 vaccine-equity-model.Rproj
 inst/doc
 *.dcf
+.Rprofile
+^renv$
+renv/*
+renv.lock
