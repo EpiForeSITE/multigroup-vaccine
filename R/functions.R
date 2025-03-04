@@ -130,8 +130,6 @@ getFinalSize <- function(vacTime,
                          suscRatio) {
 
 
-
-
   Isim1 <- c(0, 0)
   Rsim1 <- c(0, 0)
 
