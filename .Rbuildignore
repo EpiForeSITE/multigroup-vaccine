@@ -6,7 +6,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
-^docs$
 ^\.pre-commit-config\.yaml$
 ^_pkgdown\.yml$
 ^pkgdown$
