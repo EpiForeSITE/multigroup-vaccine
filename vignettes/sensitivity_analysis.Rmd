@@ -9,6 +9,7 @@ vignette: >
 
   ```{r, include = FALSE}
 knitr::opts_chunk$set(
+  rmarkdown.html_vignette.check_title = FALSE,
   collapse = TRUE,
   comment = "#>"
 )
@@ -29,6 +30,7 @@ for (i in 1:100) {
     contactRatio = 1.7,
     contactWithinGroup = c(0.2, 0.5),
     suscRatio = 1)
+  print(portion)
   print(ret)
 }
 ```
