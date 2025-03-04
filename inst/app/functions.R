@@ -129,16 +129,7 @@ getFinalSize <- function(vacTime,
                          contactRatio,
                          contactWithinGroup,
                          suscRatio) {
-  # vacTime: time after first case at which all vaccinations are delivered
-  # vacPortion: fraction of each population vaccinated
-  # popSize: size of each population
-  # R0: overall basic reproduction number
-  # recoveryRate: inverse of mean infectious period (same time units as vacTime)
-  # contactRatio: ratio of 2nd group's : 1st group's overall contact rate
-  # contactWithinGroup: fraction of each group's contacts that are
-  # exclusively within group
-  # suscRatio: ratio of 2nd group's : 1st group's susceptibility to
-  # infection per contact
+
 
 
 
