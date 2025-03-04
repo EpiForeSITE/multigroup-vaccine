@@ -108,7 +108,18 @@ sim.exposure.SIR <- function(Rinit, Iinit, Vinit, tm, N, R0, gam, a, eps, q) {
   simulation
 }
 
-
+#' main calculation
+#' @param vacTime time after first case at which all vaccinations are delivered
+#' @param vacPortion fraction of each population vaccinated
+#' @param popSize size of each population
+#' @param R0 overall basic reproduction number
+#' @param recoveryRate inverse of mean infectious period
+#'     (same time units as vacTime)
+#' @param contactRatio ratio of 2nd group's : 1st group's overall contact rate
+#' @param contactWithinGroup fraction of each group's contacts that are
+#'    in-group vs out-group
+#' @param suscRatio ratio of 2nd group's : 1st group's susceptibility to infection per contact
+#' @param
 #' @export
 getFinalSize <- function(vacTime,
                          vacPortion,
