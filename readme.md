@@ -3,6 +3,8 @@
 
 Vaccine Equity Model
 
+
+
 ## Getting Started
 
 This models the behavior of a population with two distinct sub-populations
