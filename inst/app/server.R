@@ -3,7 +3,6 @@ library(shiny)
 source("global.R")
 
 server <- function(input, output, session) {
-
   getTable <- function(input) {
     popSize <- c(as.numeric(input$popsize_a), as.numeric(input$popsize_b))
     R0 <- as.numeric(input$R0)
@@ -25,9 +24,11 @@ server <- function(input, output, session) {
       need(all(nonHospDeath >= 0 & nonHospDeath <= 1), "Non-hospitalization death probability must be between 0 and 1")
     )
 
-    fs <- getFinalSize(vacTime = vacTime, vacPortion = vacP, popSize = popSize, R0 = R0,
+    fs <- getFinalSize(
+      vacTime = vacTime, vacPortion = vacP, popSize = popSize, R0 = R0,
       recoveryRate = recoveryRate, contactRatio = contactRatio,
-      contactWithinGroup = contactWithinGroup, suscRatio = suscRatio)
+      contactWithinGroup = contactWithinGroup, suscRatio = suscRatio
+    )
 
     hosp <- hospProb * fs
     death <- hosp * hospDeath + (1 - hosp) * nonHospDeath
@@ -42,7 +43,8 @@ server <- function(input, output, session) {
     tblDeath <- c(sum(death), death)
     tblDeathPrev <- tblDeath / c(sum(popSize), popSize)
 
-    tbl <- rbind(vaccines = tblVax, vaccinationPercentage = 100 * tblVaxCov,
+    tbl <- rbind(
+      vaccines = tblVax, vaccinationPercentage = 100 * tblVaxCov,
       infections = tblInf,
       infectionPercentage = 100 * tblInfPrev,
       hospitalizations = tblHosp,

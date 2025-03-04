@@ -32,12 +32,6 @@ getFinalSizeAnalytic <- function(Rinit, Iinit, Vinit, N, R0, a, eps, q) {
 
 exposure.SIR <- function(Time, state, Pars) {
   with(as.list(c(Time, state, Pars)), {
-    S <- c(S1, S2)
-    I <- c(I1, I2)
-    R <- c(R1, R2)
-
-    N <- c(N1, N2)
-
     # beta is a 2x2 transmission matrix
     beta <- (1 - epsilon) *
       outer(activities, activities) / sum(c(N1, N2) * activities) +

@@ -1,4 +1,3 @@
-
 ## dependencies
 require(deSolve)
 require(shiny)
@@ -26,7 +25,8 @@ double_input_row <- function(input_ida,
                              valuea,
                              valueb,
                              tip = NULL) {
-  tags$tr(tags$td(myToolTip(tip), label),
+  tags$tr(
+    tags$td(myToolTip(tip), label),
     tags$td(
       numericInput(
         inputId = input_ida,
@@ -42,7 +42,8 @@ double_input_row <- function(input_ida,
         label = NULL,
         width = "100px"
       )
-  ))
+    )
+  )
 }
 
 single_input_row <- function(input_id, label, value, tip = NULL) {
@@ -78,15 +79,12 @@ ui <- page_fluid(
   navset_tab(
     nav_panel(
       "Model",
-
-
       layout_column_wrap(
         width = "250px",
         card(
           card_title("Population Setup"),
           tags$table(
             tags$tr(tags$td(""), tags$th("Group A"), tags$th("Group B")),
-
             double_input_row("popsize_a", "popsize_b", "Population Size", 80000, 20000, tip = "Size of each population"),
             double_input_row(
               "vacPortion_a",
@@ -137,13 +135,13 @@ ui <- page_fluid(
             single_input_row("recoveryRate", "Recovery Rate", 0.1, tip = "Probability per day of a infected individual recovering"),
             single_input_row("R0", "R0", 2, tip = "Basic Reproduction Number"),
             single_input_row("contactRatio", "Contact Ratio", 1.1, tip = "The ratio of the contact rate of the second group to the first group"),
-            single_input_row("suscRatio", "Susceptibility Ratio", 1.2, tip =
-              "The ratio of the susceptibility of the second group to the first group")
+            single_input_row("suscRatio", "Susceptibility Ratio", 1.2,
+              tip =
+                "The ratio of the susceptibility of the second group to the first group"
+            )
             # ,single_input_row("vaccineCostRatio", "Vaccine cost ratio", 1.3, tip =
             #  "The ratio of the cost of the vaccine for the second group to the first group")
             # ,single_input_row("amountToSpend", "Amount to spend", 1e5, tip = "Funds available for vacination ($)")
-
-
           )
         ),
         card(
@@ -152,7 +150,6 @@ ui <- page_fluid(
         )
       ),
       # plotOutput("plot", click = "plot_click", ),
-
     ),
     nav_panel(
       "About",
@@ -167,8 +164,6 @@ ui <- page_fluid(
         the authors and do not necessarily represent the official views of the Centers for Disease Control and Prevention.")
     )
   ),
-
-
   absolutePanel(
     bottom = 0,
     left = 0,
