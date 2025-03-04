@@ -31,6 +31,7 @@ for (i in 1:100) {
     contactWithinGroup = c(0.2, 0.5),
     suscRatio = 1)
   print(portion)
+  print(portion * 0.4)
   print(ret)
 }
 ```
