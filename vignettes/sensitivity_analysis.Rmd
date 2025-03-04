@@ -2,12 +2,12 @@
 title: "Sensitivity Analysis"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{sensitivity_analysis}
+%\VignetteIndexEntry{sensitivity_analysis}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
----
+  ---
 
-```{r, include = FALSE}
+  ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -16,4 +16,19 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(vaccine.equity)
+```
+
+```{r}
+for (i in 1:100) {
+  portion <- i / 100
+  ret <- getFinalSize(vacTime = 0,
+    vacPortion = c(0.2, portion * 0.4),
+    popSize = c(80000, 20000),
+    R0 = 1.75,
+    recoveryRate = 1 / 7,
+    contactRatio = 1.7,
+    contactWithinGroup = c(0.2, 0.5),
+    suscRatio = 1)
+  print(ret)
+}
 ```
