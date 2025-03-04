@@ -1,8 +1,8 @@
 ---
-title: "run_shiny_app"
+title: "run_model_on_command_line"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{run_shiny_app}
+  %\VignetteIndexEntry{run_model_on_command_line}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
-How to run the Shiny App
+
 ```{r setup}
 library(vaccine.equity)
 ```

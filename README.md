@@ -16,11 +16,10 @@ and that have different rates of vaccine adherence.
 
 ### Installing
 
-The package can be installed from github using the devtools package.
+Install the package from github using the devtools package, then run
+the Shiny application with the run_my_app() function.
 
-With devtools installed:
-
-    install.package("EpiForeSITE/vaccine-equity-model")
+    install_github("EpiForeSITE/vaccine-equity-model")
 
     vaccine-equity-model::run_my_app()
 
