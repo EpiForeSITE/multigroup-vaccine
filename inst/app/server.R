@@ -2,6 +2,7 @@ library(shiny)
 library(vaccine.equity)
 
 
+
 server <- function(input, output, session) {
   getTable <- function(input) {
     popSize <- c(as.numeric(input$popsize_a), as.numeric(input$popsize_b))
