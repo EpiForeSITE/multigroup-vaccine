@@ -1,6 +1,6 @@
 library(shiny)
+library(vaccine.equity)
 
-source("global.R")
 
 server <- function(input, output, session) {
   getTable <- function(input) {

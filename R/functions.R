@@ -119,7 +119,6 @@ sim.exposure.SIR <- function(Rinit, Iinit, Vinit, tm, N, R0, gam, a, eps, q) {
 #' @param contactWithinGroup fraction of each group's contacts that are
 #'    in-group vs out-group
 #' @param suscRatio ratio of 2nd group's : 1st group's susceptibility to infection per contact
-#' @param
 #' @export
 getFinalSize <- function(vacTime,
                          vacPortion,
