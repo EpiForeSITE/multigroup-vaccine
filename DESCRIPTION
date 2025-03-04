@@ -3,7 +3,7 @@ Type: Package
 Title: Vaccine Equity Model
 Version: 0.1.0
 Authors@R:
-    c(person("Damon", "Toth", , "damon.toth@hsc.utah.edu", role = c("aut", "cre"),
+    c(person("Damon", "Toth", , "damon.toth@hsc.utah.edu", role = c("aut", "ctb"),
            comment = c(ORCID = "0000-0001-7393-4814")),
            person("Willy", "Ray", , "william.ray@hsc.utah.edu", role = c("cre", "ctb")),
            person("Centers for Disease Control and Prevention's Center for Forecasting and Outbreak Analytics",
