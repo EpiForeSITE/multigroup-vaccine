@@ -108,6 +108,7 @@ sim.exposure.SIR <- function(Rinit, Iinit, Vinit, tm, N, R0, gam, a, eps, q) {
   simulation
 }
 
+
 #' @export
 getFinalSize <- function(vacTime,
                          vacPortion,
