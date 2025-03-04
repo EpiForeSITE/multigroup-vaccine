@@ -13,17 +13,14 @@ and that have different rates of vaccine adherence.
 
 ### Installing
 
-A step by step series of examples that tell you how to get a development
-environment running
+The package can be installed from github using the devtools package.
 
 With devtools installed:
 
     install.package("EpiForeSITE/vaccine-equity-model")
 
-    vaccine-equity-model::run_model()
+    vaccine-equity-model::run_my_app()
 
-End with an example of getting some data out of the system or using it
-for a little demo
 
 ## License
 

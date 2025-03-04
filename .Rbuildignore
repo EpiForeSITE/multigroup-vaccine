@@ -8,3 +8,6 @@
 ^LICENSE\.md$
 ^docs$
 ^\.pre-commit-config\.yaml$
+^_pkgdown\.yml$
+^pkgdown$
+^\.github$

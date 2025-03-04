@@ -23,3 +23,4 @@ Suggests:
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
+URL: https://epiforesite.github.io/vaccine-equity-model/
