@@ -1,5 +1,5 @@
 ---
-title: "sensitivity_analysis"
+title: "Sensitivity Analysis"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{sensitivity_analysis}
