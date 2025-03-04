@@ -2,8 +2,13 @@ Package: vaccine.equity
 Type: Package
 Title: Vaccine Equity Model
 Version: 0.1.0
-Author: Damon Toth, Willy Ray
-Maintainer: william.ray@hcs.utah.edu
+Authors@R:
+    c(person("Damon", "Toth", , "damon.toth@hsc.utah.edu", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-7393-4814")),
+           person("Willy", "Ray", , "william.ray@hsc.utah.edu", role = c("cre", "ctb")),
+           person("Centers for Disease Control and Prevention's Center for Forecasting and Outbreak Analytics",
+           role="fnd", comment = "Cooperative agreement CDC-RFA-FT-23-0069"))
+Maintainer: Willy Ray <william.ray@hsc.utah.edu>
 Description: This package provides a tool for examining the effects of
     differential rates of vaccination in populations of different size,
     and with different contact rates and other parameters.
