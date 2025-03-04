@@ -2,9 +2,10 @@
 title: "Run Model in the console"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{run_model_on_command_line}
+  %\VignetteIndexEntry{Run Model in the console}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+
 ---
 
 ```{r, include = FALSE}

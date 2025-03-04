@@ -2,14 +2,15 @@
 title: "Sensitivity Analysis"
 output: rmarkdown::html_vignette
 vignette: >
-%\VignetteIndexEntry{sensitivity_analysis}
+%\VignetteIndexEntry{Sensitivity Analysis}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+
   ---
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  rmarkdown.html_vignette.check_title = FALSE,
+
   collapse = TRUE,
   comment = "#>"
 )
