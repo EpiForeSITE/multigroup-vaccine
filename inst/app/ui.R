@@ -5,17 +5,23 @@ require(shiny)
 library(shiny)
 library(bslib)
 
+
 #' @import shiny
 
 library(bslib)
 
-myToolTip <- function(tipText = NULL) {
+myToolTip <- function(tipText = NULL, id = NULL) {
   if (!is.null(tipText)) {
     return(tooltip(img(
       src = "figs/tooltip.png",
       height = 20,
-      width = 20
-    ), tipText))
+      width = 20,
+      alt = tipText
+    ),
+    tags$label(tipText)
+    ))
+
+
   }
 }
 
@@ -58,6 +64,7 @@ single_input_row <- function(input_id, label, value, tip = NULL) {
 }
 
 ui <- page_fluid(
+
   gap = 0,
   tags$head(
     tags$style(
