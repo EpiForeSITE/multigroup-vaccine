@@ -23,6 +23,10 @@ the Shiny application with the run_my_app() function.
 
     vaccine-equity-model::run_my_app()
 
+### Usage
+
+Change the values in the population setup and disease parameters panel to see the effects on the outcomes for the two sub-populations.
+![Screen shot of Vaccine Equity Application](https://raw.githubusercontent.com/EpiForeSITE/vaccine-equity-model/refs/heads/main/inst/app/www/figs/screenshot.PNG)
 
 ## License
 
