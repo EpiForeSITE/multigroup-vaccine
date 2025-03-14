@@ -4,6 +4,7 @@ require(shiny)
 ## dependent functions
 library(shiny)
 library(bslib)
+library(shinya11y)
 
 
 #' @import shiny
@@ -64,7 +65,7 @@ single_input_row <- function(input_id, label, value, tip = NULL) {
 }
 
 ui <- page_fluid(
-
+  use_tota11y(),
   gap = 0,
   tags$head(
     tags$style(
