@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(vaccine.equity)
+library(multigroup.vaccine)
 
-test_check("vaccine.equity")
+test_check("multigroup.vaccine")

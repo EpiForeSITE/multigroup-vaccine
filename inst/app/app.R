@@ -6,6 +6,6 @@
 #' @export
 run_model <- function() {
   shinyAppDir(
-    system.file("app/", package = "vaccine.equity")
+    system.file("app/", package = "multigroup.vaccine")
   )
 }

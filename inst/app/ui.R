@@ -163,7 +163,7 @@ ui <- page_fluid(
       "About",
       h3("Abstract:"),
       p(
-        "Addressing disparities in vaccine uptake through equity-targeted outreach programs requires additional funding, but the cost and outcome trade-offs are not well-understood. This study compared the overall and distributional health and cost outcomes of different vaccination programs."
+        "Addressing disparities in vaccine uptake through targeted outreach programs requires additional funding, but the cost and outcome trade-offs are not well-understood. This study compared the overall and distributional health and cost outcomes of different vaccination programs."
       ),
       tags$i("D. Nguyen1 ∙ K. Duong2 ∙ E. Coates3 ∙ R.E. Nelson4 ∙ J. Love4 ∙ M.M. Jones4 ∙ M. Samore5 ∙ N. Chaiyakunapruk6 ∙ D. Toth"),
       a("https://doi.org/10.1016/j.jval.2024.03.039", href = "https://doi.org/10.1016/j.jval.2024.03.039", class = "link-class", id = "paper_link"),

@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(vaccine.equity)
+library(multigroup.vaccine)
 ```
 
 Consider a population with the following parameters:
@@ -36,7 +36,7 @@ Consider a population with the following parameters:
 -   Susceptibility ratio is the susceptibility of individuals in population B over that of individuals in population A. With susceptibility = 1, they are equally susceptible.
 
 ```{r}
-vaccine.equity::getFinalSize(vacTime = 0,
+multigroup.vaccine::getFinalSize(vacTime = 0,
   vacPortion = c(0.3, 0.2),
   popSize = c(80000, 20000),
   R0 = 1.75,
