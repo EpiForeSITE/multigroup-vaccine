@@ -1,8 +1,8 @@
-library(vaccine.equity)
+library(multigroup.vaccine)
 
 
 test_that("final size calculation works", {
-  ret <- vaccine.equity::getFinalSize(0, c(0.1, 0.1), c(80000, 20000), 1.5, 1 / 7, 1.7, c(0.4, 0.4), 1)
+  ret <- multigroup.vaccine::getFinalSize(0, c(0.1, 0.1), c(80000, 20000), 1.5, 1 / 7, 1.7, c(0.4, 0.4), 1)
   expect_vector(ret, 2)
 
   ret1 <- ret[1]

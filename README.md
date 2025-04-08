@@ -1,7 +1,5 @@
-# Vaccine Equity Model
+# Multigroup Vaccine Model
 [![ForeSITE Group](https://github.com/EpiForeSITE/software/raw/e82ed88f75e0fe5c0a1a3b38c2b94509f122019c/docs/assets/foresite-software-badge.svg)](https://github.com/EpiForeSITE)
-
-Vaccine Equity Model
 
 ## Getting Started
 
@@ -18,14 +16,14 @@ Install the package from github using the [remotes](https://cran.r-project.org/p
 the Shiny application with the run_my_app() function.
 
 ```r
-remotes::install_github("EpiForeSITE/vaccine-equity-model")
-vaccine.equity::run_my_app()
+remotes::install_github("EpiForeSITE/multigroup-vaccine")
+multigroup.vaccine::run_my_app()
 ```
 
 ### Usage
 
 Change the values in the population setup and disease parameters panel to see the effects on the outcomes for the two sub-populations.
-![Screen shot of Vaccine Equity Application](https://raw.githubusercontent.com/EpiForeSITE/vaccine-equity-model/refs/heads/main/inst/app/www/figs/screenshot.PNG)
+![Screen shot of Multigroup Vaccine Application](https://raw.githubusercontent.com/EpiForeSITE/multigroup-vaccine/refs/heads/main/inst/app/www/figs/screenshot.PNG)
 
 ## License
 

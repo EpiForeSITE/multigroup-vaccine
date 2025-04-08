@@ -1,6 +1,6 @@
-Package: vaccine.equity
+Package: multigroup.vaccine
 Type: Package
-Title: Vaccine Equity Model
+Title: Multigroup Vaccine Model
 Version: 0.1.0
 Authors@R:
     c(person("Damon", "Toth", , "damon.toth@hsc.utah.edu", role = c("aut", "ctb"),
@@ -30,4 +30,4 @@ Suggests:
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
-URL: https://epiforesite.github.io/vaccine-equity-model/
+URL: https://epiforesite.github.io/multigroup-vaccine/

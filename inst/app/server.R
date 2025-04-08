@@ -1,5 +1,5 @@
 library(shiny)
-library(vaccine.equity)
+library(multigroup.vaccine)
 
 
 

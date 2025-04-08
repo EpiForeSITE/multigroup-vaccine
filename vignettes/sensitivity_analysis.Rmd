@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(vaccine.equity)
+library(multigroup.vaccine)
 ```
 
 Consider a population with the following parameters:
