@@ -1,10 +1,10 @@
 pandoc: 3.1.11
-pkgdown: 2.1.1
+pkgdown: 2.1.2
 pkgdown_sha: ~
 articles:
   run_model_on_command_line: run_model_on_command_line.html
   sensitivity_analysis: sensitivity_analysis.html
-last_built: 2025-04-08T22:40Z
+last_built: 2025-05-12T23:18Z
 urls:
   reference: https://epiforesite.github.io/multigroup-vaccine/reference
   article: https://epiforesite.github.io/multigroup-vaccine/articles
