@@ -2,6 +2,7 @@
 
 export(getFinalSize)
 export(run_my_app)
+export(transmissionRates)
 import(shiny)
 importFrom(bslib,page_sidebar)
 importFrom(bslib,sidebar)
