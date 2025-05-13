@@ -23,7 +23,7 @@ getFinalSizeAnalytic <- function(Rinit, Iinit, Vinit, N, R0, a, eps, q) {
 
   optVal <- Inf
   while (optVal > 1) {
-    opt <- optim((0.01 + 0.98 * runif(length(N))) * N, optfn)
+    opt <- stats::optim((0.01 + 0.98 * stats::runif(length(N))) * N, optfn)
     optVal <- opt$value
   }
   opt$par + Iinit + Rinit
