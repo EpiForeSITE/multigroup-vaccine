@@ -37,7 +37,7 @@ test_that("transmission rate calibration works", {
   beta32 <- relcontact[3] * relsusc[3] * (1 - incontact[3]) * (1 - incontact[2]) * relcontact[2] *
     popsize[2] / sum((1 - incontact) * relcontact * popsize)
 
-  betamat <- rbind(c(beta11, beta12, beta13), c(beta21, beta22, beta23), c(beta31 ,beta32, beta33))
+  betamat <- matrix(c(beta11, beta21, beta31, beta12, beta22, beta32, beta13, beta23, beta33), 3, 3)
 
   betachk <- betamat * R0 / meaninf / eigen(betamat)$values[1]
   expect_equal(max(abs(betaij - betachk)), 0, tolerance = sqrt(.Machine$double.eps))
