@@ -8,6 +8,6 @@ test_that("final size calculation works", {
   ret1 <- ret[1]
   ret2 <- ret[2]
 
-  expect_equal(ret1, 23270, tolerance=1)
-  expect_equal(ret2, 10238, tolerance=1)
+  expect_equal(ret1, 23270, tolerance = 1)
+  expect_equal(ret2, 10238, tolerance = 1)
 })
