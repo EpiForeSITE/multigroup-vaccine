@@ -9,7 +9,7 @@
 #' @examples
 #' transmissionRates(R0 = 15, meaninf = 7, popsize = c(100, 200, 300), incontact = c(0.3, 0.4, 0.45), relcontact = c(1, 1.1, 1.4), relsusc = c(1, 1.2, 1.1))
 #' @export
-transmissionRates <- function(R0, meaninf, popsize, incontact, relcontact, relsusc){
+transmissionRates <- function(R0, meaninf, popsize, incontact, relcontact, relsusc) {
   f <- (1 - incontact) * relcontact * popsize
   Bij <- relcontact * relsusc * (diag(incontact) + outer((1 - incontact), f / sum(f)))
   betaij <- Bij * R0 / eigen(Bij)$values[1] / meaninf
