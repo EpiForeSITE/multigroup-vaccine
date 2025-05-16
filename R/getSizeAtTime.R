@@ -13,13 +13,13 @@
 #' @export
 getSizeAtTime <- function(time, R0, recoveryRate, popsize, initR, initI, initV, incontact, relcontact, relsusc) {
 
-  beta <- transmissionRates(R0, 1/recoveryRate, popsize, incontact, relcontact, relsusc)
-  betaoverNj <- t(t(beta)/popsize)
+  beta <- transmissionRates(R0, 1 / recoveryRate, popsize, incontact, relcontact, relsusc)
+  betaoverNj <- t(t(beta) / popsize)
 
   odefun <- function(time, state, par) {
-    ngrp <- length(state)/3
+    ngrp <- length(state) / 3
     S <- state[1:ngrp]
-    I <- state[(ngrp+1):(2*ngrp)]
+    I <- state[(ngrp + 1):(2 * ngrp)]
     betaoverNj <- matrix(par[1:(ngrp^2)], nrow=ngrp, ncol=ngrp)
     gam <- par[length(par)]
 
@@ -37,8 +37,8 @@ getSizeAtTime <- function(time, R0, recoveryRate, popsize, initR, initI, initV, 
   times <- seq(0, time, len = 1000)
 
   sim <- deSolve::ode(y0, times, odefun, parms)
-  Isim <- as.numeric(sim[,-1][nrow(sim),(length(popsize)+1):(length(popsize)*2)])
-  Rsim <- as.numeric(sim[,-1][nrow(sim),(length(popsize)*2+1):(length(popsize)*3)])
+  Isim <- as.numeric(sim[, -1][nrow(sim), (length(popsize) + 1):(length(popsize) * 2)])
+  Rsim <- as.numeric(sim[, -1][nrow(sim), (length(popsize) * 2 + 1):(length(popsize) * 3)])
 
   list(totalSize = Isim + Rsim, activeSize = Isim)
 }

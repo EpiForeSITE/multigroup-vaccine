@@ -13,9 +13,9 @@ test_that("final size calculation works", {
   fs <- getFinalSize(0, vacPortion, popsize, R0, recoveryRate, contactRatio, incontact, suscRatio)
   expect_equal(length(fs), length(popsize))
 
-  time <- 1/recoveryRate * 1000
+  time <- 1 / recoveryRate * 1000
   initR <- c(0, 0)
-  initI <- popsize/sum(popsize)
+  initI <- popsize / sum(popsize)
   initV <- vacPortion * popsize
   relcontact <- c(1, contactRatio)
   relsusc <- c(1, suscRatio)
