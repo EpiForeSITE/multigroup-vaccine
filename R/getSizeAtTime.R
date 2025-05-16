@@ -16,27 +16,13 @@ getSizeAtTime <- function(time, R0, recoveryRate, popsize, initR, initI, initV, 
   beta <- transmissionRates(R0, 1 / recoveryRate, popsize, incontact, relcontact, relsusc)
   betaoverNj <- t(t(beta) / popsize)
 
-  odefun <- function(time, state, par) {
-    ngrp <- length(state) / 3
-    S <- state[1:ngrp]
-    I <- state[(ngrp + 1):(2 * ngrp)]
-    betaoverNj <- matrix(par[1:(ngrp^2)], nrow = ngrp, ncol = ngrp)
-    gam <- par[length(par)]
-
-    dS <- -(betaoverNj %*% I) * S
-    dI <- (betaoverNj %*% I) * S - gam * I
-    dR <- gam * I
-
-    return(list(c(dS, dI, dR)))
-  }
-
   initS <- popsize - initR - initI - initV
 
   y0 <- c(initS, initI, initR)
   parms <- c(betaoverNj, recoveryRate)
   times <- seq(0, time, len = 1000)
 
-  sim <- deSolve::ode(y0, times, odefun, parms)
+  sim <- deSolve::ode(y0, times, odeSIR, parms)
   Isim <- as.numeric(sim[, -1][nrow(sim), (length(popsize) + 1):(length(popsize) * 2)])
   Rsim <- as.numeric(sim[, -1][nrow(sim), (length(popsize) * 2 + 1):(length(popsize) * 3)])
 
