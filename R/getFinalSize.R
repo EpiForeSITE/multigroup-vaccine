@@ -20,7 +20,7 @@ getFinalSize <- function(vacTime,
                          suscRatio) {
 
 
-  Isim1 <- popSize/sum(popSize)
+  Isim1 <- popSize / sum(popSize)
   Rsim1 <- c(0, 0)
   Vsim1 <- c(0, 0)
 
