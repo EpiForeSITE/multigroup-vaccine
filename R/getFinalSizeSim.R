@@ -7,7 +7,7 @@ getFinalSizeSim <- function(R0, recoveryRate, popsize, initR, initI, initV, inco
 
   y0 <- c(initS, initI, initR)
   parms <- c(betaoverNj, recoveryRate)
-  times <- seq(0, 1000/recoveryRate, len = 1000)
+  times <- seq(0, 1000 / recoveryRate, len = 1000)
   rootfun <- function(t, y, parms) sum(y[(length(popsize) + 1):(length(popsize) * 2)]) - sqrt(.Machine$double.eps)
 
   sim <- deSolve::ode(y0, times, odeSIR, parms, rootfun = rootfun, method = "lsodar")
