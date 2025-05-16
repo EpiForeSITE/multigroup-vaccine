@@ -20,7 +20,7 @@ getSizeAtTime <- function(time, R0, recoveryRate, popsize, initR, initI, initV, 
     ngrp <- length(state) / 3
     S <- state[1:ngrp]
     I <- state[(ngrp + 1):(2 * ngrp)]
-    betaoverNj <- matrix(par[1:(ngrp^2)], nrow=ngrp, ncol=ngrp)
+    betaoverNj <- matrix(par[1:(ngrp^2)], nrow = ngrp, ncol = ngrp)
     gam <- par[length(par)]
 
     dS <- -(betaoverNj %*% I) * S
