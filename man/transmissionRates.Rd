@@ -26,6 +26,6 @@ a matrix of transmission rates to (row) and from (column) each group
 Calculate transmission rate matrix for multigroup model with specified R0
 }
 \examples{
-transmissionRates(R0 = 15, meaninf = 7, popsize = c(100,200,300), incontact = c(0.3,0.4,0.45),
-relcontact = c(1,1.1,1.4), relsusc = c(1,1.2,1.1))
+transmissionRates(R0 = 15, meaninf = 7, popsize = c(100, 200, 300),
+  incontact = c(0.3, 0.4, 0.45), relcontact = c(1, 1.1, 1.4), relsusc = c(1, 1.2, 1.1))
 }

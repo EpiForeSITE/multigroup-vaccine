@@ -7,7 +7,8 @@
 #' @param relsusc relative susceptibility to infection per contact of each group
 #' @returns a matrix of transmission rates to (row) and from (column) each group
 #' @examples
-#' transmissionRates(R0 = 15, meaninf = 7, popsize = c(100, 200, 300), incontact = c(0.3, 0.4, 0.45), relcontact = c(1, 1.1, 1.4), relsusc = c(1, 1.2, 1.1))
+#' transmissionRates(R0 = 15, meaninf = 7, popsize = c(100, 200, 300),
+#'   incontact = c(0.3, 0.4, 0.45), relcontact = c(1, 1.1, 1.4), relsusc = c(1, 1.2, 1.1))
 #' @export
 transmissionRates <- function(R0, meaninf, popsize, incontact, relcontact, relsusc) {
   f <- (1 - incontact) * relcontact * popsize

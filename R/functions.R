@@ -22,7 +22,7 @@ getFinalSizeAnalytic <- function(Rinit, Iinit, Vinit, N, R0, a, eps, q) {
     ifelse(all(x > 0), max(abs(x - Zrhs(x))), Inf)
 
   optVal <- Inf
-  while (optVal > 1) {
+  while (optVal > 0.1) {
     opt <- stats::optim((0.01 + 0.98 * stats::runif(length(N))) * N, optfn)
     optVal <- opt$value
   }
@@ -31,7 +31,7 @@ getFinalSizeAnalytic <- function(Rinit, Iinit, Vinit, N, R0, a, eps, q) {
 
 
 exposure.SIR <- function(Time, state, Pars) {
-  with(as.list(c(Time, state, Pars)), {
+  with(as.list(c(state, Pars)), {
     # beta is a 2x2 transmission matrix
     beta <- (1 - epsilon) *
       outer(activities, activities) / sum(c(N1, N2) * activities) +
