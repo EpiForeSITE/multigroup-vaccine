@@ -11,7 +11,7 @@ test_that("final size calculation works: vax at time 0", {
   incontact <- c(0.4, 0.4)
 
   fs <- getFinalSize(0, vacPortion, popsize, R0, recoveryRate, contactRatio, incontact, suscRatio)
-  #expect_equal(length(fs), length(popsize))
+  expect_equal(length(fs), length(popsize))
 
   time <- 1 / recoveryRate * 1000
   initR <- c(0, 0)
