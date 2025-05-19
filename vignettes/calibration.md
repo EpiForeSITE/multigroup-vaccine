@@ -1,9 +1,7 @@
----
-title: "Sensitivity Analysis"
-format: gfm
----
+# Sensitivity Analysis
 
-```{r}
+
+``` r
 library(multigroup.vaccine)
 
 pops <- c(60, 100, 500)
@@ -21,7 +19,7 @@ ode_size <- multigroup.vaccine:::getFinalSizeSim(
   )
 ```
 
-```{r}
+``` r
 library(epiworldR)
 
 cmat <- matrix(
@@ -62,18 +60,38 @@ set.seed(331)
 run_multiple(m = abm_model, ndays = 200, nsims = 500, saver = saver, nthreads = 7)
 ```
 
+    Starting multiple runs (500) using 7 thread(s)
+    _________________________________________________________________________
+    _________________________________________________________________________
+    ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| done.
 
-```{r}
+``` r
 library(data.table)
 res <- run_multiple_get_results(abm_model)
 total_hist <- res$total_hist |> 
   as.data.table()
 
 library(ggplot2)
+```
+
+    Warning: package 'ggplot2' was built under R version 4.4.2
+
+``` r
 total_hist[date == 200 & state == "Recovered"] |>
   ggplot(aes(y = counts)) 
-    geom_histogram()
+```
 
+![](calibration_files/figure-commonmark/unnamed-chunk-3-1.png)
+
+``` r
+    geom_histogram()
+```
+
+    geom_bar: na.rm = FALSE, orientation = NA
+    stat_bin: binwidth = NULL, bins = NULL, na.rm = FALSE, orientation = NA, pad = FALSE
+    position_stack 
+
+``` r
 final_size <- total_hist[date == 200 & state != "Susceptible"]
 final_size <- final_size[, .(counts = sum(counts)), by = "sim_num"]
 
@@ -84,6 +102,14 @@ final_size[counts >= 100, .(
     lower = quantile(counts, probs = .025),
     upper = quantile(counts, probs = .975)
   )]
+```
 
+           mean       sd median lower upper
+          <num>    <num>  <int> <num> <num>
+    1: 366.8571 69.37115    385   167 447.7
+
+``` r
 hist(final_size$counts, breaks = 50)
 ```
+
+![](calibration_files/figure-commonmark/unnamed-chunk-3-2.png)
