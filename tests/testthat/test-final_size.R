@@ -1,7 +1,7 @@
 library(multigroup.vaccine)
 
 
-test_that("final size calculation works: vax at time 0", {
+test_that("final size calculation works: 2 groups, vax at time 0", {
   vacPortion <- c(0.1, 0.1)
   popsize <- c(80000, 20000)
   R0 <- 1.5
@@ -10,21 +10,20 @@ test_that("final size calculation works: vax at time 0", {
   suscRatio <- 1.1
   incontact <- c(0.4, 0.4)
 
-  fs <- getFinalSize(0, vacPortion, popsize, R0, recoveryRate, contactRatio, incontact, suscRatio)
+  fs <- getFinalSize(0, vacPortion, popsize, R0, recoveryRate, c(1, contactRatio), incontact, c(1, suscRatio))
   expect_equal(length(fs), length(popsize))
 
-  time <- 1 / recoveryRate * 1000
   initR <- c(0, 0)
   initI <- popsize / sum(popsize)
   initV <- vacPortion * popsize
   relcontact <- c(1, contactRatio)
   relsusc <- c(1, suscRatio)
-  fssim <- getSizeAtTime(time, R0, recoveryRate, popsize, initR, initI, initV, incontact, relcontact, relsusc)
+  fssim <- getFinalSizeSim(R0, recoveryRate, popsize, initR, initI, initV, incontact, relcontact, relsusc)
   expect_equal(max(abs(fssim$activeSize)), 0, tolerance = sqrt(.Machine$double.eps))
   expect_equal(max(abs(fssim$totalSize - fs)), 0, tolerance = 1)
 })
 
-test_that("final size calculation works: delayed vax", {
+test_that("final size calculation works: 2 groups, delayed vax", {
   vacPortion <- c(0.1, 0.1)
   popsize <- c(80000, 20000)
   R0 <- 1.5
@@ -34,10 +33,10 @@ test_that("final size calculation works: delayed vax", {
   incontact <- c(0.4, 0.4)
   vacTime <- 50
 
-  fs <- getFinalSize(vacTime, vacPortion, popsize, R0, recoveryRate, contactRatio, incontact, suscRatio)
+  fs <- getFinalSize(vacTime, vacPortion, popsize, R0, recoveryRate, c(1, contactRatio), incontact, c(1, suscRatio))
   expect_equal(length(fs), length(popsize))
 
-  time <- 1 / recoveryRate * 1000
+  #time <- 1 / recoveryRate * 1000
   initR <- c(0, 0)
   initI <- popsize / sum(popsize)
   initV <- c(0, 0)
@@ -47,8 +46,29 @@ test_that("final size calculation works: delayed vax", {
   vacI <- initsim$activeSize
   vacR <- initsim$totalSize - vacI
   vacV <- vacPortion * popsize
-  fssim <- getSizeAtTime(time, R0, recoveryRate, popsize, vacR, vacI, vacV, incontact, relcontact, relsusc)
+  fssim <- getFinalSizeSim(R0, recoveryRate, popsize, vacR, vacI, vacV, incontact, relcontact, relsusc)
 
+  expect_equal(max(abs(fssim$activeSize)), 0, tolerance = sqrt(.Machine$double.eps))
+  expect_equal(max(abs(fssim$totalSize - fs)), 0, tolerance = 1)
+})
+
+test_that("final size calculation works: 3 groups, vax at time 0", {
+  vacPortion <- c(0.9, 0.8, 0.7)
+  popsize <- c(80000, 1000, 500)
+  R0 <- 15
+  recoveryRate <- 1 / 7
+  relcontact <- rep(1, 3)
+  relsusc <- rep(1, 3)
+  incontact <- rep(0.8, 3)
+
+  fs <- getFinalSize(0, vacPortion, popsize, R0, recoveryRate, relcontact, incontact, relsusc)
+  expect_equal(length(fs), length(popsize))
+
+  initR <- rep(0, length(popsize))
+  initI <- popsize / sum(popsize)
+  initV <- vacPortion * popsize
+
+  fssim <- getFinalSizeSim(R0, recoveryRate, popsize, initR, initI, initV, incontact, relcontact, relsusc)
   expect_equal(max(abs(fssim$activeSize)), 0, tolerance = sqrt(.Machine$double.eps))
   expect_equal(max(abs(fssim$totalSize - fs)), 0, tolerance = 1)
 })

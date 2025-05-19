@@ -10,9 +10,9 @@ getFinalSize(
   popSize,
   R0,
   recoveryRate,
-  contactRatio,
+  relContact,
   contactWithinGroup,
-  suscRatio
+  relSusc
 )
 }
 \arguments{
@@ -27,12 +27,12 @@ getFinalSize(
 \item{recoveryRate}{inverse of mean infectious period
 (same time units as vacTime)}
 
-\item{contactRatio}{ratio of 2nd group's : 1st group's overall contact rate}
+\item{relContact}{relative overall contact rate of each group}
 
 \item{contactWithinGroup}{fraction of each group's contacts that are
 in-group vs out-group}
 
-\item{suscRatio}{ratio of 2nd group's : 1st group's susceptibility to infection per contact}
+\item{relSusc}{relative susceptibility to infection per contact of each group}
 }
 \description{
 Calculate final size of outbreak: the total number of infections in each group

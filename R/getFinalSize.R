@@ -5,28 +5,28 @@
 #' @param R0 overall basic reproduction number
 #' @param recoveryRate inverse of mean infectious period
 #'     (same time units as vacTime)
-#' @param contactRatio ratio of 2nd group's : 1st group's overall contact rate
+#' @param relContact relative overall contact rate of each group
 #' @param contactWithinGroup fraction of each group's contacts that are
 #'    in-group vs out-group
-#' @param suscRatio ratio of 2nd group's : 1st group's susceptibility to infection per contact
+#' @param relSusc relative susceptibility to infection per contact of each group
 #' @export
 getFinalSize <- function(vacTime,
                          vacPortion,
                          popSize,
                          R0,
                          recoveryRate,
-                         contactRatio,
+                         relContact,
                          contactWithinGroup,
-                         suscRatio) {
+                         relSusc) {
 
 
   Isim1 <- popSize / sum(popSize)
-  Rsim1 <- c(0, 0)
-  Vsim1 <- c(0, 0)
+  Rsim1 <- rep(0, length(popSize))
+  Vsim1 <- rep(0, length(popSize))
 
   incontact <- contactWithinGroup
-  relcontact <- c(1, contactRatio)
-  relsusc <- c(1, suscRatio)
+  relcontact <- relContact
+  relsusc <- relSusc
 
   if (vacTime > 0) {
     sizeAtVacTime <- getSizeAtTime(vacTime, R0, recoveryRate, popSize, Rsim1, Isim1, Vsim1, incontact, relcontact, relsusc)
@@ -40,9 +40,9 @@ getFinalSize <- function(vacTime,
     Vinit = popSize * vacPortion,
     N = popSize,
     R0 = R0,
-    a = c(1, contactRatio),
+    a = relContact,
     eps = contactWithinGroup,
-    q = c(1, suscRatio)
+    q = relSusc
   )
 
 }

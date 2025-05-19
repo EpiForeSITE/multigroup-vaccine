@@ -27,8 +27,8 @@ server <- function(input, output, session) {
 
     fs <- getFinalSize(
       vacTime = vacTime, vacPortion = vacP, popSize = popSize, R0 = R0,
-      recoveryRate = recoveryRate, contactRatio = contactRatio,
-      contactWithinGroup = contactWithinGroup, suscRatio = suscRatio
+      recoveryRate = recoveryRate, relContact = c(1, contactRatio),
+      contactWithinGroup = contactWithinGroup, relSusc = c(1, suscRatio)
     )
 
     hosp <- hospProb * fs
