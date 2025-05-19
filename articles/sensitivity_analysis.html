@@ -95,9 +95,9 @@ susceptible to infection as Group A.</p></li>
 <span>    popSize <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">popA</span>, <span class="va">popB</span><span class="op">)</span>,</span>
 <span>    R0 <span class="op">=</span> <span class="fl">1.75</span>,</span>
 <span>    recoveryRate <span class="op">=</span> <span class="fl">1</span> <span class="op">/</span> <span class="fl">7</span>,</span>
-<span>    contactRatio <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>    relContact <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>,</span>
 <span>    contactWithinGroup <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.75</span>, <span class="fl">0.5</span><span class="op">)</span>,</span>
-<span>    suscRatio <span class="op">=</span> <span class="va">i</span><span class="op">)</span></span>
+<span>    relSusc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">i</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="va">ret</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">&gt;</span> <span class="fl">1000</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">index</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">index</span>, <span class="va">i</span><span class="op">)</span></span>
