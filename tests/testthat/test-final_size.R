@@ -36,7 +36,6 @@ test_that("final size calculation works: 2 groups, delayed vax", {
   fs <- getFinalSize(vacTime, vacPortion, popsize, R0, recoveryRate, c(1, contactRatio), incontact, c(1, suscRatio))
   expect_equal(length(fs), length(popsize))
 
-  #time <- 1 / recoveryRate * 1000
   initR <- c(0, 0)
   initI <- popsize / sum(popsize)
   initV <- c(0, 0)

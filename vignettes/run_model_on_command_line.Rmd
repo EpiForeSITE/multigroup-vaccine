@@ -41,9 +41,9 @@ multigroup.vaccine::getFinalSize(vacTime = 0,
   popSize = c(80000, 20000),
   R0 = 1.75,
   recoveryRate = 1 / 7,
-  contactRatio = 1.7,
+  relContact = c(1, 1.7),
   contactWithinGroup = c(0.2, 0.5),
-  suscRatio = 1)
+  relSusc = c(1, 1))
 ```
 
 ```
