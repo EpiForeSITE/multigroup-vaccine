@@ -29,7 +29,9 @@ getFinalSize <- function(vacTime,
   relsusc <- relSusc
 
   if (vacTime > 0) {
-    sizeAtVacTime <- getSizeAtTime(vacTime, R0, recoveryRate, popSize, Rsim1, Isim1, Vsim1, incontact, relcontact, relsusc)
+    f <- (1 - incontact) * relcontact * popSize
+    contactmatrix <- (diag(incontact) + outer((1 - incontact), f / sum(f)))
+    sizeAtVacTime <- getSizeAtTime(vacTime, R0, recoveryRate, popSize, Rsim1, Isim1, Vsim1, contactmatrix, relcontact, relsusc)
     Isim1 <- sizeAtVacTime$activeSize
     Rsim1 <- sizeAtVacTime$totalSize - Isim1
   }

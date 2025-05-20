@@ -8,22 +8,6 @@ library(multigroup.vaccine)
 
 pops <- c(60, 100, 500)
 
-ode_size <- multigroup.vaccine:::getFinalSizeSim(
-  R0 = 1.5,
-  recoveryRate = 1 / 7,
-  popsize = pops,
-  initR = rep(0, 3),
-  initI = c(1, 0, 0),
-  initV = rep(0, 3),
-  incontact = c(.8, .8, .8),
-  relcontact = c(1, 1, 1),
-  relsusc = c(1, 1, 1)
-  )
-```
-
-```{r}
-library(epiworldR)
-
 cmat <- matrix(
   c(0.8, 0.1, 0.1,
     0.1, 0.8, 0.1,
@@ -31,6 +15,31 @@ cmat <- matrix(
     ),
   nrow = 3, byrow = TRUE
 )
+
+betaij <- transmissionRates(
+  R0 = 1.5,
+  meaninf = 7,
+  popsize = pops,
+  contactmatrix = cmat,
+  relcontact = c(1, 1, 1),
+  relsusc = c(1, 1, 1)
+)
+
+ode_size <- multigroup.vaccine:::getFinalSizeSim(
+  R0 = 1.5,
+  recoveryRate = 1 / 7,
+  popsize = pops,
+  initR = rep(0, 3),
+  initI = c(1, 0, 0),
+  initV = rep(0, 3),
+  contactmatrix = cmat,
+  relcontact = c(1, 1, 1),
+  relsusc = c(1, 1, 1)
+  )
+```
+
+```{r}
+library(epiworldR)
 
 abm_model <- ModelSEIRMixing(
   name = "abc",
@@ -86,4 +95,14 @@ final_size[counts >= 100, .(
   )]
 
 hist(final_size$counts, breaks = 50)
+```
+
+
+Looking at R0
+
+```{r}
+repnum <- res$reproductive |>
+  as.data.table()
+
+repnum[source_exposure_date == 0 & source >= 0, mean(rt)]
 ```

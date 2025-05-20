@@ -47,9 +47,9 @@ for (i in seq(0.5, 2, 0.01)) {
     popSize = c(popA, popB),
     R0 = 1.75,
     recoveryRate = 1 / 7,
-    contactRatio = 2,
+    relContact = c(1, 2),
     contactWithinGroup = c(0.75, 0.5),
-    suscRatio = i)
+    relSusc = c(1, i))
 
   if (ret[1] > 1000) {
     index <- c(index, i)

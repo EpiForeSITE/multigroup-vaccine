@@ -12,7 +12,7 @@ getSizeAtTime(
   initR,
   initI,
   initV,
-  incontact,
+  contactmatrix,
   relcontact,
   relsusc
 )
@@ -32,7 +32,7 @@ getSizeAtTime(
 
 \item{initV}{initial number of each group who are vaccinated and had no prior infection}
 
-\item{incontact}{fraction of each group's contacts that are exclusively within group}
+\item{contactmatrix}{matrix with fraction of each row-group's contacts that are with column-group}
 
 \item{relcontact}{relative overall contact rates of each group}
 

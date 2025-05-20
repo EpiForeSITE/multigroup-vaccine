@@ -6,14 +6,14 @@
 #' @param initR initial number of each group who have already recovered from infection
 #' @param initI initial number of each group who are actively infected
 #' @param initV initial number of each group who are vaccinated and had no prior infection
-#' @param incontact fraction of each group's contacts that are exclusively within group
+#' @param contactmatrix matrix with fraction of each row-group's contacts that are with column-group
 #' @param relcontact relative overall contact rates of each group
 #' @param relsusc relative susceptibility to infection per contact of each group
 #' @returns a list with totalSize (total cumulative infections) and activeSize (total currently infected) in each group at the specified time
 #' @export
-getSizeAtTime <- function(time, R0, recoveryRate, popsize, initR, initI, initV, incontact, relcontact, relsusc) {
+getSizeAtTime <- function(time, R0, recoveryRate, popsize, initR, initI, initV, contactmatrix, relcontact, relsusc) {
 
-  beta <- transmissionRates(R0, 1 / recoveryRate, popsize, incontact, relcontact, relsusc)
+  beta <- transmissionRates(R0, 1 / recoveryRate, popsize, contactmatrix, relcontact, relsusc)
   betaoverNj <- t(t(beta) / popsize)
 
   initS <- popsize - initR - initI - initV

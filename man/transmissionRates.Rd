@@ -4,7 +4,7 @@
 \alias{transmissionRates}
 \title{Calculate transmission rate matrix for multigroup model with specified R0}
 \usage{
-transmissionRates(R0, meaninf, popsize, incontact, relcontact, relsusc)
+transmissionRates(R0, meaninf, popsize, contactmatrix, relcontact, relsusc)
 }
 \arguments{
 \item{R0}{overall basic reproduction number}
@@ -13,7 +13,7 @@ transmissionRates(R0, meaninf, popsize, incontact, relcontact, relsusc)
 
 \item{popsize}{population size of each group}
 
-\item{incontact}{fraction of each group's contacts that are exclusively within group}
+\item{contactmatrix}{matrix with fraction of each row-group's contacts that are with column-group}
 
 \item{relcontact}{relative overall contact rates of each group}
 
@@ -27,5 +27,6 @@ Calculate transmission rate matrix for multigroup model with specified R0
 }
 \examples{
 transmissionRates(R0 = 15, meaninf = 7, popsize = c(100, 200, 300),
-  incontact = c(0.3, 0.4, 0.45), relcontact = c(1, 1.1, 1.4), relsusc = c(1, 1.2, 1.1))
+  contactmatrix = rbind(c(0.8, 0.1, 0.1), c(0.1, 0.8, 0.1), c(0.1, 0.1, 0.8)),
+  relcontact = c(1, 1.1, 1.4), relsusc = c(1, 1.2, 1.1))
 }
