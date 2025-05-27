@@ -5,22 +5,8 @@
 library(multigroup.vaccine)
 
 pops <- c(60, 100, 500)
-
-ode_size <- multigroup.vaccine:::getFinalSizeSim(
-  R0 = 1.5,
-  recoveryRate = 1 / 7,
-  popsize = pops,
-  initR = rep(0, 3),
-  initI = c(1, 0, 0),
-  initV = rep(0, 3),
-  incontact = c(.8, .8, .8),
-  relcontact = c(1, 1, 1),
-  relsusc = c(1, 1, 1)
-  )
-```
-
-``` r
-library(epiworldR)
+R0 <- 1.5
+meaninf <- 7
 
 cmat <- matrix(
   c(0.8, 0.1, 0.1,
@@ -30,12 +16,58 @@ cmat <- matrix(
   nrow = 3, byrow = TRUE
 )
 
+betaij <- transmissionRates(
+  R0 = R0,
+  meaninf = meaninf,
+  popsize = pops,
+  contactmatrix = cmat,
+  relcontact = c(1, 1, 1),
+  relsusc = c(1, 1, 1)
+)
+
+ode_size <- multigroup.vaccine:::getFinalSizeSim(
+  R0 = R0,
+  recoveryRate = 1 / meaninf,
+  popsize = pops,
+  initR = rep(0, 3),
+  initI = c(1, 0, 0),
+  initV = rep(0, 3),
+  contactmatrix = cmat,
+  relcontact = c(1, 1, 1),
+  relsusc = c(1, 1, 1)
+  )
+
+sum(ode_size$totalSize)
+```
+
+    [1] 386.7012
+
+``` r
+bet <- transmissionRates(R0, meaninf, pops, cmat, c(1, 1, 1), c(1, 1, 1))
+size_dist <- multigroup.vaccine:::getFinalSizeDist(
+  n = 500,
+  popsize = pops,
+  recoveryrate = 1 / meaninf,
+  transmrates = bet,
+  initI = c(1, 0, 0),
+  initV = rep(0, 3)
+)
+fs1 <- rowSums(size_dist)
+c(median = median(fs1), mean = mean(fs1), max = max(fs1))
+```
+
+     median    mean     max 
+     28.000 175.298 470.000 
+
+``` r
+library(epiworldR)
+
 abm_model <- ModelSEIRMixing(
   name = "abc",
   n = sum(pops),
   prevalence = 1/sum(pops),
-  contact_rate = 1.5 * (1/7) / .1,
-  recovery_rate = 1 / 7,
+  contact_rate = R0 * (1 / meaninf) / .1,
+  recovery_rate = 1 / meaninf,
   contact_matrix = cmat,
   transmission_rate = .1,
   incubation_days = 0
@@ -57,59 +89,24 @@ saver <- make_saver("total_hist", "reproductive")
 
 # Running multiple simulations
 set.seed(331)
-run_multiple(m = abm_model, ndays = 200, nsims = 500, saver = saver, nthreads = 7)
+ndays <- 400
+run_multiple(m = abm_model, ndays = ndays, nsims = 500, saver = saver, nthreads = 1)
 ```
 
-    Starting multiple runs (500) using 7 thread(s)
+    Starting multiple runs (500) using 1 thread(s)
     _________________________________________________________________________
     _________________________________________________________________________
     ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| done.
 
 ``` r
-library(data.table)
 res <- run_multiple_get_results(abm_model)
-total_hist <- res$total_hist |> 
-  as.data.table()
-
-library(ggplot2)
+total_hist <- res$total_hist
+final_day <- total_hist[total_hist$date == ndays, ]
+fs2 <- final_day$counts[final_day$state == "Recovered"]
+rbind(c(median = median(fs1), mean = mean(fs1), max = max(fs1)),
+  c(median = median(fs2), mean = mean(fs2), max = max(fs2)))
 ```
 
-    Warning: package 'ggplot2' was built under R version 4.4.2
-
-``` r
-total_hist[date == 200 & state == "Recovered"] |>
-  ggplot(aes(y = counts)) 
-```
-
-![](calibration_files/figure-commonmark/unnamed-chunk-3-1.png)
-
-``` r
-    geom_histogram()
-```
-
-    geom_bar: na.rm = FALSE, orientation = NA
-    stat_bin: binwidth = NULL, bins = NULL, na.rm = FALSE, orientation = NA, pad = FALSE
-    position_stack 
-
-``` r
-final_size <- total_hist[date == 200 & state != "Susceptible"]
-final_size <- final_size[, .(counts = sum(counts)), by = "sim_num"]
-
-final_size[counts >= 100, .(
-    mean = mean(counts),
-    sd = sd(counts),
-    median = median(counts),
-    lower = quantile(counts, probs = .025),
-    upper = quantile(counts, probs = .975)
-  )]
-```
-
-           mean       sd median lower upper
-          <num>    <num>  <int> <num> <num>
-    1: 366.8571 69.37115    385   167 447.7
-
-``` r
-hist(final_size$counts, breaks = 50)
-```
-
-![](calibration_files/figure-commonmark/unnamed-chunk-3-2.png)
+         median    mean max
+    [1,]     28 175.298 470
+    [2,]      3 112.674 490
