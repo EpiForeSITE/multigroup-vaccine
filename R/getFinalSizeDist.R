@@ -4,13 +4,13 @@ getFinalSizeDist <- function(n, popsize, recoveryrate, transmrates, initV){
   betaoverNj <- t(t(transmrates) / popsize)
   initS <- popsize - initV
   Rtally <- matrix(0, n, g)
-  for (r in 1:n){
+  for (r in 1:n) {
     I <- rep(0, g)
     I[sample(g, 1, prob = initS)] <- 1
     S <- initS - I
     R <- rep(0, g)
 
-    while (sum(I) > 0){
+    while (sum(I) > 0) {
       tr <- rowSums(outer(S, I) * betaoverNj)
       rr <- I * recoveryrate
 

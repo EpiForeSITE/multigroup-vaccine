@@ -1,4 +1,4 @@
-getR0dist <- function(n, popsize, recoveryrate, transmrates, initV){
+getR0dist <- function(n, popsize, recoveryrate, transmrates, initV) {
   g <- length(popsize) # number of groups
   e <- g * 2           # number of distinct events
   betaoverNj <- t(t(transmrates) / popsize)
@@ -15,9 +15,9 @@ getR0dist <- function(n, popsize, recoveryrate, transmrates, initV){
 
       event <- sample(e, 1, prob = c(tr, rr))
 
-      if(event > g){
+      if (event > g) {
         I[event - g] <- I[event - g] - 1
-      }else{
+      } else {
         transmissions[r] <- transmissions[r] + 1
       }
     }

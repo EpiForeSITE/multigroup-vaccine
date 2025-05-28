@@ -11,14 +11,6 @@ incontact <- c(0.8, 0.8, 0.8)
 f <- (1 - incontact) * pops
 cmat <- (diag(incontact) + outer((1 - incontact), f / sum(f)))
 
-# cmat <- matrix(
-#  c(0.8, 0.1, 0.1,
-#    0.1, 0.8, 0.1,
-#    0.1, 0.1, 0.8
-#    ),
-#  nrow = 3, byrow = TRUE
-# )
-
 betaij <- transmissionRates(
   R0 = R0,
   meaninf = meaninf,
@@ -38,7 +30,7 @@ ode_size <- multigroup.vaccine:::getFinalSizeSim(
   contactmatrix = cmat,
   relcontact = c(1, 1, 1),
   relsusc = c(1, 1, 1)
-  )
+)
 
 fsODE <- sum(ode_size$totalSize)
 ```
@@ -61,7 +53,7 @@ library(epiworldR)
 abm_model <- ModelSEIRMixing(
   name = "abc",
   n = sum(pops),
-  prevalence = 1/sum(pops),
+  prevalence = 1 / sum(pops),
   contact_rate = R0 * (1 / meaninf) / .1,
   recovery_rate = 1 / meaninf,
   contact_matrix = cmat,
@@ -84,7 +76,6 @@ abm_model |>
 saver <- make_saver("total_hist", "reproductive")
 
 # Running multiple simulations
-#set.seed(331)
 ndays <- 400
 nthr <- parallel::detectCores() - 1L
 run_multiple(m = abm_model, ndays = ndays, nsims = numsims, saver = saver, nthreads = nthr)
@@ -105,9 +96,7 @@ getdiststats <- function(fs) {
   c(median = median(fs), mean = mean(fs), meanHigh = mean(fs[fs > fsODE / 2]))
 }
 
-list(finalSizeODE = fsODE,
-     finalSizeGillespie = getdiststats(fs1),
-     finalSizeEpiworld = getdiststats(fs2))
+list(finalSizeODE = fsODE, finalSizeGillespie = getdiststats(fs1), finalSizeEpiworld = getdiststats(fs2))
 ```
 
     $finalSizeODE
@@ -115,8 +104,8 @@ list(finalSizeODE = fsODE,
 
     $finalSizeGillespie
       median     mean meanHigh 
-      2.0000 119.1880 375.9286 
+      2.0000 119.5330 369.4603 
 
     $finalSizeEpiworld
       median     mean meanHigh 
-      3.0000 126.2360 367.3522 
+      4.0000 128.1420 369.9436 
