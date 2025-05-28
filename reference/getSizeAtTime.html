@@ -18,7 +18,8 @@
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/run_model_on_command_line.html">Run Model in the console</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/epiworld_comparison.html">Comparison to epiworld</a></li>
+    <li><a class="dropdown-item" href="../articles/run_model_on_command_line.html">Run Model in the console</a></li>
     <li><a class="dropdown-item" href="../articles/sensitivity_analysis.html">Sensitivity Analysis</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -50,7 +51,7 @@
 <span>  <span class="va">initR</span>,</span>
 <span>  <span class="va">initI</span>,</span>
 <span>  <span class="va">initV</span>,</span>
-<span>  <span class="va">incontact</span>,</span>
+<span>  <span class="va">contactmatrix</span>,</span>
 <span>  <span class="va">relcontact</span>,</span>
 <span>  <span class="va">relsusc</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -88,8 +89,8 @@
 <dd><p>initial number of each group who are vaccinated and had no prior infection</p></dd>
 
 
-<dt id="arg-incontact">incontact<a class="anchor" aria-label="anchor" href="#arg-incontact"></a></dt>
-<dd><p>fraction of each group's contacts that are exclusively within group</p></dd>
+<dt id="arg-contactmatrix">contactmatrix<a class="anchor" aria-label="anchor" href="#arg-contactmatrix"></a></dt>
+<dd><p>matrix with fraction of each row-group's contacts that are with column-group</p></dd>
 
 
 <dt id="arg-relcontact">relcontact<a class="anchor" aria-label="anchor" href="#arg-relcontact"></a></dt>
@@ -114,7 +115,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer></div>

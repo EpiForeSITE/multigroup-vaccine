@@ -33,7 +33,8 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/run_model_on_command_line.html">Run Model in the console</a></li>
+<li><a class="dropdown-item" href="../articles/epiworld_comparison.html">Comparison to epiworld</a></li>
+    <li><a class="dropdown-item" href="../articles/run_model_on_command_line.html">Run Model in the console</a></li>
     <li><a class="dropdown-item" href="../articles/sensitivity_analysis.html">Sensitivity Analysis</a></li>
   </ul>
 </li>
@@ -74,16 +75,16 @@ size 20000 (B)</p></li>
 <li><p>Set the reproductive number 1.75</p></li>
 <li><p>Recovery rate of 1/7 creates a time to symptom resolution of 1
 week.</p></li>
-<li><p>Contact ratio is 1.7. This is the overall contact rate for B over
-the overall contact rate for A. This means that an individual in Group B
-makes 1.7 contacts for every 1 made by an individual in group
-A.</p></li>
+<li><p>Relative contact rates are 1 and 1.7. This is the overall contact
+rates of groups A and B relative to each other. This means that an
+individual in Group B makes 1.7 contacts for every 1 made by an
+individual in group A.</p></li>
 <li><p>Contact within group is set to 0.2 for A, 0.5 for B. This is the
 fraction of all contacts that are A-&gt;A, or B-&gt;B
 respectively.</p></li>
-<li><p>Susceptibility ratio is the susceptibility of individuals in
-population B over that of individuals in population A. With
-susceptibility = 1, they are equally susceptible.</p></li>
+<li><p>Relative susceptibility is the susceptibility to infection per
+contact of individuals in each group relative to each other. With
+relative susceptibility = (1, 1), they are equally susceptible.</p></li>
 </ul>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">multigroup.vaccine</span><span class="fu">::</span><span class="fu"><a href="../reference/getFinalSize.html">getFinalSize</a></span><span class="op">(</span>vacTime <span class="op">=</span> <span class="fl">0</span>,</span>
@@ -109,7 +110,7 @@ to 1 by population A.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>
