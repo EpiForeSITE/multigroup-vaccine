@@ -1,0 +1,105 @@
+---
+title: "Sensitivity Analysis"
+format: gfm
+---
+
+```{r}
+library(multigroup.vaccine)
+
+pops <- c(60, 100, 500)
+R0 <- 1.5
+meaninf <- 7
+incontact <- c(0.8, 0.8, 0.8)
+f <- (1 - incontact) * pops
+cmat <- (diag(incontact) + outer((1 - incontact), f / sum(f)))
+
+# cmat <- matrix(
+#  c(0.8, 0.1, 0.1,
+#    0.1, 0.8, 0.1,
+#    0.1, 0.1, 0.8
+#    ),
+#  nrow = 3, byrow = TRUE
+# )
+
+betaij <- transmissionRates(
+  R0 = R0,
+  meaninf = meaninf,
+  popsize = pops,
+  contactmatrix = cmat,
+  relcontact = c(1, 1, 1),
+  relsusc = c(1, 1, 1)
+)
+
+ode_size <- multigroup.vaccine:::getFinalSizeSim(
+  R0 = R0,
+  recoveryRate = 1 / meaninf,
+  popsize = pops,
+  initR = rep(0, 3),
+  initI = c(1, 0, 0),
+  initV = rep(0, 3),
+  contactmatrix = cmat,
+  relcontact = c(1, 1, 1),
+  relsusc = c(1, 1, 1)
+  )
+
+fsODE <- sum(ode_size$totalSize)
+```
+
+```{r}
+numsims <- 1000
+size_dist <- multigroup.vaccine:::getFinalSizeDist(
+  n = numsims,
+  popsize = pops,
+  recoveryrate = 1 / meaninf,
+  transmrates = betaij,
+  initV = rep(0, 3)
+)
+fs1 <- rowSums(size_dist)
+```
+
+```{r}
+library(epiworldR)
+
+abm_model <- ModelSEIRMixing(
+  name = "abc",
+  n = sum(pops),
+  prevalence = 1/sum(pops),
+  contact_rate = R0 * (1 / meaninf) / .1,
+  recovery_rate = 1 / meaninf,
+  contact_matrix = cmat,
+  transmission_rate = .1,
+  incubation_days = 0
+)
+
+# Start off creating three entities.
+# Individuals will be distribured randomly between the three.
+e1 <- entity("Population 1", pops[1], as_proportion = FALSE)
+e2 <- entity("Population 2", pops[2], as_proportion = FALSE)
+e3 <- entity("Population 3", pops[3], as_proportion = FALSE)
+
+abm_model |>
+  add_entity(e1) |>
+  add_entity(e2) |>
+  add_entity(e3)
+
+# Creating the saver
+saver <- make_saver("total_hist", "reproductive")
+
+# Running multiple simulations
+#set.seed(331)
+ndays <- 400
+nthr <- parallel::detectCores() - 1L
+run_multiple(m = abm_model, ndays = ndays, nsims = numsims, saver = saver, nthreads = nthr)
+res <- run_multiple_get_results(abm_model)
+total_hist <- res$total_hist
+final_day <- total_hist[total_hist$date == ndays, ]
+fs2 <- final_day$counts[final_day$state == "Recovered"]
+
+getdiststats <- function(fs) {
+  c(median = median(fs), mean = mean(fs), meanHigh = mean(fs[fs > fsODE / 2]))
+}
+
+list(finalSizeODE = fsODE,
+     finalSizeGillespie = getdiststats(fs1),
+     finalSizeEpiworld = getdiststats(fs2))
+```

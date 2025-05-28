@@ -29,11 +29,11 @@ Consider a population with the following parameters:
 
 -   Recovery rate of 1/7 creates a time to symptom resolution of 1 week.
 
--   Contact ratio is 1.7. This is the overall contact rate for B over the overall contact rate for A. This means that an individual in Group B makes 1.7 contacts for every 1 made by an individual in group A.
+-   Relative contact rates are 1 and 1.7. This is the overall contact rates of groups A and B relative to each other. This means that an individual in Group B makes 1.7 contacts for every 1 made by an individual in group A.
 
 -   Contact within group is set to 0.2 for A, 0.5 for B. This is the fraction of all contacts that are A-\>A, or B-\>B respectively.
 
--   Susceptibility ratio is the susceptibility of individuals in population B over that of individuals in population A. With susceptibility = 1, they are equally susceptible.
+-   Relative susceptibility is the susceptibility to infection per contact of individuals in each group relative to each other. With relative susceptibility = (1, 1), they are equally susceptible.
 
 ```{r}
 multigroup.vaccine::getFinalSize(vacTime = 0,
