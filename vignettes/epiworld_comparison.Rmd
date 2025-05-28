@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(multigroup.vaccine)
+library(epiworldR)
 ```
 
 ```{r}
@@ -63,8 +64,6 @@ fs1 <- rowSums(size_dist)
 ```
 
 ```{r}
-library(epiworldR)
-
 abm_model <- ModelSEIRMixing(
   name = "abc",
   n = sum(pops),
@@ -92,9 +91,9 @@ saver <- make_saver("total_hist", "reproductive")
 
 # Running multiple simulations
 ndays <- 400
-nthr <- parallel::detectCores() - 1L
-run_multiple(m = abm_model, ndays = ndays, nsims = numsims, saver = saver, nthreads = nthr)
-res <- run_multiple_get_results(abm_model)
+# nthr <- parallel::detectCores() - 1L
+run_multiple(m = abm_model, ndays = ndays, nsims = numsims, saver = saver, nthreads = 1)
+res <- run_multiple_get_results(abm_model, nthreads = 1)
 total_hist <- res$total_hist
 final_day <- total_hist[total_hist$date == ndays, ]
 fs2 <- final_day$counts[final_day$state == "Recovered"]
