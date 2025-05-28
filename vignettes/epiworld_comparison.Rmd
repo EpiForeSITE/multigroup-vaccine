@@ -1,9 +1,24 @@
-# Sensitivity Analysis
+---
+title: "Comparison to epiworld"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Comparison to epiworld}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
 
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
 
-``` r
+```{r setup}
 library(multigroup.vaccine)
+```
 
+```{r}
 pops <- c(60, 100, 500)
 R0 <- 1.5
 meaninf <- 7
@@ -35,7 +50,7 @@ ode_size <- multigroup.vaccine:::getFinalSizeSim(
 fsODE <- sum(ode_size$totalSize)
 ```
 
-``` r
+```{r}
 numsims <- 1000
 size_dist <- multigroup.vaccine:::getFinalSizeDist(
   n = numsims,
@@ -47,7 +62,7 @@ size_dist <- multigroup.vaccine:::getFinalSizeDist(
 fs1 <- rowSums(size_dist)
 ```
 
-``` r
+```{r}
 library(epiworldR)
 
 abm_model <- ModelSEIRMixing(
@@ -79,14 +94,6 @@ saver <- make_saver("total_hist", "reproductive")
 ndays <- 400
 nthr <- parallel::detectCores() - 1L
 run_multiple(m = abm_model, ndays = ndays, nsims = numsims, saver = saver, nthreads = nthr)
-```
-
-    Starting multiple runs (1000) using 7 thread(s)
-    _________________________________________________________________________
-    _________________________________________________________________________
-    ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| done.
-
-``` r
 res <- run_multiple_get_results(abm_model)
 total_hist <- res$total_hist
 final_day <- total_hist[total_hist$date == ndays, ]
@@ -97,15 +104,5 @@ getdiststats <- function(fs) {
 }
 
 c(finalSizeODE = fsODE)
-```
-
-    finalSizeODE 
-        385.7413 
-
-``` r
 rbind(finalSizeGillespie = getdiststats(fs1), finalSizeEpiworld = getdiststats(fs2))
 ```
-
-                       median    mean meanHigh
-    finalSizeGillespie      2 113.864 368.7010
-    finalSizeEpiworld       3 122.880 368.2006
