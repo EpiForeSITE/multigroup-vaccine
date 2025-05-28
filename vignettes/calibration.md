@@ -96,16 +96,16 @@ getdiststats <- function(fs) {
   c(median = median(fs), mean = mean(fs), meanHigh = mean(fs[fs > fsODE / 2]))
 }
 
-list(finalSizeODE = fsODE, finalSizeGillespie = getdiststats(fs1), finalSizeEpiworld = getdiststats(fs2))
+c(finalSizeODE = fsODE)
 ```
 
-    $finalSizeODE
-    [1] 385.7413
+    finalSizeODE 
+        385.7413 
 
-    $finalSizeGillespie
-      median     mean meanHigh 
-      2.0000 119.5330 369.4603 
+``` r
+rbind(finalSizeGillespie = getdiststats(fs1), finalSizeEpiworld = getdiststats(fs2))
+```
 
-    $finalSizeEpiworld
-      median     mean meanHigh 
-      4.0000 128.1420 369.9436 
+                       median    mean meanHigh
+    finalSizeGillespie      2 113.864 368.7010
+    finalSizeEpiworld       3 122.880 368.2006

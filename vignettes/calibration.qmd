@@ -90,5 +90,6 @@ getdiststats <- function(fs) {
   c(median = median(fs), mean = mean(fs), meanHigh = mean(fs[fs > fsODE / 2]))
 }
 
-list(finalSizeODE = fsODE, finalSizeGillespie = getdiststats(fs1), finalSizeEpiworld = getdiststats(fs2))
+c(finalSizeODE = fsODE)
+rbind(finalSizeGillespie = getdiststats(fs1), finalSizeEpiworld = getdiststats(fs2))
 ```
