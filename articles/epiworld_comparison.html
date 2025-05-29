@@ -82,16 +82,13 @@
 <span>  reltransm <span class="op">=</span> <span class="va">cmat</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">ode_size</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu">getFinalSizeSim</span><span class="op">(</span></span>
-<span>  R0 <span class="op">=</span> <span class="va">R0</span>,</span>
-<span>  recoveryRate <span class="op">=</span> <span class="fl">1</span> <span class="op">/</span> <span class="va">meaninf</span>,</span>
+<span><span class="va">ode_size</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">::</span><span class="fu"><a href="../reference/getFinalSizeODE.html">getFinalSizeODE</a></span><span class="op">(</span></span>
+<span>  transmrates <span class="op">=</span> <span class="va">betaij</span>,</span>
+<span>  recoveryrate <span class="op">=</span> <span class="fl">1</span> <span class="op">/</span> <span class="va">meaninf</span>,</span>
 <span>  popsize <span class="op">=</span> <span class="va">pops</span>,</span>
 <span>  initR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">3</span><span class="op">)</span>,</span>
 <span>  initI <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span>,</span>
-<span>  initV <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">3</span><span class="op">)</span>,</span>
-<span>  contactmatrix <span class="op">=</span> <span class="va">cmat</span>,</span>
-<span>  relcontact <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>  relsusc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span>  initV <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">fsODE</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">ode_size</span><span class="op">$</span><span class="va">totalSize</span><span class="op">)</span></span></code></pre></div>
