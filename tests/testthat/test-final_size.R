@@ -20,7 +20,9 @@ test_that("final size calculation works: 2 groups, vax at time 0", {
   relsusc <- c(1, suscRatio)
   f <- (1 - incontact) * relcontact * popsize
   contactmatrix <- (diag(incontact) + outer((1 - incontact), f / sum(f)))
-  fssim <- getFinalSizeSim(R0, recoveryRate, popsize, initR, initI, initV, contactmatrix, relcontact, relsusc)
+  reltransm <- relcontact * relsusc * contactmatrix
+  transmrates <- transmissionRates(R0, 1 / recoveryRate, reltransm)
+  fssim <- getFinalSizeODE(transmrates, recoveryRate, popsize, initR, initI, initV)
   expect_equal(max(abs(fssim$activeSize)), 0, tolerance = sqrt(.Machine$double.eps))
   expect_equal(max(abs(fssim$totalSize - fs)), 0, tolerance = 1)
 })
@@ -45,13 +47,15 @@ test_that("final size calculation works: 2 groups, delayed vax", {
   relsusc <- c(1, suscRatio)
   f <- (1 - incontact) * relcontact * popsize
   contactmatrix <- (diag(incontact) + outer((1 - incontact), f / sum(f)))
+  reltransm <- relcontact * relsusc * contactmatrix
+  transmrates <- transmissionRates(R0, 1 / recoveryRate, reltransm)
 
   initsim <- getSizeAtTime(vacTime, R0, recoveryRate, popsize, initR, initI, initV, contactmatrix, relcontact, relsusc)
   vacI <- initsim$activeSize
   vacR <- initsim$totalSize - vacI
   vacV <- vacPortion * popsize
 
-  fssim <- getFinalSizeSim(R0, recoveryRate, popsize, vacR, vacI, vacV, contactmatrix, relcontact, relsusc)
+  fssim <- getFinalSizeODE(transmrates, recoveryRate, popsize, vacR, vacI, vacV)
 
   expect_equal(max(abs(fssim$activeSize)), 0, tolerance = sqrt(.Machine$double.eps))
   expect_equal(max(abs(fssim$totalSize - fs)), 0, tolerance = 1)
@@ -74,7 +78,9 @@ test_that("final size calculation works: 3 groups, vax at time 0", {
   initV <- vacPortion * popsize
   f <- (1 - incontact) * relcontact * popsize
   contactmatrix <- (diag(incontact) + outer((1 - incontact), f / sum(f)))
-  fssim <- getFinalSizeSim(R0, recoveryRate, popsize, initR, initI, initV, contactmatrix, relcontact, relsusc)
+  reltransm <- relcontact * relsusc * contactmatrix
+  transmrates <- transmissionRates(R0, 1 / recoveryRate, reltransm)
+  fssim <- getFinalSizeODE(transmrates, recoveryRate, popsize, initR, initI, initV)
   expect_equal(max(abs(fssim$activeSize)), 0, tolerance = sqrt(.Machine$double.eps))
   expect_equal(max(abs(fssim$totalSize - fs)), 0, tolerance = 1)
 })

@@ -33,16 +33,13 @@ betaij <- transmissionRates(
   reltransm = cmat
 )
 
-ode_size <- multigroup.vaccine:::getFinalSizeSim(
-  R0 = R0,
-  recoveryRate = 1 / meaninf,
+ode_size <- multigroup.vaccine::getFinalSizeODE(
+  transmrates = betaij,
+  recoveryrate = 1 / meaninf,
   popsize = pops,
   initR = rep(0, 3),
   initI = c(1, 0, 0),
-  initV = rep(0, 3),
-  contactmatrix = cmat,
-  relcontact = c(1, 1, 1),
-  relsusc = c(1, 1, 1)
+  initV = rep(0, 3)
 )
 
 fsODE <- sum(ode_size$totalSize)
