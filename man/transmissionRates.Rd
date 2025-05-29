@@ -2,29 +2,25 @@
 % Please edit documentation in R/transmissionRates.R
 \name{transmissionRates}
 \alias{transmissionRates}
-\title{Calculate transmission rate matrix for multigroup model with specified R0}
+\title{Calculate transmission rate matrix for multi-group model with specified R0}
 \usage{
-transmissionRates(R0, meaninf, contactmatrix, relcontact, relsusc)
+transmissionRates(R0, meaninf, reltransm)
 }
 \arguments{
 \item{R0}{overall basic reproduction number}
 
 \item{meaninf}{mean duration of infectious period}
 
-\item{contactmatrix}{matrix with fraction of each row-group's contacts that are with column-group}
-
-\item{relcontact}{relative overall contact rates of each group}
-
-\item{relsusc}{relative susceptibility to infection per contact of each group}
+\item{reltransm}{matrix with relative transmission rates, from column-group to row-group}
 }
 \value{
-a matrix of transmission rates to (row) and from (column) each group
+a matrix of transmission rates to (row) and from (column) each group,
+in same time units as meaninf
 }
 \description{
-Calculate transmission rate matrix for multigroup model with specified R0
+Calculate transmission rate matrix for multi-group model with specified R0
 }
 \examples{
 transmissionRates(R0 = 15, meaninf = 7,
-  contactmatrix = rbind(c(0.8, 0.1, 0.1), c(0.1, 0.8, 0.1), c(0.1, 0.1, 0.8)),
-  relcontact = c(1, 1.1, 1.4), relsusc = c(1, 1.2, 1.1))
+  reltransm = rbind(c(1, 0.5, 0.9), c(0.3, 1.9, 1), c(0.3, 0.6, 2.8)))
 }

@@ -8,7 +8,8 @@ test_that("transmission rate calibration works", {
 
   f <- (1 - incontact) * relcontact * popsize
   contactmatrix <- (diag(incontact) + outer((1 - incontact), f / sum(f)))
-  betaij <- transmissionRates(R0, meaninf, contactmatrix, relcontact, relsusc)
+  reltransm <- relcontact * relsusc * contactmatrix
+  betaij <- transmissionRates(R0, meaninf, reltransm)
 
   expect_equal(eigen(betaij)$values[1] * meaninf, R0)
 

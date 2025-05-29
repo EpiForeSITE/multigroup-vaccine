@@ -13,7 +13,8 @@
 #' @export
 getSizeAtTime <- function(time, R0, recoveryRate, popsize, initR, initI, initV, contactmatrix, relcontact, relsusc) {
 
-  beta <- transmissionRates(R0, 1 / recoveryRate, contactmatrix, relcontact, relsusc)
+  reltransm <- relcontact * relsusc * contactmatrix
+  beta <- transmissionRates(R0, 1 / recoveryRate, reltransm)
   betaoverNj <- t(t(beta) / popsize)
 
   initS <- popsize - initR - initI - initV
