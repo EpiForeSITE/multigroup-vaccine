@@ -1,6 +1,6 @@
 getFinalSizeSim <- function(R0, recoveryRate, popsize, initR, initI, initV, contactmatrix, relcontact, relsusc) {
 
-  beta <- transmissionRates(R0, 1 / recoveryRate, popsize, contactmatrix, relcontact, relsusc)
+  beta <- transmissionRates(R0, 1 / recoveryRate, contactmatrix, relcontact, relsusc)
   betaoverNj <- t(t(beta) / popsize)
 
   initS <- popsize - initR - initI - initV

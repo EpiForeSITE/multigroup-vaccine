@@ -4,14 +4,12 @@
 \alias{transmissionRates}
 \title{Calculate transmission rate matrix for multigroup model with specified R0}
 \usage{
-transmissionRates(R0, meaninf, popsize, contactmatrix, relcontact, relsusc)
+transmissionRates(R0, meaninf, contactmatrix, relcontact, relsusc)
 }
 \arguments{
 \item{R0}{overall basic reproduction number}
 
 \item{meaninf}{mean duration of infectious period}
-
-\item{popsize}{population size of each group}
 
 \item{contactmatrix}{matrix with fraction of each row-group's contacts that are with column-group}
 
@@ -26,7 +24,7 @@ a matrix of transmission rates to (row) and from (column) each group
 Calculate transmission rate matrix for multigroup model with specified R0
 }
 \examples{
-transmissionRates(R0 = 15, meaninf = 7, popsize = c(100, 200, 300),
+transmissionRates(R0 = 15, meaninf = 7,
   contactmatrix = rbind(c(0.8, 0.1, 0.1), c(0.1, 0.8, 0.1), c(0.1, 0.1, 0.8)),
   relcontact = c(1, 1.1, 1.4), relsusc = c(1, 1.2, 1.1))
 }

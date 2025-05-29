@@ -30,7 +30,6 @@ cmat <- (diag(incontact) + outer((1 - incontact), f / sum(f)))
 betaij <- transmissionRates(
   R0 = R0,
   meaninf = meaninf,
-  popsize = pops,
   contactmatrix = cmat,
   relcontact = c(1, 1, 1),
   relsusc = c(1, 1, 1)
