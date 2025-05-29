@@ -5,7 +5,7 @@ articles:
   epiworld_comparison: epiworld_comparison.html
   run_model_on_command_line: run_model_on_command_line.html
   sensitivity_analysis: sensitivity_analysis.html
-last_built: 2025-05-29T21:30Z
+last_built: 2025-05-29T22:20Z
 urls:
   reference: https://epiforesite.github.io/multigroup-vaccine/reference
   article: https://epiforesite.github.io/multigroup-vaccine/articles
