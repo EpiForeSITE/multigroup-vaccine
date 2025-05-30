@@ -43,18 +43,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">getSizeAtTime</span><span class="op">(</span></span>
-<span>  <span class="va">time</span>,</span>
-<span>  <span class="va">R0</span>,</span>
-<span>  <span class="va">recoveryRate</span>,</span>
-<span>  <span class="va">popsize</span>,</span>
-<span>  <span class="va">initR</span>,</span>
-<span>  <span class="va">initI</span>,</span>
-<span>  <span class="va">initV</span>,</span>
-<span>  <span class="va">contactmatrix</span>,</span>
-<span>  <span class="va">relcontact</span>,</span>
-<span>  <span class="va">relsusc</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">getSizeAtTime</span><span class="op">(</span><span class="va">time</span>, <span class="va">transmrates</span>, <span class="va">recoveryrate</span>, <span class="va">popsize</span>, <span class="va">initR</span>, <span class="va">initI</span>, <span class="va">initV</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -65,40 +54,28 @@
 <dd><p>the time at which to calculate the outbreak size</p></dd>
 
 
-<dt id="arg-r-">R0<a class="anchor" aria-label="anchor" href="#arg-r-"></a></dt>
-<dd><p>overall basic reproduction number</p></dd>
+<dt id="arg-transmrates">transmrates<a class="anchor" aria-label="anchor" href="#arg-transmrates"></a></dt>
+<dd><p>matrix of group-to-group (column-to-row) transmission rates</p></dd>
 
 
-<dt id="arg-recoveryrate">recoveryRate<a class="anchor" aria-label="anchor" href="#arg-recoveryrate"></a></dt>
-<dd><p>inverse of the mean duration of infectious period</p></dd>
+<dt id="arg-recoveryrate">recoveryrate<a class="anchor" aria-label="anchor" href="#arg-recoveryrate"></a></dt>
+<dd><p>inverse of mean infectious period</p></dd>
 
 
 <dt id="arg-popsize">popsize<a class="anchor" aria-label="anchor" href="#arg-popsize"></a></dt>
-<dd><p>population size of each group</p></dd>
+<dd><p>the population size of each group</p></dd>
 
 
 <dt id="arg-initr">initR<a class="anchor" aria-label="anchor" href="#arg-initr"></a></dt>
-<dd><p>initial number of each group who have already recovered from infection</p></dd>
+<dd><p>initial number of each group already infected and removed (included in size result)</p></dd>
 
 
 <dt id="arg-initi">initI<a class="anchor" aria-label="anchor" href="#arg-initi"></a></dt>
-<dd><p>initial number of each group who are actively infected</p></dd>
+<dd><p>initial number of each group infectious</p></dd>
 
 
 <dt id="arg-initv">initV<a class="anchor" aria-label="anchor" href="#arg-initv"></a></dt>
-<dd><p>initial number of each group who are vaccinated and had no prior infection</p></dd>
-
-
-<dt id="arg-contactmatrix">contactmatrix<a class="anchor" aria-label="anchor" href="#arg-contactmatrix"></a></dt>
-<dd><p>matrix with fraction of each row-group's contacts that are with column-group</p></dd>
-
-
-<dt id="arg-relcontact">relcontact<a class="anchor" aria-label="anchor" href="#arg-relcontact"></a></dt>
-<dd><p>relative overall contact rates of each group</p></dd>
-
-
-<dt id="arg-relsusc">relsusc<a class="anchor" aria-label="anchor" href="#arg-relsusc"></a></dt>
-<dd><p>relative susceptibility to infection per contact of each group</p></dd>
+<dd><p>initial number of each group vaccinated</p></dd>
 
 </dl></div>
     <div class="section level2">
