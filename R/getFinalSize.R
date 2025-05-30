@@ -19,7 +19,6 @@ getFinalSize <- function(vacTime,
                          contactWithinGroup,
                          relSusc) {
 
-
   Isim1 <- popSize / sum(popSize)
   Rsim1 <- rep(0, length(popSize))
   Vsim1 <- rep(0, length(popSize))
@@ -31,7 +30,9 @@ getFinalSize <- function(vacTime,
   if (vacTime > 0) {
     f <- (1 - incontact) * relcontact * popSize
     contactmatrix <- (diag(incontact) + outer((1 - incontact), f / sum(f)))
-    sizeAtVacTime <- getSizeAtTime(vacTime, R0, recoveryRate, popSize, Rsim1, Isim1, Vsim1, contactmatrix, relcontact, relsusc)
+    reltransm <- relcontact * relsusc * contactmatrix
+    transmrates <- transmissionRates(R0, 1 / recoveryRate, reltransm)
+    sizeAtVacTime <- getSizeAtTime(vacTime, transmrates, recoveryRate, popSize, Rsim1, Isim1, Vsim1)
     Isim1 <- sizeAtVacTime$activeSize
     Rsim1 <- sizeAtVacTime$totalSize - Isim1
   }

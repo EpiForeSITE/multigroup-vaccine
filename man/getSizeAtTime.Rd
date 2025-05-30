@@ -4,39 +4,22 @@
 \alias{getSizeAtTime}
 \title{Calculate outbreak size at a given time}
 \usage{
-getSizeAtTime(
-  time,
-  R0,
-  recoveryRate,
-  popsize,
-  initR,
-  initI,
-  initV,
-  contactmatrix,
-  relcontact,
-  relsusc
-)
+getSizeAtTime(time, transmrates, recoveryrate, popsize, initR, initI, initV)
 }
 \arguments{
 \item{time}{the time at which to calculate the outbreak size}
 
-\item{R0}{overall basic reproduction number}
+\item{transmrates}{matrix of group-to-group (column-to-row) transmission rates}
 
-\item{recoveryRate}{inverse of the mean duration of infectious period}
+\item{recoveryrate}{inverse of mean infectious period}
 
-\item{popsize}{population size of each group}
+\item{popsize}{the population size of each group}
 
-\item{initR}{initial number of each group who have already recovered from infection}
+\item{initR}{initial number of each group already infected and removed (included in size result)}
 
-\item{initI}{initial number of each group who are actively infected}
+\item{initI}{initial number of each group infectious}
 
-\item{initV}{initial number of each group who are vaccinated and had no prior infection}
-
-\item{contactmatrix}{matrix with fraction of each row-group's contacts that are with column-group}
-
-\item{relcontact}{relative overall contact rates of each group}
-
-\item{relsusc}{relative susceptibility to infection per contact of each group}
+\item{initV}{initial number of each group vaccinated}
 }
 \value{
 a list with totalSize (total cumulative infections) and activeSize (total currently infected) in each group at the specified time

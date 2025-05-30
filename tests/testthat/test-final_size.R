@@ -50,7 +50,7 @@ test_that("final size calculation works: 2 groups, delayed vax", {
   reltransm <- relcontact * relsusc * contactmatrix
   transmrates <- transmissionRates(R0, 1 / recoveryRate, reltransm)
 
-  initsim <- getSizeAtTime(vacTime, R0, recoveryRate, popsize, initR, initI, initV, contactmatrix, relcontact, relsusc)
+  initsim <- getSizeAtTime(vacTime, transmrates, recoveryRate, popsize, initR, initI, initV)
   vacI <- initsim$activeSize
   vacR <- initsim$totalSize - vacI
   vacV <- vacPortion * popsize

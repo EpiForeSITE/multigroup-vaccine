@@ -1,26 +1,21 @@
 #' Calculate outbreak size at a given time
 #' @param time the time at which to calculate the outbreak size
-#' @param R0 overall basic reproduction number
-#' @param recoveryRate inverse of the mean duration of infectious period
-#' @param popsize population size of each group
-#' @param initR initial number of each group who have already recovered from infection
-#' @param initI initial number of each group who are actively infected
-#' @param initV initial number of each group who are vaccinated and had no prior infection
-#' @param contactmatrix matrix with fraction of each row-group's contacts that are with column-group
-#' @param relcontact relative overall contact rates of each group
-#' @param relsusc relative susceptibility to infection per contact of each group
+#' @param transmrates matrix of group-to-group (column-to-row) transmission rates
+#' @param recoveryrate inverse of mean infectious period
+#' @param popsize the population size of each group
+#' @param initR initial number of each group already infected and removed (included in size result)
+#' @param initI initial number of each group infectious
+#' @param initV initial number of each group vaccinated
 #' @returns a list with totalSize (total cumulative infections) and activeSize (total currently infected) in each group at the specified time
 #' @export
-getSizeAtTime <- function(time, R0, recoveryRate, popsize, initR, initI, initV, contactmatrix, relcontact, relsusc) {
+getSizeAtTime <- function(time, transmrates, recoveryrate, popsize, initR, initI, initV) {
 
-  reltransm <- relcontact * relsusc * contactmatrix
-  beta <- transmissionRates(R0, 1 / recoveryRate, reltransm)
-  betaoverNj <- t(t(beta) / popsize)
+  betaoverNj <- t(t(transmrates) / popsize)
 
   initS <- popsize - initR - initI - initV
 
   y0 <- c(initS, initI, initR)
-  parms <- c(betaoverNj, recoveryRate)
+  parms <- c(betaoverNj, recoveryrate)
   times <- seq(0, time, len = 1000)
 
   sim <- deSolve::ode(y0, times, odeSIR, parms)
