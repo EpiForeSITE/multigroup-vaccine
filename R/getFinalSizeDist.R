@@ -1,14 +1,23 @@
-getFinalSizeDist <- function(n, popsize, recoveryrate, transmrates, initV) {
+#' Estimate the distribution of final outbreak sizes by group using stochastic simulations of multi-group model
+#' @param n the number of simulations to run
+#' @param transmrates matrix of group-to-group (column-to-row) transmission rates
+#' @param recoveryrate inverse of mean infectious period
+#' @param popsize the population size of each group
+#' @param initR initial number of each group already infected and removed (included in size result)
+#' @param initI initial number of each group infectious
+#' @param initV initial number of each group vaccinated
+#' @returns a matrix with the final number infected from each group (column) in each simulation (row)
+#' @export
+getFinalSizeDist <- function(n, transmrates, recoveryrate, popsize, initR, initI, initV) {
   g <- length(popsize) # number of groups
   e <- g * 2           # number of distinct events
   betaoverNj <- t(t(transmrates) / popsize)
-  initS <- popsize - initV
+  initS <- popsize - initR - initV
   Rtally <- matrix(0, n, g)
   for (r in 1:n) {
-    I <- rep(0, g)
-    I[sample(g, 1, prob = initS)] <- 1
-    S <- initS - I
-    R <- rep(0, g)
+    I <- initI
+    S <- initS
+    R <- initR
 
     while (sum(I) > 0) {
       tr <- rowSums(outer(S, I) * betaoverNj)

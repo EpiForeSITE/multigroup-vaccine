@@ -46,14 +46,28 @@ fsODE <- sum(ode_size$totalSize)
 ```
 
 ```{r}
-numsims <- 1000
-size_dist <- multigroup.vaccine:::getFinalSizeDist(
-  n = numsims,
-  popsize = pops,
-  recoveryrate = 1 / meaninf,
-  transmrates = betaij,
-  initV = rep(0, 3)
-)
+numsims <- 100
+getFSD <- function(n, initI){
+  multigroup.vaccine::getFinalSizeDist(
+    n = n,
+    transmrates = betaij,
+    recoveryrate = 1 / meaninf,
+    popsize = pops,
+    initR = rep(0, length(pops)),
+    initV = rep(0, length(pops)),
+    initI = initI
+  )
+}
+initIcounts <- tabulate(sample(length(pops), numsims, replace = TRUE, prob = pops))
+ind <- c(0, cumsum(initIcounts))
+size_dist <- matrix(0, numsims, length(pops))
+for (i in seq_along(initIcounts)) {
+  if (initIcounts[i] > 0) {
+    initI <- rep(0, length(pops))
+    initI[i] <- 1
+    size_dist[(ind[i] + 1):ind[i + 1], ] <- getFSD(initIcounts[i], initI)
+  }
+}
 fs1 <- rowSums(size_dist)
 ```
 
