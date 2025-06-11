@@ -21,6 +21,9 @@ library(epiworldR)
 
 ```{r}
 pops <- c(60, 100, 500)
+initI <- c(1, 0, 0)
+initV <- c(0, 0, 0)
+initR <- c(0, 0, 0)
 R0 <- 1.5
 meaninf <- 7
 incontact <- c(0.8, 0.8, 0.8)
@@ -37,37 +40,26 @@ ode_size <- multigroup.vaccine::getFinalSizeODE(
   transmrates = betaij,
   recoveryrate = 1 / meaninf,
   popsize = pops,
-  initR = rep(0, 3),
-  initI = c(1, 0, 0),
-  initV = rep(0, 3)
+  initR = initR,
+  initI = initI,
+  initV = initV
 )
 
 fsODE <- sum(ode_size$totalSize)
 ```
 
 ```{r}
-numsims <- 100
-getFSD <- function(n, initI){
-  multigroup.vaccine::getFinalSizeDist(
-    n = n,
+numsims <- 1000
+size_dist <- getFinalSizeDist(
+    n = numsims,
     transmrates = betaij,
     recoveryrate = 1 / meaninf,
     popsize = pops,
-    initR = rep(0, length(pops)),
-    initV = rep(0, length(pops)),
+    initR = initR,
+    initV = initV,
     initI = initI
   )
-}
-initIcounts <- tabulate(sample(length(pops), numsims, replace = TRUE, prob = pops))
-ind <- c(0, cumsum(initIcounts))
-size_dist <- matrix(0, numsims, length(pops))
-for (i in seq_along(initIcounts)) {
-  if (initIcounts[i] > 0) {
-    initI <- rep(0, length(pops))
-    initI[i] <- 1
-    size_dist[(ind[i] + 1):ind[i + 1], ] <- getFSD(initIcounts[i], initI)
-  }
-}
+
 fs1 <- rowSums(size_dist)
 ```
 
@@ -89,10 +81,29 @@ e1 <- entity("Population 1", pops[1], as_proportion = FALSE)
 e2 <- entity("Population 2", pops[2], as_proportion = FALSE)
 e3 <- entity("Population 3", pops[3], as_proportion = FALSE)
 
+grp <- rep(1:length(pops), pops)
+set_distribution_entity(
+  entity = e1,
+  distfun = distribute_entity_to_set(0:(pops[1] - 1))
+)
+set_distribution_entity(
+  entity = e2,
+  distfun = distribute_entity_to_set(pops[1]:(pops[2] - 1))
+)
+set_distribution_entity(
+  entity = e3,
+  distfun = distribute_entity_to_set(pops[2]:(sum(pops) - 1))
+)
+
 abm_model |>
   add_entity(e1) |>
   add_entity(e2) |>
   add_entity(e3)
+
+set_distribution_virus(
+  virus = get_virus(abm_model, 0),
+  distfun = distribute_virus_randomly(1, FALSE, agents_ids = 0L)
+)
 
 # Creating the saver
 saver <- make_saver("total_hist", "reproductive")
@@ -104,12 +115,22 @@ run_multiple(m = abm_model, ndays = ndays, nsims = numsims, saver = saver, nthre
 res <- run_multiple_get_results(abm_model, nthreads = 1)
 total_hist <- res$total_hist
 final_day <- total_hist[total_hist$date == ndays, ]
-fs2 <- final_day$counts[final_day$state == "Recovered"]
+# fs2 <- final_day$counts[final_day$state == "Recovered"]
 
-getdiststats <- function(fs) {
-  c(median = median(fs), mean = mean(fs), meanHigh = mean(fs[fs > fsODE / 2]))
+rr <- res$reproductive[res$reproductive$source >= 0, ]
+rr$source_entity <- grp[rr$source + 1]
+fs2 <- tabulate(rr$sim_num)
+size_dist2 <- matrix(0, numsims, length(pops))
+for (i in 1:numsims) {
+  size_dist2[i, ] <- tabulate(rr$source_entity[rr$sim_num == i], length(pops))
 }
 
-c(finalSizeODE = fsODE)
-rbind(finalSizeGillespie = getdiststats(fs1), finalSizeEpiworld = getdiststats(fs2))
+getdiststats <- function(sd) {
+  c(median = apply(sd, 2, median),
+    mean = apply(sd, 2, mean),
+    meanHigh = apply(sd, 2, function(x) mean(x[x > max(x) / 2])))
+}
+
+c(finalSizeODE = ode_size$totalSize)
+cbind(finalSizeGillespie = getdiststats(size_dist), finalSizeEpiworld = getdiststats(size_dist2))
 ```
