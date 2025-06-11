@@ -51,14 +51,13 @@ fsODE <- sum(ode_size$totalSize)
 ```{r}
 numsims <- 1000
 size_dist <- getFinalSizeDist(
-    n = numsims,
-    transmrates = betaij,
-    recoveryrate = 1 / meaninf,
-    popsize = pops,
-    initR = initR,
-    initV = initV,
-    initI = initI
-  )
+  n = numsims,
+  transmrates = betaij,
+  recoveryrate = 1 / meaninf,
+  popsize = pops,
+  initR = initR,
+  initV = initV,
+  initI = initI)
 
 fs1 <- rowSums(size_dist)
 ```
@@ -81,7 +80,7 @@ e1 <- entity("Population 1", pops[1], as_proportion = FALSE)
 e2 <- entity("Population 2", pops[2], as_proportion = FALSE)
 e3 <- entity("Population 3", pops[3], as_proportion = FALSE)
 
-grp <- rep(1:length(pops), pops)
+grp <- rep(seq_along(pops), pops)
 set_distribution_entity(
   entity = e1,
   distfun = distribute_entity_to_set(0:(pops[1] - 1))
