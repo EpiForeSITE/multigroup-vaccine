@@ -98,14 +98,13 @@
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">numsims</span> <span class="op">&lt;-</span> <span class="fl">1000</span></span>
 <span><span class="va">size_dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/getFinalSizeDist.html">getFinalSizeDist</a></span><span class="op">(</span></span>
-<span>    n <span class="op">=</span> <span class="va">numsims</span>,</span>
-<span>    transmrates <span class="op">=</span> <span class="va">betaij</span>,</span>
-<span>    recoveryrate <span class="op">=</span> <span class="fl">1</span> <span class="op">/</span> <span class="va">meaninf</span>,</span>
-<span>    popsize <span class="op">=</span> <span class="va">pops</span>,</span>
-<span>    initR <span class="op">=</span> <span class="va">initR</span>,</span>
-<span>    initV <span class="op">=</span> <span class="va">initV</span>,</span>
-<span>    initI <span class="op">=</span> <span class="va">initI</span></span>
-<span>  <span class="op">)</span></span>
+<span>  n <span class="op">=</span> <span class="va">numsims</span>,</span>
+<span>  transmrates <span class="op">=</span> <span class="va">betaij</span>,</span>
+<span>  recoveryrate <span class="op">=</span> <span class="fl">1</span> <span class="op">/</span> <span class="va">meaninf</span>,</span>
+<span>  popsize <span class="op">=</span> <span class="va">pops</span>,</span>
+<span>  initR <span class="op">=</span> <span class="va">initR</span>,</span>
+<span>  initV <span class="op">=</span> <span class="va">initV</span>,</span>
+<span>  initI <span class="op">=</span> <span class="va">initI</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">fs1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">size_dist</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -126,7 +125,7 @@
 <span><span class="va">e2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://uofuepibio.github.io/epiworldR/reference/entities.html" class="external-link">entity</a></span><span class="op">(</span><span class="st">"Population 2"</span>, <span class="va">pops</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, as_proportion <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">e3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://uofuepibio.github.io/epiworldR/reference/entities.html" class="external-link">entity</a></span><span class="op">(</span><span class="st">"Population 3"</span>, <span class="va">pops</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>, as_proportion <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">grp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">pops</span><span class="op">)</span>, <span class="va">pops</span><span class="op">)</span></span>
+<span><span class="va">grp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">pops</span><span class="op">)</span>, <span class="va">pops</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://uofuepibio.github.io/epiworldR/reference/entities.html" class="external-link">set_distribution_entity</a></span><span class="op">(</span></span>
 <span>  entity <span class="op">=</span> <span class="va">e1</span>,</span>
 <span>  distfun <span class="op">=</span> <span class="fu"><a href="https://uofuepibio.github.io/epiworldR/reference/entities.html" class="external-link">distribute_entity_to_set</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="op">(</span><span class="va">pops</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
