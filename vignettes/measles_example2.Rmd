@@ -84,5 +84,3 @@ size_dist <- getFinalSizeDist(
 fs1 <- rowSums(size_dist)
 hist(fs1, breaks = 50)
 ```
-
-
