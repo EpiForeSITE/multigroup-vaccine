@@ -7,7 +7,7 @@ articles:
   measles_example2: measles_example2.html
   run_model_on_command_line: run_model_on_command_line.html
   sensitivity_analysis: sensitivity_analysis.html
-last_built: 2025-06-17T17:57Z
+last_built: 2025-06-17T19:25Z
 urls:
   reference: https://epiforesite.github.io/multigroup-vaccine/reference
   article: https://epiforesite.github.io/multigroup-vaccine/articles
