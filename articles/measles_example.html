@@ -34,6 +34,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/epiworld_comparison.html">Comparison to epiworld</a></li>
+    <li><a class="dropdown-item" href="../articles/measles_agemodel.html">Measles Age-Structured Model</a></li>
     <li><a class="dropdown-item" href="../articles/measles_example.html">Measles Outbreak Example</a></li>
     <li><a class="dropdown-item" href="../articles/measles_example2.html">Measles Outbreak Example 2</a></li>
     <li><a class="dropdown-item" href="../articles/run_model_on_command_line.html">Run Model in the console</a></li>
@@ -76,6 +77,7 @@
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pops</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">414</span>, <span class="fl">37</span>, <span class="fl">987</span>, <span class="fl">647</span>, <span class="fl">944</span>, <span class="fl">190</span>, <span class="fl">594</span>, <span class="fl">131</span>, <span class="fl">133</span>, <span class="fl">1133</span>, <span class="fl">632</span>, <span class="fl">604</span>, <span class="fl">221</span>, <span class="fl">512</span>, <span class="fl">511</span>, <span class="fl">29</span>,</span>
 <span>  <span class="fl">548</span>, <span class="fl">232</span>, <span class="fl">110</span>, <span class="fl">2296</span>, <span class="fl">98</span>, <span class="fl">1218</span>, <span class="fl">742</span>, <span class="fl">582</span>, <span class="fl">1352</span>, <span class="fl">173</span>, <span class="fl">41</span>, <span class="fl">11</span><span class="op">)</span></span>
+<span></span>
 <span><span class="va">initV</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">371</span>, <span class="fl">36</span>, <span class="fl">913</span>, <span class="fl">578</span>, <span class="fl">905</span>, <span class="fl">168</span>, <span class="fl">420</span>, <span class="fl">97</span>, <span class="fl">117</span>, <span class="fl">1072</span>, <span class="fl">581</span>, <span class="fl">555</span>, <span class="fl">201</span>, <span class="fl">489</span>, <span class="fl">469</span>, <span class="fl">19</span>,</span>
 <span>  <span class="fl">509</span>, <span class="fl">219</span>, <span class="fl">103</span>, <span class="fl">1143</span>, <span class="fl">95</span>, <span class="fl">786</span>, <span class="fl">431</span>, <span class="fl">517</span>, <span class="fl">1276</span>, <span class="fl">113</span>, <span class="fl">29</span>, <span class="fl">11</span><span class="op">)</span></span>
 <span></span>
