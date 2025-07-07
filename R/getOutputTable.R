@@ -1,8 +1,8 @@
-getOutputTable <- function(agelims, agepops, agecovr, ageveff, initgrp){
+getOutputTable <- function(agelims, agepops, agecovr, ageveff, initgrp) {
 
   grpnames <- c(paste0("under", agelims[2]),
-                paste0(agelims[2:(length(agelims)-1)], "to", agelims[3:length(agelims)]-1),
-                paste0(agelims[length(agelims)], "+"))
+    paste0(agelims[2:(length(agelims)-1)], "to", agelims[3:length(agelims)]-1),
+    paste0(agelims[length(agelims)], "+"))
 
   agevacimmune <- round(agepops * agecovr * ageveff)
 
@@ -19,10 +19,10 @@ getOutputTable <- function(agelims, agepops, agecovr, ageveff, initgrp){
   data(polymod)
   suppressWarnings (
   cm <- contact_matrix(polymod,
-                       age.limits = agelims,
-                       symmetric = TRUE,
-                       missing.participant.age = "remove",
-                       missing.contact.age = "remove")
+    age.limits = agelims,
+    symmetric = TRUE,
+    missing.participant.age = "remove",
+    missing.contact.age = "remove")
   )
 
   nj <- cm$demography$proportion
@@ -34,7 +34,7 @@ getOutputTable <- function(agelims, agepops, agecovr, ageveff, initgrp){
   Rv <- rep(0, length(R0vals))
   escapesize <- matrix(0, length(R0vals), length(pops))
 
-  for(i in seq_along(R0vals)) {
+  for (i in seq_along(R0vals)) {
     betaij <- transmissionRates(
       R0 = R0vals[i],
       meaninf = meaninf,
@@ -42,9 +42,9 @@ getOutputTable <- function(agelims, agepops, agecovr, ageveff, initgrp){
     )
     Rv[i] <- repnum(meaninf, agepops, betaij, initR, agecovr * agepops, ageveff)
 
-    if(Rv[i] < 1){
+    if (Rv[i] < 1) {
       escapesize[i, ] <- rep(0, length(pops))
-    }else{
+    } else {
       escapesize[i, ] <- getFinalSizeODE(
         transmrates = betaij,
         recoveryrate = 1 / meaninf,
@@ -60,8 +60,8 @@ getOutputTable <- function(agelims, agepops, agecovr, ageveff, initgrp){
   numsims <- 10000
 
   probescape <- rep(0, length(R0vals))
-  for(i in seq_along(R0vals)) {
-    if(Rv[i] < 1) {
+  for (i in seq_along(R0vals)) {
+    if (Rv[i] < 1) {
       probescape[i] <- 0
     } else {
       betaij <- transmissionRates(

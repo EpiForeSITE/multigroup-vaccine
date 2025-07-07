@@ -26,7 +26,7 @@ ageveff <- c(0.93, 0.93, rep(0.97, 5), 1)
 
 agepops <- c(2354, 9418, 19835, 17001, 19219, 47701, 53956, 32842)
 agecovr <- c(0, 0.83, 0.852, 0.879, 0.9, 0.925, 0.95, 1)
-initgrp <- 6 #assume first case in 25-44 group
+initgrp <- 6 # assume first case in 25-44 group
 
 ot1 <- multigroup.vaccine:::getOutputTable(
   agelims = agelims,
