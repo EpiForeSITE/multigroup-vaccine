@@ -1,0 +1,63 @@
+---
+title: "Measles Age-Structured Model"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Measles Age-Structured Model}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(multigroup.vaccine)
+library(socialmixr)
+```
+
+```{r}
+# under 1, 1-4, 5-11, 12-17, 18-24, 25-44, 45-69, 70 plus
+agelims <- c(0, 1, 5, 12, 18, 25, 45, 70)
+ageveff <- c(0.93, 0.93, rep(0.97, 5), 1)
+
+agepops <- c(2354, 9418, 19835, 17001, 19219, 47701, 53956, 32842)
+agecovr <- c(0, 0.83, 0.852, 0.879, 0.9, 0.925, 0.95, 1)
+initgrp <- 6 #assume first case in 25-44 group
+
+ot1 <- multigroup.vaccine:::getOutputTable(
+  agelims = agelims,
+  agepops = c(2354, 9418, 19835, 17001, 19219, 47701, 53956, 32842),
+  agecovr = c(0, 0.83, 0.852, 0.879, 0.9, 0.925, 0.95, 1),
+  ageveff = ageveff,
+  initgrp = initgrp
+)
+
+print(as.data.frame(ot1), row.names = FALSE)
+```
+```{r}
+ot2 <- multigroup.vaccine:::getOutputTable(
+  agelims = agelims,
+  agepops = c(11981, 47922, 86718, 77302, 120132, 199914, 136997, 38206),
+  agecovr = c(0, 0.86, 0.899, 0.933, 0.95, 0.95, 0.95, 1),
+  ageveff = ageveff,
+  initgrp = initgrp
+)
+
+print(as.data.frame(ot2), row.names = FALSE)
+```
+
+```{r}
+ot3 <- multigroup.vaccine:::getOutputTable(
+  agelims = agelims,
+  agepops = c(14527, 58108, 114156, 106006, 118837, 367597, 310945, 95637),
+  agecovr = c(0, 0.89, 0.949, 0.950, 0.95, 0.95, 0.95, 1),
+  ageveff = ageveff,
+  initgrp = initgrp
+)
+
+print(as.data.frame(ot3), row.names = FALSE)
+```
