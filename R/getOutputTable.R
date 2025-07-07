@@ -16,7 +16,7 @@ getOutputTable <- function(agelims, agepops, agecovr, ageveff, initgrp) {
   R0vals <- 10:18
   meaninf <- 7
 
-  data(socialmixr::polymod)
+  data(polymod)
   suppressWarnings(
     cm <- socialmixr::contact_matrix(polymod,
       age.limits = agelims,
