@@ -18,7 +18,7 @@ getFinalSizeDistEscape <- function(n, transmrates, recoveryrate, popsize, initR,
 
       logprobend <- sum(I) * log(recoveryrate / sum(tr))
 
-      if(logprobend < -40) {
+      if (logprobend < -40) {
         R <- fsODE
         I <- rep(0, g)
       } else {
