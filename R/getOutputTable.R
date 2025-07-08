@@ -1,8 +1,10 @@
 getOutputTable <- function(agelims, agepops, agecovr, ageveff, initgrp) {
 
-  grpnames <- c(paste0("under", agelims[2]),
+  grpnames <- c(
+    paste0("under", agelims[2]),
     paste0(agelims[2:(length(agelims) - 1)], "to", agelims[3:length(agelims)] - 1),
-    paste0(agelims[length(agelims)], "+"))
+    paste0(agelims[length(agelims)], "+")
+  )
 
   agevacimmune <- round(agepops * agecovr * ageveff)
 
