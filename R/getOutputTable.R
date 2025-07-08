@@ -6,6 +6,8 @@ getOutputTable <- function(agelims, agepops, agecovr, ageveff, initgrp) {
 
   agevacimmune <- round(agepops * agecovr * ageveff)
 
+  mij <- contactMatrixPolymod(agelims, agepops)
+
   pops <- agepops
   initV <- agevacimmune
 
@@ -15,21 +17,6 @@ getOutputTable <- function(agelims, agepops, agecovr, ageveff, initgrp) {
 
   R0vals <- 10:18
   meaninf <- 7
-
-  data(polymod)
-  suppressWarnings(
-    cm <- socialmixr::contact_matrix(polymod,
-      age.limits = agelims,
-      symmetric = TRUE,
-      missing.participant.age = "remove",
-      missing.contact.age = "remove")
-  )
-
-  nj <- cm$demography$proportion
-  mij <- t(t(cm$matrix) / nj * (pops / sum(pops)))
-
-  relcontact <- rowSums(mij)
-  cmat <- mij / relcontact
 
   Rv <- rep(0, length(R0vals))
   escapesize <- matrix(0, length(R0vals), length(pops))
