@@ -6,7 +6,7 @@ contactMatrixPolymod <- function(agelims, agepops) {
     paste0(agelims[length(agelims)], "+")
   )
 
-  data(polymod)
+  #data(polymod)
   suppressWarnings(
     cm <- socialmixr::contact_matrix(
       polymod,

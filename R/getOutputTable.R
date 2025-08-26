@@ -46,7 +46,7 @@ getOutputTable <- function(agelims, agepops, agecovr, ageveff, initgrp) {
     escapesizetot <- rowSums(escapesize)
   }
 
-  numsims <- 10000
+  numsims <- 1000
 
   probescape <- rep(0, length(R0vals))
   for (i in seq_along(R0vals)) {
