@@ -1,4 +1,4 @@
-repnum <- function(meaninf, popsize, trmat, initR, initV, vaxeff) {
+vaxrepnum <- function(meaninf, popsize, trmat, initR, initV, vaxeff) {
 
   betaij <- trmat * (1 - (initR + initV * vaxeff) / popsize)
 
