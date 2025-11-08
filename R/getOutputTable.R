@@ -29,7 +29,7 @@ getOutputTable <- function(agelims, agepops, agecovr, ageveff, initgrp) {
       meaninf = meaninf,
       reltransm = mij
     )
-    Rv[i] <- repnum(meaninf, agepops, betaij, initR, agecovr * agepops, ageveff)
+    Rv[i] <- vaxrepnum(meaninf, agepops, betaij, initR, agecovr * agepops, ageveff)
 
     if (Rv[i] < 1) {
       escapesize[i, ] <- rep(0, length(pops))
