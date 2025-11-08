@@ -1,0 +1,14 @@
+pandoc: 3.1.11
+pkgdown: 2.2.0
+pkgdown_sha: ~
+articles:
+  epiworld_comparison: epiworld_comparison.html
+  measles_agemodel: measles_agemodel.html
+  measles_example: measles_example.html
+  measles_example2: measles_example2.html
+  run_model_on_command_line: run_model_on_command_line.html
+  sensitivity_analysis: sensitivity_analysis.html
+last_built: 2025-11-08T01:23Z
+urls:
+  reference: https://epiforesite.github.io/multigroup-vaccine/reference
+  article: https://epiforesite.github.io/multigroup-vaccine/articles
