@@ -9,7 +9,7 @@ contactMatrixPolymod <- function(agelims, agepops) {
   #data(polymod)
   suppressWarnings(
     cm <- socialmixr::contact_matrix(
-      polymod,
+      socialmixr::polymod,
       age.limits = agelims,
       symmetric = TRUE,
       missing.participant.age = "remove",
