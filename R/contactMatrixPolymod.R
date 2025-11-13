@@ -1,4 +1,4 @@
-contactMatrixPolymod <- function(agelims, agepops) {
+contactMatrixPolymod <- function(agelims, agepops = NULL) {
 
   grpnames <- c(
     paste0("under", agelims[2]),
@@ -17,8 +17,13 @@ contactMatrixPolymod <- function(agelims, agepops) {
     )
   )
 
-  nj <- cm$demography$proportion
-  mij <- t(t(cm$matrix) / nj * (agepops / sum(agepops)))
+  if(is.null(agepops)){
+    mij <- cm$matrix
+  }else{
+    nj <- cm$demography$proportion
+    mij <- t(t(cm$matrix) / nj * (agepops / sum(agepops)))
+  }
+
   rownames(mij) <- grpnames
   colnames(mij) <- grpnames
   mij
