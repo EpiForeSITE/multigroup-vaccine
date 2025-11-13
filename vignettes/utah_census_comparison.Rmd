@@ -1,0 +1,322 @@
+---
+title: "Utah Census Data: Measles Outbreak Modeling Comparison"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Utah Census Data: Measles Outbreak Modeling Comparison}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 11,
+  fig.height = 7
+)
+```
+
+```{css, echo=FALSE}
+body {
+  max-width: 1100px;
+  margin: auto;
+  padding: 1em;
+}
+
+table {
+  width: 100%;
+}
+```
+
+```{r setup}
+library(multigroup.vaccine)
+library(socialmixr)
+```
+
+## Introduction
+
+This vignette demonstrates how to use the `getCensusData()` function to retrieve real U.S. Census Bureau population data for Utah counties and use it in measles outbreak modeling. We'll compare how different counties with varying demographic structures respond to measles outbreaks under different vaccination scenarios.
+
+## Measles Model Setup
+
+For measles outbreak modeling, we'll use the standard age groups from the measles age-structured model:
+
+```{r age-setup}
+# Standard measles age groups: under 1, 1-4, 5-11, 12-17, 18-24, 25-44, 45-69, 70+
+agelims <- c(0, 1, 5, 12, 18, 25, 45, 70)
+
+# Vaccine effectiveness by age group
+ageveff <- c(0.93, 0.93, rep(0.97, 5), 1)
+
+# Initial infection in the 25-44 age group (working age adults)
+initgrp <- 6
+```
+
+## Getting Census Data for Utah Counties
+
+Let's retrieve population data for three diverse Utah counties:
+
+```{r get-census-data}
+utah_fips <- getStateFIPS("Utah")
+
+# Get data for three counties with different characteristics
+counties <- c("Salt Lake County", "Utah County", "Washington County")
+
+county_data_list <- list()
+
+for (county in counties) {
+  data <- getCensusData(
+    state_fips = utah_fips,
+    county_name = county,
+    year = 2024,
+    age_groups = agelims
+  )
+
+  county_data_list[[county]] <- data
+
+  cat("\n", county, ":\n", sep = "")
+  cat("  Total population:", format(data$total_pop, big.mark = ","), "\n")
+  cat("  Age distribution:\n")
+  for (i in seq_along(data$age_labels)) {
+    pct <- 100 * data$age_pops[i] / data$total_pop
+    cat(sprintf("    %s: %s (%.1f%%)\n",
+                data$age_labels[i],
+                format(data$age_pops[i], big.mark = ","),
+                pct))
+  }
+}
+```
+
+## Scenario 1: Current Vaccination Coverage
+
+Let's model outbreaks under current estimated vaccination coverage levels in Utah.
+
+```{r scenario1-setup}
+# Based on school data and estimates
+current_coverage <- c(0, 0.89, 0.949, 0.950, 0.95, 0.95, 0.95, 1)
+```
+
+### Salt Lake County - Current Coverage
+
+```{r slc-current}
+slc_data <- county_data_list[["Salt Lake County"]]
+
+slc_current <- getOutputTable(
+  agelims = agelims,
+  agepops = slc_data$age_pops,
+  agecovr = current_coverage,
+  ageveff = ageveff,
+  initgrp = initgrp
+)
+
+cat("Salt Lake County - Current Vaccination Coverage\n")
+print(as.data.frame(slc_current), row.names = FALSE)
+```
+
+### Utah County - Current Coverage
+
+```{r utah-current}
+utah_data <- county_data_list[["Utah County"]]
+
+utah_current <- getOutputTable(
+  agelims = agelims,
+  agepops = utah_data$age_pops,
+  agecovr = current_coverage,
+  ageveff = ageveff,
+  initgrp = initgrp
+)
+
+cat("\nUtah County - Current Vaccination Coverage\n")
+print(as.data.frame(utah_current), row.names = FALSE)
+```
+
+### Washington County - Current Coverage
+
+```{r wash-current}
+wash_data <- county_data_list[["Washington County"]]
+
+wash_current <- getOutputTable(
+  agelims = agelims,
+  agepops = wash_data$age_pops,
+  agecovr = current_coverage,
+  ageveff = ageveff,
+  initgrp = initgrp
+)
+
+cat("\nWashington County - Current Vaccination Coverage\n")
+print(as.data.frame(wash_current), row.names = FALSE)
+```
+
+## Visualization: Comparing Counties
+
+Let's visualize the outbreak potential across counties:
+
+```{r plot-comparison-current}
+# Extract R0=15 results for comparison
+r0_15_idx <- which(slc_current[, "R0"] == 15)
+
+counties_names <- c("Salt Lake", "Utah", "Washington")
+escape_totals <- c(
+  slc_current[r0_15_idx, "escapeInfTot"],
+  utah_current[r0_15_idx, "escapeInfTot"],
+  wash_current[r0_15_idx, "escapeInfTot"]
+)
+total_pops <- c(
+  slc_data$total_pop,
+  utah_data$total_pop,
+  wash_data$total_pop
+)
+
+escape_pcts <- 100 * escape_totals / total_pops
+
+par(mfrow = c(1, 2), mar = c(5, 4, 4, 2))
+
+# Absolute numbers
+barplot(escape_totals,
+        names.arg = counties_names,
+        main = "Potential Outbreak Size (R0=15)\nCurrent Coverage",
+        ylab = "Total Infections",
+        col = "coral",
+        las = 2)
+
+# Percentages
+barplot(escape_pcts,
+        names.arg = counties_names,
+        main = "% of Population (R0=15)\nCurrent Coverage",
+        ylab = "% of Population Infected",
+        col = "steelblue",
+        las = 2)
+```
+
+## Scenario 2: Reduced Vaccination Coverage
+
+What happens if vaccination coverage drops by 10% across all age groups?
+
+```{r scenario2-setup}
+reduced_coverage <- current_coverage * 0.9  # 10% reduction
+reduced_coverage[1] <- 0  # Keep under-1 at 0
+```
+
+```{r scenario2-models}
+slc_reduced <- getOutputTable(
+  agelims = agelims,
+  agepops = slc_data$age_pops,
+  agecovr = reduced_coverage,
+  ageveff = ageveff,
+  initgrp = initgrp
+)
+
+utah_reduced <- getOutputTable(
+  agelims = agelims,
+  agepops = utah_data$age_pops,
+  agecovr = reduced_coverage,
+  ageveff = ageveff,
+  initgrp = initgrp
+)
+
+wash_reduced <- getOutputTable(
+  agelims = agelims,
+  agepops = wash_data$age_pops,
+  agecovr = reduced_coverage,
+  ageveff = ageveff,
+  initgrp = initgrp
+)
+
+cat("Salt Lake County - Reduced Coverage (-10%)\n")
+print(as.data.frame(slc_reduced), row.names = FALSE)
+```
+
+### Impact of Reduced Coverage
+
+```{r plot-coverage-impact}
+# Compare current vs reduced for R0=15
+escape_reduced <- c(
+  slc_reduced[r0_15_idx, "escapeInfTot"],
+  utah_reduced[r0_15_idx, "escapeInfTot"],
+  wash_reduced[r0_15_idx, "escapeInfTot"]
+)
+
+comparison_matrix <- rbind(escape_totals, escape_reduced)
+colnames(comparison_matrix) <- counties_names
+rownames(comparison_matrix) <- c("Current", "Reduced -10%")
+
+barplot(comparison_matrix,
+        beside = TRUE,
+        main = "Impact of 10% Reduction in Vaccination Coverage\n(R0=15)",
+        xlab = "County",
+        ylab = "Total Infections",
+        col = c("steelblue", "coral"),
+        legend.text = rownames(comparison_matrix),
+        args.legend = list(x = "topleft", bty = "n"))
+
+# Calculate percent increase
+pct_increase <- 100 * (escape_reduced - escape_totals) / escape_totals
+cat("\nPercent increase in outbreak size with 10% coverage reduction:\n")
+for (i in seq_along(counties_names)) {
+  cat(sprintf("  %s: +%.1f%%\n", counties_names[i], pct_increase[i]))
+}
+```
+
+## Scenario 3: Age-Specific Vaccination Gaps
+
+What if vaccination coverage is particularly low in school-age children (5-17)?
+
+```{r scenario3-setup}
+school_gap_coverage <- current_coverage
+school_gap_coverage[3] <- 0.75  # 5-11: reduced from 85.2% to 75%
+school_gap_coverage[4] <- 0.75  # 12-17: reduced from 87.9% to 75%
+```
+
+```{r scenario3-models}
+slc_schoolgap <- getOutputTable(
+  agelims = agelims,
+  agepops = slc_data$age_pops,
+  agecovr = school_gap_coverage,
+  ageveff = ageveff,
+  initgrp = initgrp
+)
+
+utah_schoolgap <- getOutputTable(
+  agelims = agelims,
+  agepops = utah_data$age_pops,
+  agecovr = school_gap_coverage,
+  ageveff = ageveff,
+  initgrp = initgrp
+)
+
+wash_schoolgap <- getOutputTable(
+  agelims = agelims,
+  agepops = wash_data$age_pops,
+  agecovr = school_gap_coverage,
+  ageveff = ageveff,
+  initgrp = initgrp
+)
+
+cat("Salt Lake County - School-Age Vaccination Reduction\n")
+print(as.data.frame(slc_schoolgap), row.names = FALSE)
+```
+
+### Age-Specific Impact
+
+```{r plot-age-impact}
+# Compare infections by age group for Salt Lake County
+age_labels_short <- c("0", "1-4", "5-11", "12-17", "18-24", "25-44", "45-69", "70+")
+
+# Get age-specific infections for R0=15
+slc_current_ages <- as.numeric(slc_current[r0_15_idx, 5:12])
+slc_schoolgap_ages <- as.numeric(slc_schoolgap[r0_15_idx, 5:12])
+
+age_comparison <- rbind(slc_current_ages, slc_schoolgap_ages)
+colnames(age_comparison) <- age_labels_short
+rownames(age_comparison) <- c("Current", "School-Age Reduced")
+
+barplot(age_comparison,
+        beside = TRUE,
+        main = "Salt Lake County: Impact of School-Age Vaccination Reduction\n(R0=15)",
+        xlab = "Age Group",
+        ylab = "Infections",
+        col = c("darkseagreen", "coral"),
+        legend.text = rownames(age_comparison),
+        args.legend = list(x = "topright", bty = "n"),
+        las = 2)
+```
