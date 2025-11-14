@@ -9,7 +9,9 @@ getCensusData(
   county_name,
   year = 2024,
   age_groups = NULL,
-  by_sex = FALSE
+  by_sex = FALSE,
+  csv_path = NULL,
+  cache_dir = NULL
 )
 }
 \arguments{
@@ -23,6 +25,15 @@ getCensusData(
 Default NULL returns single-year ages 0-85+}
 
 \item{by_sex}{Logical, if TRUE returns separate male/female groups}
+
+\item{csv_path}{Optional path to a previously downloaded census CSV file. If provided,
+data will be read from this file instead of downloading. Use \code{cache_dir} for
+automatic caching.}
+
+\item{cache_dir}{Optional directory path for caching downloaded census files. If provided,
+the function will check for an existing cached file and use it, or download and save
+a new one. Default is NULL (no caching). Use "." for current directory or specify
+a custom path like "~/census_cache"}
 }
 \value{
 A list containing:
@@ -41,23 +52,47 @@ state and county, organized by age groups. Supports single-year age data with
 optional sex disaggregation.
 }
 \examples{
-\dontrun{
-# Get single-year age data for Salt Lake County
-slc_data <- getCensusData(state_fips = "49", 
-                          county_name = "Salt Lake County",
-                          year = 2024)
+# Use the included example data (recommended for package examples)
+slc_data <- getCensusData(
+  state_fips = "49", 
+  county_name = "Salt Lake County",
+  year = 2024,
+  csv_path = getCensusDataPath()
+)
 
 # Get age groups without sex disaggregation
-slc_grouped <- getCensusData(state_fips = "49",
-                             county_name = "Salt Lake County", 
-                             year = 2024,
-                             age_groups = c(0, 5, 18, 65))
+slc_grouped <- getCensusData(
+  state_fips = "49",
+  county_name = "Salt Lake County", 
+  year = 2024,
+  age_groups = c(0, 5, 18, 65),
+  csv_path = getCensusDataPath()
+)
 
 # Get age groups by sex
-slc_by_sex <- getCensusData(state_fips = "49",
-                            county_name = "Salt Lake County",
-                            year = 2024, 
-                            age_groups = c(0, 5, 18, 65),
-                            by_sex = TRUE)
+slc_by_sex <- getCensusData(
+  state_fips = "49",
+  county_name = "Salt Lake County",
+  year = 2024, 
+  age_groups = c(0, 5, 18, 65),
+  by_sex = TRUE,
+  csv_path = getCensusDataPath()
+)
+
+\dontrun{
+# Download from web (requires internet)
+slc_web <- getCensusData(
+  state_fips = "49",
+  county_name = "Salt Lake County",
+  year = 2024
+)
+
+# Use caching to avoid repeated downloads
+slc_cached <- getCensusData(
+  state_fips = "49",
+  county_name = "Salt Lake County",
+  year = 2024,
+  cache_dir = "~/census_cache"
+)
 }
 }

@@ -10,6 +10,13 @@
 #' @param age_groups Vector of age limits for grouping (e.g., c(0, 5, 18, 65)).
 #'   Default NULL returns single-year ages 0-85+
 #' @param by_sex Logical, if TRUE returns separate male/female groups
+#' @param csv_path Optional path to a previously downloaded census CSV file. If provided,
+#'   data will be read from this file instead of downloading. Use \code{cache_dir} for
+#'   automatic caching.
+#' @param cache_dir Optional directory path for caching downloaded census files. If provided,
+#'   the function will check for an existing cached file and use it, or download and save
+#'   a new one. Default is NULL (no caching). Use "." for current directory or specify
+#'   a custom path like "~/census_cache"
 #' @return A list containing:
 #'   \item{county}{County name}
 #'   \item{state}{State name}
@@ -20,50 +27,118 @@
 #'   \item{sex_labels}{If by_sex=TRUE, labels indicating sex}
 #'   \item{data}{Full filtered data frame}
 #' @examples
-#' \dontrun{
-#' # Get single-year age data for Salt Lake County
-#' slc_data <- getCensusData(state_fips = "49", 
-#'                           county_name = "Salt Lake County",
-#'                           year = 2024)
+#' # Use the included example data (recommended for package examples)
+#' slc_data <- getCensusData(
+#'   state_fips = "49", 
+#'   county_name = "Salt Lake County",
+#'   year = 2024,
+#'   csv_path = getCensusDataPath()
+#' )
 #'
 #' # Get age groups without sex disaggregation
-#' slc_grouped <- getCensusData(state_fips = "49",
-#'                              county_name = "Salt Lake County", 
-#'                              year = 2024,
-#'                              age_groups = c(0, 5, 18, 65))
+#' slc_grouped <- getCensusData(
+#'   state_fips = "49",
+#'   county_name = "Salt Lake County", 
+#'   year = 2024,
+#'   age_groups = c(0, 5, 18, 65),
+#'   csv_path = getCensusDataPath()
+#' )
 #'
 #' # Get age groups by sex
-#' slc_by_sex <- getCensusData(state_fips = "49",
-#'                             county_name = "Salt Lake County",
-#'                             year = 2024, 
-#'                             age_groups = c(0, 5, 18, 65),
-#'                             by_sex = TRUE)
+#' slc_by_sex <- getCensusData(
+#'   state_fips = "49",
+#'   county_name = "Salt Lake County",
+#'   year = 2024, 
+#'   age_groups = c(0, 5, 18, 65),
+#'   by_sex = TRUE,
+#'   csv_path = getCensusDataPath()
+#' )
+#'
+#' \dontrun{
+#' # Download from web (requires internet)
+#' slc_web <- getCensusData(
+#'   state_fips = "49",
+#'   county_name = "Salt Lake County",
+#'   year = 2024
+#' )
+#'
+#' # Use caching to avoid repeated downloads
+#' slc_cached <- getCensusData(
+#'   state_fips = "49",
+#'   county_name = "Salt Lake County",
+#'   year = 2024,
+#'   cache_dir = "~/census_cache"
+#' )
 #' }
 #' @export
 getCensusData <- function(state_fips, 
                           county_name, 
                           year = 2024,
                           age_groups = NULL,
-                          by_sex = FALSE) {
+                          by_sex = FALSE,
+                          csv_path = NULL,
+                          cache_dir = NULL) {
   # Validate inputs
   if (!year %in% c(2020, 2020.1, 2021, 2022, 2023, 2024)) {
     stop("Year must be 2020, 2020.1 (April 1 base), 2021, 2022, 2023, or 2024")
   }
 
-  # Construct Census URL
-  base_url <- "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/counties/asrh/"
+  # Construct file name
   file_name <- sprintf("cc-est2024-syasex-%s.csv", state_fips)
-  census_url <- paste0(base_url, file_name)
-
-  # Download and read data
-  message(sprintf("Downloading census data from: %s", census_url))
-
-  tryCatch({
-    raw_data <- read.csv(census_url, stringsAsFactors = FALSE)
-  }, error = function(e) {
-    stop(sprintf("Failed to download census data. Check state FIPS code '%s'.\nError: %s",
-                 state_fips, e$message))
-  })
+  
+  # Determine where to read data from
+  if (!is.null(csv_path)) {
+    # User provided a specific CSV path
+    if (!file.exists(csv_path)) {
+      stop(sprintf("CSV file not found: %s", csv_path))
+    }
+    message(sprintf("Reading census data from: %s", csv_path))
+    raw_data <- read.csv(csv_path, stringsAsFactors = FALSE)
+    
+  } else if (!is.null(cache_dir)) {
+    # Check cache directory for existing file
+    if (!dir.exists(cache_dir)) {
+      message(sprintf("Creating cache directory: %s", cache_dir))
+      dir.create(cache_dir, recursive = TRUE)
+    }
+    
+    cached_file <- file.path(cache_dir, file_name)
+    
+    if (file.exists(cached_file)) {
+      message(sprintf("Reading cached census data from: %s", cached_file))
+      raw_data <- read.csv(cached_file, stringsAsFactors = FALSE)
+    } else {
+      # Download and cache
+      base_url <- "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/counties/asrh/"
+      census_url <- paste0(base_url, file_name)
+      
+      message(sprintf("Downloading census data from: %s", census_url))
+      message(sprintf("Saving to cache: %s", cached_file))
+      
+      tryCatch({
+        raw_data <- read.csv(census_url, stringsAsFactors = FALSE)
+        # Save to cache
+        write.csv(raw_data, cached_file, row.names = FALSE)
+      }, error = function(e) {
+        stop(sprintf("Failed to download census data. Check state FIPS code '%s'.\nError: %s",
+                     state_fips, e$message))
+      })
+    }
+    
+  } else {
+    # Download without caching (original behavior)
+    base_url <- "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/counties/asrh/"
+    census_url <- paste0(base_url, file_name)
+    
+    message(sprintf("Downloading census data from: %s", census_url))
+    
+    tryCatch({
+      raw_data <- read.csv(census_url, stringsAsFactors = FALSE)
+    }, error = function(e) {
+      stop(sprintf("Failed to download census data. Check state FIPS code '%s'.\nError: %s",
+                   state_fips, e$message))
+    })
+  }
 
   # Clean column names (remove whitespace)
   names(raw_data) <- trimws(names(raw_data))
@@ -265,27 +340,108 @@ aggregateByAgeGroups <- function(ages, pops, age_groups) {
 #'
 #' @param state_fips Two-digit FIPS code for the state
 #' @param year Census year (2020-2024), default 2024
+#' @param csv_path Optional path to a previously downloaded census CSV file
+#' @param cache_dir Optional directory path for caching downloaded census files
 #' @return Character vector of county names
 #' @examples
+#' # Use the included example data
+#' utah_counties <- listCounties(
+#'   state_fips = "49", 
+#'   year = 2024,
+#'   csv_path = getCensusDataPath()
+#' )
+#' 
 #' \dontrun{
-#' utah_counties <- listCounties(state_fips = "49", year = 2024)
+#' # Download from web (requires internet)
+#' utah_counties_web <- listCounties(state_fips = "49", year = 2024)
+#' 
+#' # With caching
+#' utah_counties_cached <- listCounties(state_fips = "49", cache_dir = "~/census_cache")
 #' }
 #' @export
-listCounties <- function(state_fips, year = 2024) {
-  base_url <- "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/counties/asrh/"
+listCounties <- function(state_fips, year = 2024, csv_path = NULL, cache_dir = NULL) {
   file_name <- sprintf("cc-est2024-syasex-%s.csv", state_fips)
-  census_url <- paste0(base_url, file_name)
+  
+  # Determine where to read data from
+  if (!is.null(csv_path)) {
+    # User provided a specific CSV path
+    if (!file.exists(csv_path)) {
+      stop(sprintf("CSV file not found: %s", csv_path))
+    }
+    message(sprintf("Reading census data from: %s", csv_path))
+    raw_data <- read.csv(csv_path, stringsAsFactors = FALSE)
+    
+  } else if (!is.null(cache_dir)) {
+    # Check cache directory for existing file
+    if (!dir.exists(cache_dir)) {
+      message(sprintf("Creating cache directory: %s", cache_dir))
+      dir.create(cache_dir, recursive = TRUE)
+    }
+    
+    cached_file <- file.path(cache_dir, file_name)
+    
+    if (file.exists(cached_file)) {
+      message(sprintf("Reading cached census data from: %s", cached_file))
+      raw_data <- read.csv(cached_file, stringsAsFactors = FALSE)
+    } else {
+      # Download and cache
+      base_url <- "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/counties/asrh/"
+      census_url <- paste0(base_url, file_name)
+      
+      message(sprintf("Downloading census data from: %s", census_url))
+      message(sprintf("Saving to cache: %s", cached_file))
+      
+      tryCatch({
+        raw_data <- read.csv(census_url, stringsAsFactors = FALSE)
+        # Save to cache
+        write.csv(raw_data, cached_file, row.names = FALSE)
+      }, error = function(e) {
+        stop(sprintf("Failed to download census data for state FIPS '%s'.\nError: %s",
+                     state_fips, e$message))
+      })
+    }
+    
+  } else {
+    # Download without caching (original behavior)
+    base_url <- "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/counties/asrh/"
+    census_url <- paste0(base_url, file_name)
+    
+    message(sprintf("Downloading census data from: %s", census_url))
+    
+    tryCatch({
+      raw_data <- read.csv(census_url, stringsAsFactors = FALSE)
+    }, error = function(e) {
+      stop(sprintf("Failed to download census data for state FIPS '%s'.\nError: %s",
+                   state_fips, e$message))
+    })
+  }
+  
+  counties <- unique(raw_data$CTYNAME)
+  return(sort(counties))
+}
 
-  message(sprintf("Downloading census data from: %s", census_url))
-
-  tryCatch({
-    raw_data <- read.csv(census_url, stringsAsFactors = FALSE)
-    counties <- unique(raw_data$CTYNAME)
-    return(sort(counties))
-  }, error = function(e) {
-    stop(sprintf("Failed to download census data for state FIPS '%s'.\nError: %s",
-                 state_fips, e$message))
-  })
+#' Get path to example census data file
+#'
+#' Returns the path to the example Utah census data CSV file included with the package.
+#' This is useful for examples, testing, and when internet access is not available.
+#'
+#' @return Character string with the path to the example census CSV file for Utah (FIPS 49)
+#' @examples
+#' # Get path to example Utah census file
+#' utah_csv <- getCensusDataPath()
+#' 
+#' # Use it with getCensusData
+#' \dontrun{
+#' slc_data <- getCensusData(
+#'   state_fips = "49",
+#'   county_name = "Salt Lake County",
+#'   year = 2024,
+#'   csv_path = getCensusDataPath()
+#' )
+#' }
+#' @export
+getCensusDataPath <- function() {
+  system.file("extdata", "cc-est2024-syasex-49.csv", package = "multigroup.vaccine")
 }
 
 #' Get state FIPS code by state name

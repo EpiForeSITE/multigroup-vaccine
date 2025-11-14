@@ -31,11 +31,16 @@ table {
 ```{r setup}
 library(multigroup.vaccine)
 library(socialmixr)
+
+# Use the included example data file to avoid download issues during package building
+census_csv <- getCensusDataPath()
 ```
 
 ## Introduction
 
 This vignette demonstrates how to use the `getCensusData()` function to retrieve real U.S. Census Bureau population data for Utah counties and use it in measles outbreak modeling. We'll compare how different counties with varying demographic structures respond to measles outbreaks under different vaccination scenarios.
+
+**Note:** This vignette uses the included example census data file to ensure it works offline and during package building.
 
 ## Measles Model Setup
 
@@ -69,7 +74,8 @@ for (county in counties) {
     state_fips = utah_fips,
     county_name = county,
     year = 2024,
-    age_groups = agelims
+    age_groups = agelims,
+    csv_path = census_csv
   )
 
   county_data_list[[county]] <- data
