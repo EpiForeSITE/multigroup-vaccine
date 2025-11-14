@@ -14,3 +14,5 @@
   console](https://epiforesite.github.io/multigroup-vaccine/articles/run_model_on_command_line.md):
 - [Sensitivity
   Analysis](https://epiforesite.github.io/multigroup-vaccine/articles/sensitivity_analysis.md):
+- [Utah Census Data: Measles Outbreak Modeling
+  Comparison](https://epiforesite.github.io/multigroup-vaccine/articles/utah_census_comparison.md):

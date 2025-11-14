@@ -1,0 +1,33 @@
+# Get path to example census data file
+
+Returns the path to the example Utah census data CSV file included with
+the package. This is useful for examples, testing, and when internet
+access is not available.
+
+## Usage
+
+``` r
+getCensusDataPath()
+```
+
+## Value
+
+Character string with the path to the example census CSV file for Utah
+(FIPS 49)
+
+## Examples
+
+``` r
+# Get path to example Utah census file
+utah_csv <- getCensusDataPath()
+
+# Use it with getCensusData
+if (FALSE) { # \dontrun{
+slc_data <- getCensusData(
+  state_fips = "49",
+  county_name = "Salt Lake County",
+  year = 2024,
+  csv_path = getCensusDataPath()
+)
+} # }
+```
