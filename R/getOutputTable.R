@@ -8,7 +8,9 @@ getOutputTable <- function(agelims, agepops, agecovr, ageveff, initgrp) {
 
   agevacimmune <- round(agepops * agecovr * ageveff)
 
-  mij <- contactMatrixPolymod(agelims, agepops)
+  mijpolymod <- contactMatrixPolymod(agelims)
+  mijlocal <- contactMatrixPolymod(agelims, agepops)
+  R0factor <- eigen(mijlocal)$values[1] / eigen(mijpolymod)$values[1]
 
   pops <- agepops
   initV <- agevacimmune
@@ -20,15 +22,19 @@ getOutputTable <- function(agelims, agepops, agecovr, ageveff, initgrp) {
   R0vals <- 10:18
   meaninf <- 7
 
+  R0local <- rep(0, length(R0vals))
   Rv <- rep(0, length(R0vals))
   escapesize <- matrix(0, length(R0vals), length(pops))
 
   for (i in seq_along(R0vals)) {
+    R0local[i] <- R0vals[i] * R0factor
+
     betaij <- transmissionRates(
-      R0 = R0vals[i],
+      R0 = R0local[i],
       meaninf = meaninf,
-      reltransm = mij
+      reltransm = mijlocal
     )
+
     Rv[i] <- vaxrepnum(meaninf, agepops, betaij, initR, agecovr * agepops, ageveff)
 
     if (Rv[i] < 1) {
@@ -54,9 +60,9 @@ getOutputTable <- function(agelims, agepops, agecovr, ageveff, initgrp) {
       probescape[i] <- 0
     } else {
       betaij <- transmissionRates(
-        R0 = R0vals[i],
+        R0 = R0local[i],
         meaninf = meaninf,
-        reltransm = mij
+        reltransm = mijlocal
       )
       size_dist <- getFinalSizeDistEscape(
         n = numsims,
@@ -71,7 +77,7 @@ getOutputTable <- function(agelims, agepops, agecovr, ageveff, initgrp) {
     }
   }
 
-  tbl <- cbind(R0vals, Rv, probescape, round(escapesizetot), round(escapesize))
-  colnames(tbl) <- c("R0", "Rv", "pEscape", "escapeInfTot", grpnames)
+  tbl <- cbind(R0vals, R0local, Rv, probescape, round(escapesizetot), round(escapesize))
+  colnames(tbl) <- c("R0", "R0local", "Rv", "pEscape", "escapeInfTot", grpnames)
   tbl
 }
