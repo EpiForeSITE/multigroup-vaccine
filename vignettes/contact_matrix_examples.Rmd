@@ -1,0 +1,78 @@
+---
+title: "Contact Matrix Examples"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Contact Matrix Examples}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(multigroup.vaccine)
+library(socialmixr)
+```
+Set up age groups:
+```{r}
+# under 1, 1-4, 5-11, 12-13, 14-17, 18-24, 25-44, 45-69, 70 plus
+agelims <- c(0, 1, 5, 12, 14, 18, 25, 45, 70)
+agepops <- c(100, 400, 700, 200, 400, 700, 2000, 2400, 1000)
+```
+Generate contact matrix using Polymod data:
+```{r}
+cmp <- multigroup.vaccine:::contactMatrixPolymod(agelims, agepops)
+round(cmp, 2)
+```
+The sum of each row represents the relative overall contact rate of each group:
+```{r}
+round(rowSums(cmp), 2)
+```
+Those row sums can be factored out to generate the fraction of each group's contacts that are with each group:
+The sum of each row represents the relative overall contact rate of each group:
+```{r}
+round(cmp/rowSums(cmp), 2)
+```
+
+Now we split the age groups for elementary school (5-11), middle school (12-13), and high school (18-24) into two schools each:
+
+```{r}
+schoolagegroups <- c(3, 3, 4, 4, 5, 5)
+schoolpops <- c(350, 350, 100, 100, 200, 200)
+```
+
+We can access the Polymod data to specify the number of contacts that occurred at school:
+```{r}
+cmAll <- contact_matrix(socialmixr::polymod, age.limits = agelims)$matrix
+cmSchool <- contact_matrix(socialmixr::polymod, age.limits = agelims, filter = list(cnt_school = 1))$matrix
+
+round(cmAll, 2)
+round(cmSchool, 2)
+```
+Build new matrix:
+```{r}
+ngrps <- length(agepops) + length(schoolpops) - length(unique(schoolagegroups))
+cmps <- matrix(0, ngrps, ngrps)
+npre <- min(schoolagegroups) - 1
+npost <- length(agepops) - max(schoolagegroups)
+nm <- colnames(cmp)
+grpnames <- c(nm[1:npre], paste0(nm[schoolagegroups],"s",1:length(schoolagegroups)), nm[(nrow(cmp)-npost+1):nrow(cmp)])
+rownames(cmps) <- colnames(cmps) <- grpnames
+cmps[1:npre, 1:npre] <- cmp[1:npre, 1:npre]
+cmps[(ngrps-npost+1):ngrps, (ngrps-npost+1):ngrps] <- cmp[(nrow(cmp)-npost+1):nrow(cmp), (nrow(cmp)-npost+1):nrow(cmp)]
+cmps[1:npre, (ngrps-npost+1):ngrps] <- cmp[1:npre, (nrow(cmp)-npost+1):nrow(cmp)]
+cmps[(ngrps-npost+1):ngrps, 1:npre] <- cmp[(nrow(cmp)-npost+1):nrow(cmp), 1:npre]
+for(s in unique(schoolagegroups)){
+  inds <- which(schoolagegroups == s)
+  cmps[1:npre, npre + inds] <- cmp[1:npre, s] * schoolpops[inds] / agepops[s]
+  cmps[nrow(cmps)-(1:npost)+1, npre + inds] <- cmp[nrow(cmp)-(1:npost)+1, s] * schoolpops[inds] / agepops[s]
+  for(i in 1:npre) cmps[npre + inds, i] <- cmp[s, i]
+  for(i in 1:npost) cmps[npre + inds, nrow(cmps)-i+1] <- cmp[s, nrow(cmp)-i+1]
+}
+
+```
