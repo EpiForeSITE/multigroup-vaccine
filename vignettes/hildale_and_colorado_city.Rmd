@@ -1,0 +1,527 @@
+---
+title: "City Population Data: Measles Outbreak Modeling Comparison"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{City Population Data: Measles Outbreak Modeling Comparison}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 11,
+  fig.height = 7
+)
+```
+
+```{css, echo=FALSE}
+body {
+  max-width: 1100px;
+  margin: auto;
+  padding: 1em;
+}
+
+table {
+  width: 100%;
+}
+```
+
+```{r setup}
+library(multigroup.vaccine)
+library(socialmixr)
+
+# Load city data files
+hildale_path <- system.file("extdata", "hildale_ut_2023.csv", package = "multigroup.vaccine")
+colorado_city_path <- system.file("extdata", "colorado_city_az_2023.csv", package = "multigroup.vaccine")
+```
+
+## Measles Model Setup
+
+For measles outbreak modeling, we'll use age groups based on the available ACS data:
+
+```{r age-setup}
+# Age groups based on ACS 5-year intervals, adjusted to avoid zero populations
+agelims <- c(0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70)
+
+# Vaccine effectiveness by age group (adjusted for these age groups)
+# Using approximate values for these broader age categories
+ageveff <- rep(0.97, length(agelims) - 1)  # Most age groups have high effectiveness
+ageveff[1] <- 0.93  # Under 5 may have slightly lower effectiveness
+
+# Initial infection in the 25-29 age group (working age adults)
+# This corresponds to age group 25-29 (index 6)
+initgrp <- 6
+```
+
+```{r get-city-data-helper}
+
+#' Helper function to parse and Get City Population Data by Age
+#'
+#' Reads and processes population data for specific cities from ACS 5-year estimates,
+#' organized by age groups.
+#'
+#' @param city_name Name of the city (e.g., "Hildale city, Utah")
+#' @param csv_path Path to the city population CSV file
+#' @param age_groups Vector of age limits for grouping. Default uses 5-year intervals from ACS data
+#' @return A list containing:
+#'   \item{city}{City name}
+#'   \item{year}{Data year}
+#'   \item{total_pop}{Total population}
+#'   \item{age_pops}{Vector of populations by age group}
+#'   \item{age_labels}{Labels for each age group}
+#'   \item{data}{Full data frame}
+#' @examples
+#' # Load Hildale data
+#' hildale_data <- getCityData(
+#'   city_name = "Hildale city, Utah",
+#'   csv_path = system.file("extdata", "hildale_ut_2023.csv", package = "multigroup.vaccine")
+#' )
+#' @export
+getCityData <- function(city_name, csv_path, age_groups = c(0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85)) {
+  if (!file.exists(csv_path)) {
+    stop(sprintf("CSV file not found: %s", csv_path))
+  }
+
+  raw_data <- read.csv(csv_path, stringsAsFactors = FALSE)
+
+  # Find the row for the specified city
+  city_row <- raw_data[raw_data$NAME == city_name, ]
+  if (nrow(city_row) == 0) {
+    available_cities <- raw_data$NAME
+    stop(sprintf("City '%s' not found. Available cities:\n%s",
+                 city_name,
+                 paste(available_cities, collapse = "\n")))
+  }
+
+  # Extract age group populations
+  # ACS columns: S0101_C01_001E = total, 002E = under 5, 003E = 5-9, etc.
+  age_cols <- c(
+    "S0101_C01_002E",  # Under 5
+    "S0101_C01_003E",  # 5-9
+    "S0101_C01_004E",  # 10-14
+    "S0101_C01_005E",  # 15-19
+    "S0101_C01_006E",  # 20-24
+    "S0101_C01_007E",  # 25-29
+    "S0101_C01_008E",  # 30-34
+    "S0101_C01_009E",  # 35-39
+    "S0101_C01_010E",  # 40-44
+    "S0101_C01_011E",  # 45-49
+    "S0101_C01_012E",  # 50-54
+    "S0101_C01_013E",  # 55-59
+    "S0101_C01_014E",  # 60-64
+    "S0101_C01_015E",  # 65-69
+    "S0101_C01_016E",  # 70-74
+    "S0101_C01_017E",  # 75-79
+    "S0101_C01_018E",  # 80-84
+    "S0101_C01_019E"   # 85+
+  )
+
+  age_pops <- as.numeric(city_row[, age_cols])
+
+  # If age_groups specified, aggregate
+  if (!is.null(age_groups)) {
+    grouped <- aggregateByAgeGroups(rep(seq(0, 80, 5), each = 1), age_pops, age_groups)
+    age_pops <- grouped$pops
+    age_labels <- grouped$labels
+  } else {
+    age_labels <- c("under5", "5to9", "10to14", "15to19", "20to24", "25to29", "30to34",
+                    "35to39", "40to44", "45to49", "50to54", "55to59", "60to64", "65to69",
+                    "70to74", "75to79", "80to84", "85plus")
+  }
+
+  total_pop <- as.numeric(city_row$S0101_C01_001E)
+
+  return(list(
+    city = city_name,
+    year = 2023,
+    total_pop = total_pop,
+    age_pops = age_pops,
+    age_labels = age_labels,
+    data = city_row
+  ))
+}
+```
+
+## Getting City Population Data
+
+Let's retrieve population data for Hildale, UT and Colorado City, AZ:
+
+```{r get-city-data}
+cities <- c("Hildale city, Utah", "Colorado City town, Arizona")
+
+city_data_list <- list()
+
+for (city in cities) {
+  if (grepl("Hildale", city)) {
+    csv_path <- hildale_path
+  } else {
+    csv_path <- colorado_city_path
+  }
+
+  data <- getCityData(
+    city_name = city,
+    csv_path = csv_path,
+    age_groups = agelims
+  )
+
+  city_data_list[[city]] <- data
+
+  cat("\n", city, ":\n", sep = "")
+  cat("  Total population:", format(data$total_pop, big.mark = ","), "\n")
+  cat("  Age distribution:\n")
+  for (i in seq_along(data$age_labels)) {
+    pct <- 100 * data$age_pops[i] / data$total_pop
+    cat(sprintf("    %s: %s (%.1f%%)\n",
+                data$age_labels[i],
+                format(data$age_pops[i], big.mark = ","),
+                pct))
+  }
+}
+```
+
+## Scenario 1: Current Vaccination Coverage (95% adult rate)
+
+Let's model outbreaks under estimated vaccination coverage levels for these communities.
+
+```{r scenario1-setup}
+# Estimated vaccination coverage for these communities
+# These are approximate values based on general Utah/Arizona vaccination rates
+# School age children vaccination rate is based on the data available for 2024
+# For adults, we assume 95% coverage for a conservative modeling approach
+current_coverage_95 <- c(
+  0.44,  # under 5, assume 1 percentage point lower than 5-9
+  0.45,  # 5-9
+  0.50,  # 10-14
+  0.45,  # 15-19
+  0.95,  # 20-24
+  0.95,  # 25-29
+  0.95,  # 30-34
+  0.95,  # 35-39
+  0.95,  # 40-44
+  0.95,  # 45-49
+  0.95,  # 50-54
+  0.95,  # 55-59
+  0.95,  # 60-64
+  0.95,  # 65-69
+  1.00   # 70+
+)
+```
+
+### Hildale, Utah - Current Coverage (95% adult rate)
+
+```{r hildale-current}
+hildale_data <- city_data_list[["Hildale city, Utah"]]
+
+hildale_current <- multigroup.vaccine:::getOutputTable(
+  agelims = agelims,
+  agepops = hildale_data$age_pops,
+  agecovr = current_coverage_95,
+  ageveff = ageveff,
+  initgrp = initgrp
+)
+
+cat("Hildale, Utah - Current Vaccination Coverage\n")
+print(as.data.frame(hildale_current), row.names = FALSE)
+```
+
+### Colorado City, Arizona - Current Coverage (95% adult rate)
+
+```{r colorado-current}
+colorado_data <- city_data_list[["Colorado City town, Arizona"]]
+
+colorado_current <- multigroup.vaccine:::getOutputTable(
+  agelims = agelims,
+  agepops = colorado_data$age_pops,
+  agecovr = current_coverage_95,
+  ageveff = ageveff,
+  initgrp = initgrp
+)
+
+cat("\nColorado City, Arizona - Current Vaccination Coverage\n")
+print(as.data.frame(colorado_current), row.names = FALSE)
+```
+## Visualization: Comparing Cities
+
+Let's visualize the outbreak potential across the two cities:
+
+```{r plot-comparison-current}
+# Extract R0=15 results for comparison
+r0_15_idx <- which(hildale_current[, "R0"] == 15)
+
+# Calculate combined city data
+combined_age_pops <- hildale_data$age_pops + colorado_data$age_pops
+combined_total_pop <- hildale_data$total_pop + colorado_data$total_pop
+
+combined_current <- multigroup.vaccine:::getOutputTable(
+  agelims = agelims,
+  agepops = combined_age_pops,
+  agecovr = current_coverage_95,
+  ageveff = ageveff,
+  initgrp = initgrp
+)
+
+cities_names <- c("Hildale, UT", "Colorado City, AZ", "Combined")
+escape_pcts <- c(
+  100 * hildale_current[r0_15_idx, "escapeInfTot"] / hildale_data$total_pop,
+  100 * colorado_current[r0_15_idx, "escapeInfTot"] / colorado_data$total_pop,
+  100 * combined_current[r0_15_idx, "escapeInfTot"] / combined_total_pop
+)
+
+# Create percentage-only bar plot with similar styling to combined plot
+bar_positions <- barplot(escape_pcts,
+        names.arg = rep("", length(cities_names)),  # Suppress default labels
+        main = "Potential Outbreak Size (R0=15)\nCurrent Coverage",
+        ylab = "% of Population Infected",
+        col = c("#f7b360", "#9dd7da", "#c77dff"),
+        ylim = c(0, max(escape_pcts) * 1.1))
+
+# Add slanted x-axis labels
+text(x = bar_positions + 0.15, 
+     y = par("usr")[3] - 1.5,  # Position below the plot area
+     labels = cities_names, 
+     srt = 0,
+     adj = 1,   # Right-align the text
+     xpd = TRUE,  # Allow text outside plot area
+     cex = 1.0)
+
+# Add value labels on bars
+text(x = 0.7, y = escape_pcts[1] + 0.9, 
+     labels = sprintf("%.1f%%", escape_pcts[1]), 
+     col = "black", font = 2)
+text(x = 1.9, y = escape_pcts[2] + 0.9, 
+     labels = sprintf("%.1f%%", escape_pcts[2]), 
+     col = "black", font = 2)
+text(x = 3.1, y = escape_pcts[3] + 0.9, 
+     labels = sprintf("%.1f%%", escape_pcts[3]), 
+     col = "black", font = 2)
+
+# Add legend
+legend("topleft", 
+       legend = cities_names, 
+       fill = c("#f7b360", "#9dd7da", "#c77dff"),
+       bty = "n")
+```
+
+Now with a lower R0 value:
+
+```{r plot-comparison-current-r0-10}
+# Extract R0=10 results for comparison
+r0_10_idx <- which(hildale_current[, "R0"] == 10)
+
+escape_pcts_10 <- c(
+  100 * hildale_current[r0_10_idx, "escapeInfTot"] / hildale_data$total_pop,
+  100 * colorado_current[r0_10_idx, "escapeInfTot"] / colorado_data$total_pop,
+  100 * combined_current[r0_10_idx, "escapeInfTot"] / combined_total_pop
+)
+
+# Create percentage-only bar plot for R0=10
+bar_positions_10 <- barplot(escape_pcts_10,
+        names.arg = rep("", length(cities_names)),  # Suppress default labels
+        main = "Potential Outbreak Size (R0=10)\nCurrent Coverage",
+        ylab = "% of Population Infected",
+        col = c("#f7b360", "#9dd7da", "#c77dff"),
+        ylim = c(0, max(escape_pcts_10) * 1.1))
+
+# Add slanted x-axis labels
+text(x = bar_positions_10 + 0.15, 
+     y = par("usr")[3] - 1.5,  # Position below the plot area
+     labels = cities_names, 
+     srt = 0,
+     adj = 1,   # Right-align the text
+     xpd = TRUE,  # Allow text outside plot area
+     cex = 1.0)
+
+# Add value labels on bars
+text(x = 0.7, y = escape_pcts_10[1] + 0.9, 
+     labels = sprintf("%.1f%%", escape_pcts_10[1]), 
+     col = "black", font = 2)
+text(x = 1.9, y = escape_pcts_10[2] + 0.9, 
+     labels = sprintf("%.1f%%", escape_pcts_10[2]), 
+     col = "black", font = 2)
+text(x = 3.1, y = escape_pcts_10[3] + 0.9, 
+     labels = sprintf("%.1f%%", escape_pcts_10[3]), 
+     col = "black", font = 2)
+
+# Add legend
+legend("topleft", 
+       legend = cities_names, 
+       fill = c("#f7b360", "#9dd7da", "#c77dff"),
+       bty = "n")
+```
+
+## Comparison of R0 Values with Trend Analysis
+
+Let's compare how different R0 values impact the outbreak size (in % of pop) in these communities under current vaccination coverage, including trendlines and statistical comparison:
+
+```{r r0-comparison-plot}
+r0_values <- c(10, 11, 12, 13, 14, 15, 16, 17, 18)
+hildale_percents <- numeric(length(r0_values))
+colorado_percents <- numeric(length(r0_values))
+combined_percents <- numeric(length(r0_values))
+
+for (i in seq_along(r0_values)) {
+  r0_idx_hildale <- which(hildale_current[, "R0"] == r0_values[i])
+  r0_idx_colorado <- which(colorado_current[, "R0"] == r0_values[i])
+  r0_idx_combined <- which(combined_current[, "R0"] == r0_values[i])
+
+  hildale_percents[i] <- 100 * hildale_current[r0_idx_hildale, "escapeInfTot"] / hildale_data$total_pop
+  colorado_percents[i] <- 100 * colorado_current[r0_idx_colorado, "escapeInfTot"] / colorado_data$total_pop
+  combined_percents[i] <- 100 * combined_current[r0_idx_combined, "escapeInfTot"] / combined_total_pop
+}
+
+plot(r0_values, hildale_percents,
+     type = "b", pch = 19, col = "blue",
+     xlab = "R0 Value",
+     ylab = "% of Population Infected",
+     main = "Outbreak Size vs R0 Value\n(Current Vaccination Coverage)",
+     ylim = c(15, max(c(hildale_percents, colorado_percents, combined_percents)) * 1.1))
+lines(r0_values, colorado_percents, type = "b", pch = 19, col = "red")
+lines(r0_values, combined_percents, type = "b", pch = 19, col = "purple")
+
+# Add trendlines
+hildale_lm <- lm(hildale_percents ~ r0_values)
+colorado_lm <- lm(colorado_percents ~ r0_values)
+combined_lm <- lm(combined_percents ~ r0_values)
+
+abline(hildale_lm, col = "blue", lty = 2, lwd = 2)
+abline(colorado_lm, col = "red", lty = 2, lwd = 2)
+abline(combined_lm, col = "purple", lty = 2, lwd = 2)
+
+legend("topleft",
+       legend = c("Hildale, UT", "Colorado City, AZ", "Combined", "Hildale trend", "Colorado City trend", "Combined trend"),
+       col = c("blue", "red", "purple", "blue", "red", "purple"),
+       pch = c(19, 19, 19, NA, NA, NA),
+       lty = c(NA, NA, NA, 2, 2, 2),
+       lwd = c(NA, NA, NA, 2, 2, 2))
+```
+
+## Statistical Comparison of Trendlines
+
+Let's perform a statistical comparison of the relationship between R0 values and outbreak size for the cities and combined population:
+
+```{r statistical-comparison}
+# Extract slope coefficients and their standard errors
+hildale_summary <- summary(hildale_lm)
+colorado_summary <- summary(colorado_lm)
+combined_summary <- summary(combined_lm)
+
+hildale_slope <- coef(hildale_summary)[2, 1]
+hildale_se <- coef(hildale_summary)[2, 2]
+
+colorado_slope <- coef(colorado_summary)[2, 1]
+colorado_se <- coef(colorado_summary)[2, 2]
+
+combined_slope <- coef(combined_summary)[2, 1]
+combined_se <- coef(combined_summary)[2, 2]
+
+# Output results
+cat("Statistical Comparison of R0-Outbreak Size Relationships\n\n")
+cat("Hildale, UT:\n")
+cat(sprintf("  Slope: %.4f (SE: %.4f)\n", hildale_slope, hildale_se))
+cat(sprintf("  R²: %.4f\n", hildale_summary$r.squared))
+cat("\n")
+cat("Colorado City, AZ:\n")
+cat(sprintf("  Slope: %.4f (SE: %.4f)\n", colorado_slope, colorado_se))
+cat(sprintf("  R²: %.4f\n", colorado_summary$r.squared))
+cat("\n")
+cat("Combined Cities:\n")
+cat(sprintf("  Slope: %.4f (SE: %.4f)\n", combined_slope, combined_se))
+cat(sprintf("  R²: %.4f\n", combined_summary$r.squared))
+cat("\n")
+
+cat("Summary:\n")
+cat("The combined population shows the most gradual increase in outbreak size with R0,\n")
+cat("suggesting that aggregating the populations provides a more stable epidemic profile.\n")
+```
+
+## Scenario 2: Linear Interpolation of Adult Vaccination Rates
+Let's model outbreaks under this interpolated adult vaccination coverage.
+
+We will interpolate vaccination rate for adults between the end of highschool age up to 95% for the 49-65 age groups.
+
+```{r interpolation-adult-coverage}
+# Define age limits and corresponding coverage rates
+# current_coverage_95 is defined above
+# for 20, 25, 30, 35, 40, 45, 50 adjust the rate to interpolate between 45% and 95%
+adult_ages <- c(15, 20, 25, 30, 35, 40, 45, 50)
+adult_rates <- seq(0.45, 0.95, length.out = length(adult_ages))
+
+linear_coverage <- current_coverage_95
+
+for (i in seq_along(adult_ages)) {
+  age <- adult_ages[i]
+  rate <- adult_rates[i]
+  age_idx <- which(agelims[-length(agelims)] == age)
+  linear_coverage[age_idx] <- rate
+}
+
+cat("Interpolated Adult Vaccination Coverage Rates:\n")
+for (i in seq_along(adult_ages)) {
+  age <- adult_ages[i]
+  age_idx <- which(agelims[-length(agelims)] == age)
+  cat(sprintf("  Age %d: %.2f%%\n", age, linear_coverage[age_idx] * 100))
+}
+```
+
+### Combined communities visualization
+
+```{r combined-linear-plot}
+# Extract R0=15 results for comparison
+# combine the two communities populations into one and run the sim on this combined data
+combined_pops <- hildale_data$age_pops + colorado_data$age_pops
+
+combined_95 <- multigroup.vaccine:::getOutputTable(
+  agelims = agelims,
+  agepops = combined_pops,
+  agecovr = current_coverage_95,
+  ageveff = ageveff,
+  initgrp = initgrp
+)
+
+combined_linear <- multigroup.vaccine:::getOutputTable(
+  agelims = agelims,
+  agepops = combined_pops,
+  agecovr = linear_coverage,
+  ageveff = ageveff,
+  initgrp = initgrp
+)
+
+r0_15_idx <- which(combined_linear[, "R0"] == 15)
+r0_15_idx_95 <- which(combined_95[, "R0"] == 15)
+
+# Combine both scenarios into a single bar chart
+combined_percentages <- c(
+  100 * combined_95[r0_15_idx_95, "escapeInfTot"] / sum(combined_pops),
+  100 * combined_linear[r0_15_idx, "escapeInfTot"] / sum(combined_pops)
+)
+
+scenario_names <- c("Current Coverage\n(95% adult rate)", "Linear Interpolated\nAdult Coverage")
+
+bar_positions <- barplot(combined_percentages,
+        names.arg = rep("", length(scenario_names)),  # Suppress default labels
+        main = "Combined Communities: % of Population Infected (R0=15)",
+        ylab = "% of Population Infected",
+        col = c("#f7b360", "#9dd7da"),
+        ylim = c(0, max(combined_percentages) * 1.1))
+
+# Add slanted x-axis labels
+text(x = bar_positions + 0.15, 
+     y = par("usr")[3] - 1.5,  # Position below the plot area
+     labels = scenario_names, 
+     srt = 0,
+     adj = 1,   # Right-align the text
+     xpd = TRUE,  # Allow text outside plot area
+     cex = 1.0)
+
+# Add value labels on bars
+text(x = 0.7, y = combined_percentages[1] + 0.9, 
+     labels = sprintf("%.1f%%", combined_percentages[1]), 
+     col = "black", font = 2)
+text(x = 1.9, y = combined_percentages[2] + 0.9, 
+     labels = sprintf("%.1f%%", combined_percentages[2]), 
+     col = "black", font = 2)
+```
+
+
