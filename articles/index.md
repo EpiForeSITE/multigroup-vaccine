@@ -2,6 +2,8 @@
 
 ### All vignettes
 
+- [Contact Matrix
+  Examples](https://epiforesite.github.io/multigroup-vaccine/articles/contact_matrix_examples.md):
 - [Comparison to
   epiworld](https://epiforesite.github.io/multigroup-vaccine/articles/epiworld_comparison.md):
 - [Measles Age-Structured

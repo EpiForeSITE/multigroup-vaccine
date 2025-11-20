@@ -2,6 +2,7 @@ pandoc: 3.1.11
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
+  contact_matrix_examples: contact_matrix_examples.html
   epiworld_comparison: epiworld_comparison.html
   measles_agemodel: measles_agemodel.html
   measles_example: measles_example.html
@@ -9,7 +10,7 @@ articles:
   run_model_on_command_line: run_model_on_command_line.html
   sensitivity_analysis: sensitivity_analysis.html
   utah_census_comparison: utah_census_comparison.html
-last_built: 2025-11-18T00:50Z
+last_built: 2025-11-20T21:04Z
 urls:
   reference: https://epiforesite.github.io/multigroup-vaccine/reference
   article: https://epiforesite.github.io/multigroup-vaccine/articles
