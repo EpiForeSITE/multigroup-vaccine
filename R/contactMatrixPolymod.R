@@ -1,3 +1,7 @@
+#' Calculate a contact matrix for age groups based on Polymod contact survey data
+#' @param agelims minimum age in years for each age group
+#' @param agepops population size of each group, defaulting to demography of Polymod survey population
+#' @export
 contactMatrixPolymod <- function(agelims, agepops = NULL) {
 
   grpnames <- c(

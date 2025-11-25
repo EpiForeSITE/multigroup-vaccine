@@ -1,3 +1,10 @@
+#' Calculate a contact matrix for age groups and schools
+#' @param agelims minimum age in years for each age group
+#' @param agepops population size of each age group
+#' @param schoolagegroups index of the age group covered by each school
+#' @param schoolpops population size of each school
+#' @param schportion portion of within-age-group contacts that attend the same school
+#' @export
 contactMatrixAgeSchool <- function(agelims, agepops, schoolagegroups, schoolpops, schportion) {
   cmp <- contactMatrixPolymod(agelims, agepops)
   ngrps <- length(agepops) + length(schoolpops) - length(unique(schoolagegroups))
