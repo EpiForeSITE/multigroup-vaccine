@@ -111,43 +111,48 @@ contacts occur at their own school:
 schportion <- 0.70
 ```
 
-Now we build a new matrix:
+Now we build a new matrix using the `contactMatrixAgeSchool()` function:
 
 ``` r
-ngrps <- length(agepops) + length(schoolpops) - length(unique(schoolagegroups))
-cmps <- matrix(0, ngrps, ngrps)
-npre <- min(schoolagegroups) - 1
-npost <- length(agepops) - max(schoolagegroups)
-nsch <- length(schoolpops)
-ipre <- 1:npre
-ipost <- (ngrps-npost+1):ngrps
-isch <- (npre+1):(npre+nsch)
-nm <- colnames(cmp)
-grpnames <- c(nm[1:npre], paste0(nm[schoolagegroups],"s",1:length(schoolagegroups)), nm[(nrow(cmp)-npost+1):nrow(cmp)])
-rownames(cmps) <- colnames(cmps) <- grpnames
-cmps[ipre, ipre] <- cmp[1:npre, 1:npre]
-cmps[ipost, ipost] <- cmp[(nrow(cmp)-npost+1):nrow(cmp), (nrow(cmp)-npost+1):nrow(cmp)]
-cmps[ipre, ipost] <- cmp[1:npre, (nrow(cmp)-npost+1):nrow(cmp)]
-cmps[ipost, ipre] <- cmp[(nrow(cmp)-npost+1):nrow(cmp), 1:npre]
-for(s in unique(schoolagegroups)){
-  inds <- which(schoolagegroups == s)
-  cmps[1:npre, npre + inds] <- cmp[1:npre, s] * schoolpops[inds] / agepops[s]
-  cmps[nrow(cmps)-(1:npost)+1, npre + inds] <- cmp[nrow(cmp)-(1:npost)+1, s] * schoolpops[inds] / agepops[s]
-  for(i in 1:npre) cmps[npre + inds, i] <- cmp[s, i]
-  for(i in 1:npost) cmps[npre + inds, nrow(cmps)-i+1] <- cmp[s, nrow(cmp)-i+1]
-}
+cmps <- multigroup.vaccine:::contactMatrixAgeSchool(agelims, agepops, schoolagegroups, schoolpops, schportion)
 
-for(i in isch){
-  x <- schoolagegroups[i - npre]
-  for(j in isch){
-    y <- schoolagegroups[j - npre]
-    if(i==j){
-      cmps[i, j] <- cmp[x, y] * schportion
-    }else if(x == y){
-      cmps[i, j] <- cmp[x, y] * (1 - schportion) * schoolpops[j - npre] / (sum(schoolpops[schoolagegroups==x]) - schoolpops[i - npre])
-    }else{
-      cmps[i, j] <- cmp[x, y] * schoolpops[j - npre] / agepops[y]
-    }
-  }
-}
+round(cmp, 2)
+#>          contact.age.group
+#> age.group under1 1to4 5to11 12to13 14to17 18to24 25to44 45to69  70+
+#>    under1   0.42 0.72  0.57   0.09   0.21   0.32   2.11   1.14 0.13
+#>    1to4     0.18 2.98  1.52   0.16   0.24   0.49   3.28   1.89 0.35
+#>    5to11    0.08 0.87  8.79   0.82   0.46   0.46   3.35   1.88 0.37
+#>    12to13   0.04 0.32  2.86   7.98   2.50   0.57   2.77   2.22 0.47
+#>    14to17   0.05 0.24  0.80   1.25   9.67   2.21   2.71   2.51 0.37
+#>    18to24   0.05 0.28  0.46   0.16   1.26   5.72   3.68   2.87 0.37
+#>    25to44   0.11 0.66  1.17   0.28   0.54   1.29   5.72   3.83 0.61
+#>    45to69   0.05 0.32  0.55   0.18   0.42   0.84   3.20   4.27 0.96
+#>    70+      0.01 0.14  0.26   0.09   0.15   0.26   1.22   2.30 1.57
+round(cmps, 2)
+#>          under1 1to4 5to11s1 5to11s2 12to13s3 12to13s4 14to17s5 14to17s6 18to24
+#> under1     0.42 0.72    0.28    0.28     0.04     0.04     0.11     0.11   0.32
+#> 1to4       0.18 2.98    0.76    0.76     0.08     0.08     0.12     0.12   0.49
+#> 5to11s1    0.08 0.87    6.16    2.64     0.41     0.41     0.23     0.23   0.46
+#> 5to11s2    0.08 0.87    2.64    6.16     0.41     0.41     0.23     0.23   0.46
+#> 12to13s3   0.04 0.32    1.43    1.43     5.59     2.40     1.25     1.25   0.57
+#> 12to13s4   0.04 0.32    1.43    1.43     2.40     5.59     1.25     1.25   0.57
+#> 14to17s5   0.05 0.24    0.40    0.40     0.63     0.63     6.77     2.90   2.21
+#> 14to17s6   0.05 0.24    0.40    0.40     0.63     0.63     2.90     6.77   2.21
+#> 18to24     0.05 0.28    0.23    0.23     0.08     0.08     0.63     0.63   5.72
+#> 25to44     0.11 0.66    0.59    0.59     0.14     0.14     0.27     0.27   1.29
+#> 45to69     0.05 0.32    0.27    0.27     0.09     0.09     0.21     0.21   0.84
+#> 70+        0.01 0.14    0.13    0.13     0.05     0.05     0.07     0.07   0.26
+#>          25to44 45to69  70+
+#> under1     2.11   1.14 0.13
+#> 1to4       3.28   1.89 0.35
+#> 5to11s1    3.35   1.88 0.37
+#> 5to11s2    3.35   1.88 0.37
+#> 12to13s3   2.77   2.22 0.47
+#> 12to13s4   2.77   2.22 0.47
+#> 14to17s5   2.71   2.51 0.37
+#> 14to17s6   2.71   2.51 0.37
+#> 18to24     3.68   2.87 0.37
+#> 25to44     5.72   3.83 0.61
+#> 45to69     3.20   4.27 0.96
+#> 70+        1.22   2.30 1.57
 ```
