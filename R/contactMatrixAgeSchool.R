@@ -3,7 +3,7 @@
 #' @param agepops population size of each age group
 #' @param schoolagegroups index of the age group covered by each school
 #' @param schoolpops population size of each school
-#' @param schportion portion of within-age-group contacts that attend the same school
+#' @param schportion portion of within-age-group contacts that are exclusively within school
 #' @export
 contactMatrixAgeSchool <- function(agelims, agepops, schoolagegroups, schoolpops, schportion) {
   cmp <- contactMatrixPolymod(agelims, agepops)
@@ -22,24 +22,21 @@ contactMatrixAgeSchool <- function(agelims, agepops, schoolagegroups, schoolpops
   cmps[ipost, ipost] <- cmp[(nrow(cmp)-npost+1):nrow(cmp), (nrow(cmp)-npost+1):nrow(cmp)]
   cmps[ipre, ipost] <- cmp[1:npre, (nrow(cmp)-npost+1):nrow(cmp)]
   cmps[ipost, ipre] <- cmp[(nrow(cmp)-npost+1):nrow(cmp), 1:npre]
-  for(s in unique(schoolagegroups)){
+  sag <- unique(schoolagegroups)
+  for(s in sag){
     inds <- which(schoolagegroups == s)
+    nums <- length(inds)
     cmps[1:npre, npre + inds] <- cmp[1:npre, s] * schoolpops[inds] / agepops[s]
     cmps[nrow(cmps)-(1:npost)+1, npre + inds] <- cmp[nrow(cmp)-(1:npost)+1, s] * schoolpops[inds] / agepops[s]
     for(i in 1:npre) cmps[npre + inds, i] <- cmp[s, i]
     for(i in 1:npost) cmps[npre + inds, nrow(cmps)-i+1] <- cmp[s, nrow(cmp)-i+1]
-  }
+    cmps[npre + inds, npre + inds] <- contactMatrixPropPref(schoolpops[inds], rep(cmp[s, s], nums), rep(schportion, nums))
 
-  for(i in isch){
-    x <- schoolagegroups[i - npre]
-    for(j in isch){
-      y <- schoolagegroups[j - npre]
-      if(i==j){
-        cmps[i, j] <- cmp[x, y] * schportion
-      }else if(x == y){
-        cmps[i, j] <- cmp[x, y] * (1 - schportion) * schoolpops[j - npre] / (sum(schoolpops[schoolagegroups==x]) - schoolpops[i - npre])
-      }else{
-        cmps[i, j] <- cmp[x, y] * schoolpops[j - npre] / agepops[y]
+    if(length(sag) > 1){
+      for(ss in sag[sag != s]){
+        for(j in which(schoolagegroups == ss)){
+          cmps[npre + inds, npre + j] <- cmp[s, ss] * schoolpops[j] / agepops[ss]
+        }
       }
     }
   }

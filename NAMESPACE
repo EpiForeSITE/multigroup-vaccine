@@ -2,6 +2,7 @@
 
 export(contactMatrixAgeSchool)
 export(contactMatrixPolymod)
+export(contactMatrixPropPref)
 export(getCensusData)
 export(getCensusDataPath)
 export(getFinalSize)
