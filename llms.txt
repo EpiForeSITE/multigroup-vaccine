@@ -43,6 +43,14 @@ file for details.
 
 - [`UtahAgeCountyPop`](https://epiforesite.github.io/multigroup-vaccine/reference/UtahAgeCountyPop.md)
   : Population size by age group for counties in Utah
+- [`contactMatrixAgeSchool()`](https://epiforesite.github.io/multigroup-vaccine/reference/contactMatrixAgeSchool.md)
+  : Calculate a contact matrix for age groups and schools
+- [`contactMatrixPolymod()`](https://epiforesite.github.io/multigroup-vaccine/reference/contactMatrixPolymod.md)
+  : Calculate a contact matrix for age groups based on Polymod contact
+  survey data
+- [`contactMatrixPropPref()`](https://epiforesite.github.io/multigroup-vaccine/reference/contactMatrixPropPref.md)
+  : Calculate group contact matrix with proportional mixing and
+  preferential mixing within group
 - [`getCensusData()`](https://epiforesite.github.io/multigroup-vaccine/reference/getCensusData.md)
   : Get Census Population Data by Age and County
 - [`getCensusDataPath()`](https://epiforesite.github.io/multigroup-vaccine/reference/getCensusDataPath.md)

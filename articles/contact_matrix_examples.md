@@ -111,7 +111,9 @@ contacts occur at their own school:
 schportion <- 0.70
 ```
 
-Now we build a new matrix using the `contactMatrixAgeSchool()` function:
+Now we build a new matrix using the
+[`contactMatrixAgeSchool()`](https://epiforesite.github.io/multigroup-vaccine/reference/contactMatrixAgeSchool.md)
+function:
 
 ``` r
 cmps <- multigroup.vaccine:::contactMatrixAgeSchool(agelims, agepops, schoolagegroups, schoolpops, schportion)
@@ -132,12 +134,12 @@ round(cmps, 2)
 #>          under1 1to4 5to11s1 5to11s2 12to13s3 12to13s4 14to17s5 14to17s6 18to24
 #> under1     0.42 0.72    0.28    0.28     0.04     0.04     0.11     0.11   0.32
 #> 1to4       0.18 2.98    0.76    0.76     0.08     0.08     0.12     0.12   0.49
-#> 5to11s1    0.08 0.87    6.16    2.64     0.41     0.41     0.23     0.23   0.46
-#> 5to11s2    0.08 0.87    2.64    6.16     0.41     0.41     0.23     0.23   0.46
-#> 12to13s3   0.04 0.32    1.43    1.43     5.59     2.40     1.25     1.25   0.57
-#> 12to13s4   0.04 0.32    1.43    1.43     2.40     5.59     1.25     1.25   0.57
-#> 14to17s5   0.05 0.24    0.40    0.40     0.63     0.63     6.77     2.90   2.21
-#> 14to17s6   0.05 0.24    0.40    0.40     0.63     0.63     2.90     6.77   2.21
+#> 5to11s1    0.08 0.87    7.47    1.32     0.41     0.41     0.23     0.23   0.46
+#> 5to11s2    0.08 0.87    1.32    7.47     0.41     0.41     0.23     0.23   0.46
+#> 12to13s3   0.04 0.32    1.43    1.43     6.79     1.20     1.25     1.25   0.57
+#> 12to13s4   0.04 0.32    1.43    1.43     1.20     6.79     1.25     1.25   0.57
+#> 14to17s5   0.05 0.24    0.40    0.40     0.63     0.63     8.22     1.45   2.21
+#> 14to17s6   0.05 0.24    0.40    0.40     0.63     0.63     1.45     8.22   2.21
 #> 18to24     0.05 0.28    0.23    0.23     0.08     0.08     0.63     0.63   5.72
 #> 25to44     0.11 0.66    0.59    0.59     0.14     0.14     0.27     0.27   1.29
 #> 45to69     0.05 0.32    0.27    0.27     0.09     0.09     0.21     0.21   0.84
