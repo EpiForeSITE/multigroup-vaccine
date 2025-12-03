@@ -29,6 +29,10 @@ table {
 ```
 
 ```{r setup}
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+  stop("Package 'ggplot2' is needed for this vignette. Please install it.")
+}
+
 library(multigroup.vaccine)
 library(socialmixr)
 library(ggplot2)
