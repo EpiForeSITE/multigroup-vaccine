@@ -2,6 +2,7 @@
 
 export(getCensusData)
 export(getCensusDataPath)
+export(getCityData)
 export(getFinalSize)
 export(getFinalSizeDist)
 export(getFinalSizeODE)

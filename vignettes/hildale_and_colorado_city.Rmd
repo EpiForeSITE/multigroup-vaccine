@@ -31,6 +31,7 @@ table {
 ```{r setup}
 library(multigroup.vaccine)
 library(socialmixr)
+library(ggplot2)
 
 # Load city data files
 hildale_path <- system.file("extdata", "hildale_ut_2023.csv", package = "multigroup.vaccine")
@@ -47,7 +48,7 @@ agelims <- c(0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70)
 
 # Vaccine effectiveness by age group (adjusted for these age groups)
 # Using approximate values for these broader age categories
-ageveff <- rep(0.97, length(agelims) - 1)  # Most age groups have high effectiveness
+ageveff <- rep(0.97, length(agelims))  # Most age groups have high effectiveness
 ageveff[1] <- 0.93  # Under 5 may have slightly lower effectiveness
 
 # Initial infection in the 25-29 age group (working age adults)
@@ -55,98 +56,61 @@ ageveff[1] <- 0.93  # Under 5 may have slightly lower effectiveness
 initgrp <- 6
 ```
 
-```{r get-city-data-helper}
 
-#' Helper function to parse and Get City Population Data by Age
-#'
-#' Reads and processes population data for specific cities from ACS 5-year estimates,
-#' organized by age groups.
-#'
-#' @param city_name Name of the city (e.g., "Hildale city, Utah")
-#' @param csv_path Path to the city population CSV file
-#' @param age_groups Vector of age limits for grouping. Default uses 5-year intervals from ACS data
-#' @return A list containing:
-#'   \item{city}{City name}
-#'   \item{year}{Data year}
-#'   \item{total_pop}{Total population}
-#'   \item{age_pops}{Vector of populations by age group}
-#'   \item{age_labels}{Labels for each age group}
-#'   \item{data}{Full data frame}
-#' @examples
-#' # Load Hildale data
-#' hildale_data <- getCityData(
-#'   city_name = "Hildale city, Utah",
-#'   csv_path = system.file("extdata", "hildale_ut_2023.csv", package = "multigroup.vaccine")
-#' )
-#' @export
-getCityData <- function(city_name, csv_path, age_groups = c(0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85)) {
-  if (!file.exists(csv_path)) {
-    stop(sprintf("CSV file not found: %s", csv_path))
-  }
-
-  raw_data <- read.csv(csv_path, stringsAsFactors = FALSE)
-
-  # Find the row for the specified city
-  city_row <- raw_data[raw_data$NAME == city_name, ]
-  if (nrow(city_row) == 0) {
-    available_cities <- raw_data$NAME
-    stop(sprintf("City '%s' not found. Available cities:\n%s",
-                 city_name,
-                 paste(available_cities, collapse = "\n")))
-  }
-
-  # Extract age group populations
-  # ACS columns: S0101_C01_001E = total, 002E = under 5, 003E = 5-9, etc.
-  age_cols <- c(
-    "S0101_C01_002E",  # Under 5
-    "S0101_C01_003E",  # 5-9
-    "S0101_C01_004E",  # 10-14
-    "S0101_C01_005E",  # 15-19
-    "S0101_C01_006E",  # 20-24
-    "S0101_C01_007E",  # 25-29
-    "S0101_C01_008E",  # 30-34
-    "S0101_C01_009E",  # 35-39
-    "S0101_C01_010E",  # 40-44
-    "S0101_C01_011E",  # 45-49
-    "S0101_C01_012E",  # 50-54
-    "S0101_C01_013E",  # 55-59
-    "S0101_C01_014E",  # 60-64
-    "S0101_C01_015E",  # 65-69
-    "S0101_C01_016E",  # 70-74
-    "S0101_C01_017E",  # 75-79
-    "S0101_C01_018E",  # 80-84
-    "S0101_C01_019E"   # 85+
-  )
-
-  age_pops <- as.numeric(city_row[, age_cols])
-
-  # If age_groups specified, aggregate
-  if (!is.null(age_groups)) {
-    grouped <- aggregateByAgeGroups(rep(seq(0, 80, 5), each = 1), age_pops, age_groups)
-    age_pops <- grouped$pops
-    age_labels <- grouped$labels
-  } else {
-    age_labels <- c("under5", "5to9", "10to14", "15to19", "20to24", "25to29", "30to34",
-                    "35to39", "40to44", "45to49", "50to54", "55to59", "60to64", "65to69",
-                    "70to74", "75to79", "80to84", "85plus")
-  }
-
-  total_pop <- as.numeric(city_row$S0101_C01_001E)
-
-  return(list(
-    city = city_name,
-    year = 2023,
-    total_pop = total_pop,
-    age_pops = age_pops,
-    age_labels = age_labels,
-    data = city_row
-  ))
-}
-```
 
 ## Getting City Population Data
 
-Let's retrieve population data for Hildale, UT and Colorado City, AZ:
+The `getCityData` function provides flexible age grouping options:
+
+1. **Default 5-year groups**: Matches the ACS data structure
+2. **Single-year ages**: Set `age_groups = NULL` to disaggregate 5-year groups uniformly
+3. **Custom age groups**: Specify any age limits vector
+
+Let's demonstrate these options with Hildale, UT data:
+
+```{r get-city-data-examples}
+# Example 1: Default 5-year age groups (0-4, 5-9, 10-14, ...)
+hildale_5yr <- getCityData(
+  city_name = "Hildale city, Utah",
+  csv_path = hildale_path
+)
+
+cat("Example 1: Default 5-year age groups\n")
+cat("Total population:", format(hildale_5yr$total_pop, big.mark = ","), "\n")
+cat("Number of age groups:", length(hildale_5yr$age_pops), "\n")
+cat("First few groups:", paste(head(hildale_5yr$age_labels, 3), collapse = ", "), "\n\n")
+
+# Example 2: Single-year ages (disaggregated from 5-year ACS groups)
+hildale_1yr <- getCityData(
+  city_name = "Hildale city, Utah",
+  csv_path = hildale_path,
+  age_groups = NULL
+)
+
+cat("Example 2: Single-year ages (disaggregated)\n")
+cat("Total population:", format(hildale_1yr$total_pop, big.mark = ","), "\n")
+cat("Number of age groups:", length(hildale_1yr$age_pops), "\n")
+cat("First few ages:", paste(head(hildale_1yr$age_labels, 5), collapse = ", "), "\n\n")
+
+# Example 3: Custom age groups (0-18, 18-65, 65+)
+hildale_custom <- getCityData(
+  city_name = "Hildale city, Utah",
+  csv_path = hildale_path,
+  age_groups = c(0, 18, 65)
+)
+
+cat("Example 3: Custom age groups (0-18, 18-65, 65+)\n")
+cat("Total population:", format(hildale_custom$total_pop, big.mark = ","), "\n")
+for (i in seq_along(hildale_custom$age_labels)) {
+  pct <- 100 * hildale_custom$age_pops[i] / hildale_custom$total_pop
+  cat(sprintf("  %s: %s (%.1f%%)\n",
+              hildale_custom$age_labels[i],
+              format(hildale_custom$age_pops[i], big.mark = ","),
+              pct))
+}
+```
+
+Now let's retrieve population data for both cities using our custom age groups for measles modeling:
 
 ```{r get-city-data}
 cities <- c("Hildale city, Utah", "Colorado City town, Arizona")
@@ -269,39 +233,24 @@ escape_pcts <- c(
   100 * combined_current[r0_15_idx, "escapeInfTot"] / combined_total_pop
 )
 
-# Create percentage-only bar plot with similar styling to combined plot
-bar_positions <- barplot(escape_pcts,
-        names.arg = rep("", length(cities_names)),  # Suppress default labels
-        main = "Potential Outbreak Size (R0=15)\nCurrent Coverage",
-        ylab = "% of Population Infected",
-        col = c("#f7b360", "#9dd7da", "#c77dff"),
-        ylim = c(0, max(escape_pcts) * 1.1))
+# Create data frame for ggplot
+plot_data <- data.frame(
+  City = factor(cities_names, levels = cities_names),
+  Percentage = escape_pcts,
+  Color = c("#f7b360", "#9dd7da", "#c77dff")
+)
 
-# Add slanted x-axis labels
-text(x = bar_positions + 0.15, 
-     y = par("usr")[3] - 1.5,  # Position below the plot area
-     labels = cities_names, 
-     srt = 0,
-     adj = 1,   # Right-align the text
-     xpd = TRUE,  # Allow text outside plot area
-     cex = 1.0)
-
-# Add value labels on bars
-text(x = 0.7, y = escape_pcts[1] + 0.9, 
-     labels = sprintf("%.1f%%", escape_pcts[1]), 
-     col = "black", font = 2)
-text(x = 1.9, y = escape_pcts[2] + 0.9, 
-     labels = sprintf("%.1f%%", escape_pcts[2]), 
-     col = "black", font = 2)
-text(x = 3.1, y = escape_pcts[3] + 0.9, 
-     labels = sprintf("%.1f%%", escape_pcts[3]), 
-     col = "black", font = 2)
-
-# Add legend
-legend("topleft", 
-       legend = cities_names, 
-       fill = c("#f7b360", "#9dd7da", "#c77dff"),
-       bty = "n")
+ggplot(plot_data, aes(x = City, y = Percentage, fill = Color)) +
+  geom_bar(stat = "identity", width = 0.7) +
+  geom_text(aes(label = sprintf("%.1f%%", Percentage)), vjust = -0.5, size = 4) +
+  scale_fill_identity() +
+  labs(title = "Potential Outbreak Size (R0=15)\nCurrent Coverage",
+       x = "City",
+       y = "% of Population Infected") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5)) +
+  ylim(0, max(escape_pcts) * 1.1)
 ```
 
 Now with a lower R0 value:
@@ -316,39 +265,24 @@ escape_pcts_10 <- c(
   100 * combined_current[r0_10_idx, "escapeInfTot"] / combined_total_pop
 )
 
-# Create percentage-only bar plot for R0=10
-bar_positions_10 <- barplot(escape_pcts_10,
-        names.arg = rep("", length(cities_names)),  # Suppress default labels
-        main = "Potential Outbreak Size (R0=10)\nCurrent Coverage",
-        ylab = "% of Population Infected",
-        col = c("#f7b360", "#9dd7da", "#c77dff"),
-        ylim = c(0, max(escape_pcts_10) * 1.1))
+# Create data frame for ggplot
+plot_data_10 <- data.frame(
+  City = factor(cities_names, levels = cities_names),
+  Percentage = escape_pcts_10,
+  Color = c("#f7b360", "#9dd7da", "#c77dff")
+)
 
-# Add slanted x-axis labels
-text(x = bar_positions_10 + 0.15, 
-     y = par("usr")[3] - 1.5,  # Position below the plot area
-     labels = cities_names, 
-     srt = 0,
-     adj = 1,   # Right-align the text
-     xpd = TRUE,  # Allow text outside plot area
-     cex = 1.0)
-
-# Add value labels on bars
-text(x = 0.7, y = escape_pcts_10[1] + 0.9, 
-     labels = sprintf("%.1f%%", escape_pcts_10[1]), 
-     col = "black", font = 2)
-text(x = 1.9, y = escape_pcts_10[2] + 0.9, 
-     labels = sprintf("%.1f%%", escape_pcts_10[2]), 
-     col = "black", font = 2)
-text(x = 3.1, y = escape_pcts_10[3] + 0.9, 
-     labels = sprintf("%.1f%%", escape_pcts_10[3]), 
-     col = "black", font = 2)
-
-# Add legend
-legend("topleft", 
-       legend = cities_names, 
-       fill = c("#f7b360", "#9dd7da", "#c77dff"),
-       bty = "n")
+ggplot(plot_data_10, aes(x = City, y = Percentage, fill = Color)) +
+  geom_bar(stat = "identity", width = 0.7) +
+  geom_text(aes(label = sprintf("%.1f%%", Percentage)), vjust = -0.5, size = 4) +
+  scale_fill_identity() +
+  labs(title = "Potential Outbreak Size (R0=10)\nCurrent Coverage",
+       x = "City",
+       y = "% of Population Infected") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5)) +
+  ylim(0, max(escape_pcts_10) * 1.1)
 ```
 
 ## Comparison of R0 Values with Trend Analysis
@@ -371,30 +305,37 @@ for (i in seq_along(r0_values)) {
   combined_percents[i] <- 100 * combined_current[r0_idx_combined, "escapeInfTot"] / combined_total_pop
 }
 
-plot(r0_values, hildale_percents,
-     type = "b", pch = 19, col = "blue",
-     xlab = "R0 Value",
-     ylab = "% of Population Infected",
-     main = "Outbreak Size vs R0 Value\n(Current Vaccination Coverage)",
-     ylim = c(15, max(c(hildale_percents, colorado_percents, combined_percents)) * 1.1))
-lines(r0_values, colorado_percents, type = "b", pch = 19, col = "red")
-lines(r0_values, combined_percents, type = "b", pch = 19, col = "purple")
+# Create data frame for ggplot
+r0_data <- data.frame(
+  R0 = rep(r0_values, 3),
+  Percentage = c(hildale_percents, colorado_percents, combined_percents),
+  City = rep(c("Hildale, UT", "Colorado City, AZ", "Combined"), each = length(r0_values)),
+  Color = rep(c("blue", "red", "purple"), each = length(r0_values))
+)
 
-# Add trendlines
+# Fit linear models for trendlines
 hildale_lm <- lm(hildale_percents ~ r0_values)
 colorado_lm <- lm(colorado_percents ~ r0_values)
 combined_lm <- lm(combined_percents ~ r0_values)
 
-abline(hildale_lm, col = "blue", lty = 2, lwd = 2)
-abline(colorado_lm, col = "red", lty = 2, lwd = 2)
-abline(combined_lm, col = "purple", lty = 2, lwd = 2)
+# Create trendline data
+trend_data <- data.frame(
+  R0 = rep(r0_values, 3),
+  Trend = c(predict(hildale_lm), predict(colorado_lm), predict(combined_lm)),
+  City = rep(c("Hildale, UT", "Colorado City, AZ", "Combined"), each = length(r0_values))
+)
 
-legend("topleft",
-       legend = c("Hildale, UT", "Colorado City, AZ", "Combined", "Hildale trend", "Colorado City trend", "Combined trend"),
-       col = c("blue", "red", "purple", "blue", "red", "purple"),
-       pch = c(19, 19, 19, NA, NA, NA),
-       lty = c(NA, NA, NA, 2, 2, 2),
-       lwd = c(NA, NA, NA, 2, 2, 2))
+ggplot() +
+  geom_line(data = r0_data, aes(x = R0, y = Percentage, color = City), size = 1) +
+  geom_point(data = r0_data, aes(x = R0, y = Percentage, color = City), size = 3) +
+  geom_line(data = trend_data, aes(x = R0, y = Trend, color = City), linetype = "dashed", size = 1) +
+  scale_color_manual(values = c("Hildale, UT" = "blue", "Colorado City, AZ" = "red", "Combined" = "purple")) +
+  labs(title = "Outbreak Size vs R0 Value\n(Current Vaccination Coverage)",
+       x = "R0 Value",
+       y = "% of Population Infected") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  ylim(15, max(r0_data$Percentage) * 1.1)
 ```
 
 ## Statistical Comparison of Trendlines
@@ -480,6 +421,10 @@ combined_95 <- multigroup.vaccine:::getOutputTable(
   initgrp = initgrp
 )
 
+# print results for current coverage
+cat("Combined Cities - Current Vaccination Coverage (95% adult rate)\n")
+print(as.data.frame(combined_95), row.names = FALSE)
+
 combined_linear <- multigroup.vaccine:::getOutputTable(
   agelims = agelims,
   agepops = combined_pops,
@@ -487,6 +432,9 @@ combined_linear <- multigroup.vaccine:::getOutputTable(
   ageveff = ageveff,
   initgrp = initgrp
 )
+
+cat("Combined Cities - Linear Interpolated Adult Vaccination Coverage\n")
+print(as.data.frame(combined_linear), row.names = FALSE)
 
 r0_15_idx <- which(combined_linear[, "R0"] == 15)
 r0_15_idx_95 <- which(combined_95[, "R0"] == 15)
@@ -499,29 +447,24 @@ combined_percentages <- c(
 
 scenario_names <- c("Current Coverage\n(95% adult rate)", "Linear Interpolated\nAdult Coverage")
 
-bar_positions <- barplot(combined_percentages,
-        names.arg = rep("", length(scenario_names)),  # Suppress default labels
-        main = "Combined Communities: % of Population Infected (R0=15)",
-        ylab = "% of Population Infected",
-        col = c("#f7b360", "#9dd7da"),
-        ylim = c(0, max(combined_percentages) * 1.1))
+# Create data frame for ggplot
+scenario_data <- data.frame(
+  Scenario = factor(scenario_names, levels = scenario_names),
+  Percentage = combined_percentages,
+  Color = c("#f7b360", "#9dd7da")
+)
 
-# Add slanted x-axis labels
-text(x = bar_positions + 0.15, 
-     y = par("usr")[3] - 1.5,  # Position below the plot area
-     labels = scenario_names, 
-     srt = 0,
-     adj = 1,   # Right-align the text
-     xpd = TRUE,  # Allow text outside plot area
-     cex = 1.0)
-
-# Add value labels on bars
-text(x = 0.7, y = combined_percentages[1] + 0.9, 
-     labels = sprintf("%.1f%%", combined_percentages[1]), 
-     col = "black", font = 2)
-text(x = 1.9, y = combined_percentages[2] + 0.9, 
-     labels = sprintf("%.1f%%", combined_percentages[2]), 
-     col = "black", font = 2)
+ggplot(scenario_data, aes(x = Scenario, y = Percentage, fill = Color)) +
+  geom_bar(stat = "identity", width = 0.7) +
+  geom_text(aes(label = sprintf("%.1f%%", Percentage)), vjust = -0.5, size = 4) +
+  scale_fill_identity() +
+  labs(title = "Combined Communities: % of Population Infected (R0=15)",
+       x = "Vaccination Scenario",
+       y = "% of Population Infected") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5)) +
+  ylim(0, max(combined_percentages) * 1.1)
 ```
 
 
