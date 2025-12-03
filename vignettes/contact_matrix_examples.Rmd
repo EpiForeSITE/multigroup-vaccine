@@ -1,0 +1,69 @@
+---
+title: "Contact Matrix Examples"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Contact Matrix Examples}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(multigroup.vaccine)
+library(socialmixr)
+```
+Set up age groups:
+```{r}
+# under 1, 1-4, 5-11, 12-13, 14-17, 18-24, 25-44, 45-69, 70 plus
+agelims <- c(0, 1, 5, 12, 14, 18, 25, 45, 70)
+agepops <- c(100, 400, 700, 200, 400, 700, 2000, 2400, 1000)
+```
+Generate contact matrix using Polymod data:
+```{r}
+cmp <- multigroup.vaccine:::contactMatrixPolymod(agelims, agepops)
+round(cmp, 2)
+```
+The sum of each row represents the relative overall contact rate of each group:
+```{r}
+round(rowSums(cmp), 2)
+```
+Those row sums can be factored out to generate the fraction of each group's contacts that are with each group:
+The sum of each row represents the relative overall contact rate of each group:
+```{r}
+round(cmp/rowSums(cmp), 2)
+```
+
+Now we split the age groups for elementary school (5-11), middle school (12-13), and high school (18-24) into two schools each:
+
+```{r}
+schoolagegroups <- c(3, 3, 4, 4, 5, 5)
+schoolpops <- c(350, 350, 100, 100, 200, 200)
+```
+
+We can access the Polymod data to specify the number of contacts that occurred at school:
+```{r}
+cmAll <- contact_matrix(socialmixr::polymod, age.limits = agelims)$matrix
+cmSchool <- contact_matrix(socialmixr::polymod, age.limits = agelims, filter = list(cnt_school = 1))$matrix
+
+round(cmAll, 2)
+round(cmSchool, 2)
+```
+Based on this we assume that 70% of a student's within-age-group contacts occur at their own school:
+
+```{r}
+schportion <- 0.70
+```
+
+Now we build a new matrix using the `contactMatrixAgeSchool()` function:
+```{r}
+cmps <- multigroup.vaccine:::contactMatrixAgeSchool(agelims, agepops, schoolagegroups, schoolpops, schportion)
+
+round(cmp, 2)
+round(cmps, 2)
+```

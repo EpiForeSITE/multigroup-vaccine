@@ -1,4 +1,8 @@
-contactMatrixPolymod <- function(agelims, agepops) {
+#' Calculate a contact matrix for age groups based on Polymod contact survey data
+#' @param agelims minimum age in years for each age group
+#' @param agepops population size of each group, defaulting to demography of Polymod survey population
+#' @export
+contactMatrixPolymod <- function(agelims, agepops = NULL) {
 
   grpnames <- c(
     paste0("under", agelims[2]),
@@ -9,7 +13,7 @@ contactMatrixPolymod <- function(agelims, agepops) {
   #data(polymod)
   suppressWarnings(
     cm <- socialmixr::contact_matrix(
-      polymod,
+      socialmixr::polymod,
       age.limits = agelims,
       symmetric = TRUE,
       missing.participant.age = "remove",
@@ -17,8 +21,13 @@ contactMatrixPolymod <- function(agelims, agepops) {
     )
   )
 
-  nj <- cm$demography$proportion
-  mij <- t(t(cm$matrix) / nj * (agepops / sum(agepops)))
+  if(is.null(agepops)){
+    mij <- cm$matrix
+  }else{
+    nj <- cm$demography$proportion
+    mij <- t(t(cm$matrix) / nj * (agepops / sum(agepops)))
+  }
+
   rownames(mij) <- grpnames
   colnames(mij) <- grpnames
   mij
