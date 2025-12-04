@@ -70,6 +70,7 @@
 #'   cache_dir = "~/census_cache"
 #' )
 #' }
+#' @importFrom utils read.csv write.csv head
 #' @export
 getCensusData <- function(state_fips, 
                           county_name, 
@@ -154,7 +155,7 @@ getCensusData <- function(state_fips,
   county_data <- raw_data[raw_data$SUMLEV == "50" & grepl(county_name, raw_data$CTYNAME, ignore.case = TRUE), ]
 
   if (nrow(county_data) == 0) {
-    available_counties <- unique(county_level_data$CTYNAME)
+    available_counties <- unique(raw_data$CTYNAME)
     stop(sprintf("County '%s' not found. Available counties:\n%s",
                  county_name,
                  paste(head(available_counties, 20), collapse = "\n")))
@@ -403,6 +404,7 @@ aggregateByAgeGroups <- function(ages, pops, age_groups) {
 #' # With caching
 #' utah_counties_cached <- listCounties(state_fips = "49", cache_dir = "~/census_cache")
 #' }
+#' @importFrom utils read.csv write.csv
 #' @export
 listCounties <- function(state_fips, year = 2024, csv_path = NULL, cache_dir = NULL) {
   file_name <- sprintf("cc-est2024-syasex-%s.csv", state_fips)
@@ -570,6 +572,7 @@ getStateFIPS <- function(state_name) {
 #'   csv_path = system.file("extdata", "hildale_ut_2023.csv", package = "multigroup.vaccine"),
 #'   age_groups = c(0, 18, 65)
 #' )
+#' @importFrom utils read.csv
 #' @export
 getCityData <- function(city_name, csv_path, age_groups = c(0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85)) {
   if (!file.exists(csv_path)) {
