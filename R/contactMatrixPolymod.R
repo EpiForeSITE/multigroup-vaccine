@@ -1,23 +1,23 @@
 #' Calculate a contact matrix for age groups based on Polymod contact survey data
 #'
 #' @param agelims minimum age in years for each age group. The maximum valid
-#'   age limit is 70, as the Polymod survey data only covers ages 0-69. Age
-#'   limits greater than 70 will be replaced with 70 and a warning will be
-#'   issued.
+#'   age limit is 90, as the socialmixr contact_matrix function supports ages
+#'   up to 90. Age limits greater than 90 will be replaced with 90 and a
+#'   warning will be issued.
 #' @param agepops population size of each group, defaulting to demography of
 #'   Polymod survey population. If provided, must match the length of the
 #'   age groups defined by `agelims` (after any adjustments for exceeding
-#'   the 70-year limit).
+#'   the 90-year limit).
 #' @return A symmetric contact matrix with row and column names indicating
 #'   the age groups.
-#' @details The Polymod survey data only contains participants aged 0-69.
-#'   Any age limits above 70 will be adjusted to 70 with a warning, and the
-#'   corresponding populations will be aggregated into a single "70+" group.
+#' @details The socialmixr contact_matrix function supports age limits up to 90.
+#'   Any age limits above 90 will be adjusted to 90 with a warning, and the
+#'   corresponding populations will be aggregated into a single "90+" group.
 #' @export
 contactMatrixPolymod <- function(agelims, agepops = NULL) {
 
-  # Maximum age limit supported by Polymod data
-  max_age_limit <- 70L
+  # Maximum age limit supported by socialmixr contact_matrix
+  max_age_limit <- 90L
 
   # Check if any age limits exceed the maximum
   if (any(agelims > max_age_limit)) {
@@ -48,7 +48,7 @@ contactMatrixPolymod <- function(agelims, agepops = NULL) {
 
       if (!max_age_limit %in% agelims) {
         # Keep populations for age limits < max_age_limit
-        # Aggregate all populations from exceeding limits into the new 70+ group
+        # Aggregate all populations from exceeding limits into the new 90+ group
         new_agepops <- c(
           agepops[keep_idx],
           sum(agepops[exceeding_idx])
