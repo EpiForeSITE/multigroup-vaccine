@@ -87,7 +87,7 @@ for (city_data in single_year_data) {
 
 # Now aggregate into school age groups
 ages_numeric <- 0:85  # Ages 0 through 85
-grouped <- aggregateByAgeGroups(ages_numeric, combined_ages, agelims)
+grouped <- multigroup.vaccine:::aggregateByAgeGroups(ages_numeric, combined_ages, agelims)
 
 combined_data <- list(
   city = "Combined Hildale, UT and Colorado City, AZ",
