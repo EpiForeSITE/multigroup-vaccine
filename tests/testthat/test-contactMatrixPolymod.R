@@ -27,17 +27,22 @@ test_that("contactMatrixPolymod() adjusts populations correctly when exceeding 7
   expect_silent(cmp_valid <- contactMatrixPolymod(agelims_valid, agepops_valid))
   expect_equal(nrow(cmp_valid), 3)
 
-  # Age limits with values > 70 should aggregate populations
+  # Age limits with values > 70 should aggregate populations into 70+ group
+  # When 70 is already in agelims, populations for 70+ (30) and 100+ (20) should
+
+  # be combined (total 50) and used for the 70+ group in the contact matrix
   agelims_exceed <- c(0, 5, 70, 100)
-  agepops_exceed <- c(100, 200, 30, 20)  # 30 + 20 = 50 should aggregate into 70+
+  agepops_exceed <- c(100, 200, 30, 20)
 
   expect_warning(
     cmp_exceed <- contactMatrixPolymod(agelims_exceed, agepops_exceed),
     "Age limits greater than 70 are not supported"
   )
 
-  # Should still have 3 groups
+  # Should still have 3 groups (under5, 5to69, 70+)
   expect_equal(nrow(cmp_exceed), 3)
+  expect_equal(ncol(cmp_exceed), 3)
+  expect_equal(colnames(cmp_exceed)[3], "70+")
 })
 
 test_that("contactMatrixPolymod() works without agepops when exceeding 70", {

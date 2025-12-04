@@ -43,7 +43,7 @@ contactMatrixPolymod <- function(agelims, agepops = NULL) {
 
     # Aggregate populations if agepops is provided
     if (!is.null(agepops)) {
-      # Indices where agelims <= max_age_limit
+      # Indices where agelims > max_age_limit
       exceeding_idx <- which(agelims > max_age_limit)
 
       if (!max_age_limit %in% agelims) {
