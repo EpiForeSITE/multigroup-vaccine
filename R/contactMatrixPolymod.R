@@ -24,7 +24,7 @@ contactMatrixPolymod <- function(agelims, agepops = NULL) {
     exceeding <- agelims[agelims > max_age_limit]
     warning(
       "Age limits greater than ", max_age_limit, " are not supported by the ",
-      "Polymod survey data. The following age limits were replaced with ",
+      "socialmixr contact_matrix function. The following age limits were replaced with ",
       max_age_limit, ": ", paste(exceeding, collapse = ", "), ". ",
       "Corresponding populations have been aggregated into a single '",
       max_age_limit, "+' group.",
