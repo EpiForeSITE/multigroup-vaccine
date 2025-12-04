@@ -33,8 +33,8 @@ Aggregate per-age population counts into coarser age groups defined by the
 (sorted) lower bounds in \code{age_groups}. When \code{length(age_groups) == 1}, all
 ages >= that value are aggregated into a single open-ended group ("Xplus").
 When \code{length(age_groups) > 1}, groups are formed as
-[age_groups\link{i}, age_groups\link{i+1} - 1] for i = 1:(n-1) and
-[age_groups\link{n}, Inf) for the final group. Human-readable labels are produced:
+\code{age_groups[i]} to \code{age_groups[i+1] - 1} for i = 1:(n-1) and
+\code{age_groups[n]} and above for the final group. Human-readable labels are produced:
 "under1" for the 0–0 group, "ageX" for single-year groups, "XtoY" for ranges,
 and "Xplus" for the final open group. The function prints aggregation
 summaries to the console for each group using \code{cat()}.

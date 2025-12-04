@@ -290,14 +290,14 @@ processCensusDataBySex <- function(county_data, age_groups) {
 #' Aggregate population counts into age groups
 #'
 #' Aggregate per-age population counts into coarser age groups defined by the
-#' (sorted) lower bounds in `age_groups`. When `length(age_groups) == 1`, all
+#' (sorted) lower bounds in \code{age_groups}. When \code{length(age_groups) == 1}, all
 #' ages >= that value are aggregated into a single open-ended group ("Xplus").
-#' When `length(age_groups) > 1`, groups are formed as
-#' [age_groups[i], age_groups[i+1] - 1] for i = 1:(n-1) and
-#' [age_groups[n], Inf) for the final group. Human-readable labels are produced:
+#' When \code{length(age_groups) > 1}, groups are formed as
+#' \code{age_groups[i]} to \code{age_groups[i+1] - 1} for i = 1:(n-1) and
+#' \code{age_groups[n]} and above for the final group. Human-readable labels are produced:
 #' "under1" for the 0–0 group, "ageX" for single-year groups, "XtoY" for ranges,
 #' and "Xplus" for the final open group. The function prints aggregation
-#' summaries to the console for each group using `cat()`.
+#' summaries to the console for each group using \code{cat()}.
 #'
 #' @param ages Numeric vector of ages (typically integers) corresponding to the
 #'   entries in `pops`.
