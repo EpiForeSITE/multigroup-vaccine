@@ -2,11 +2,62 @@
 % Please edit documentation in R/getCensusData.R
 \name{aggregateByAgeGroups}
 \alias{aggregateByAgeGroups}
-\title{Aggregate population by age groups}
+\title{Aggregate population counts into age groups}
 \usage{
 aggregateByAgeGroups(ages, pops, age_groups)
 }
-\description{
-Aggregate population by age groups
+\arguments{
+\item{ages}{Numeric vector of ages (typically integers) corresponding to the
+entries in \code{pops}.}
+
+\item{pops}{Numeric vector of population counts for each age; must be the
+same length as \code{ages}. Note: NA values in \code{pops} will propagate into group
+sums because \code{na.rm = TRUE} is not used; clean or impute missing values
+beforehand if required.}
+
+\item{age_groups}{Numeric vector of lower bounds for desired age groups.
+Must be sorted in ascending order. If length is 1, the single value defines
+an "Xplus" group (ages >= X). For length > 1, contiguous non-overlapping
+groups are created as described above.}
 }
-\keyword{internal}
+\value{
+A named list with components:
+\describe{
+\item{pops}{Numeric vector of aggregated population counts, one element per group.}
+\item{labels}{Character vector of labels for each group (e.g. "under1", "age5", "0to4", "65plus").}
+\item{age_ranges}{List of numeric vectors of length 2 giving the inclusive lower and upper bounds for each group; the upper bound for the final group is \code{Inf}.}
+}
+}
+\description{
+Aggregate per-age population counts into coarser age groups defined by the
+(sorted) lower bounds in \code{age_groups}. When \code{length(age_groups) == 1}, all
+ages >= that value are aggregated into a single open-ended group ("Xplus").
+When \code{length(age_groups) > 1}, groups are formed as
+[age_groups\link{i}, age_groups\link{i+1} - 1] for i = 1:(n-1) and
+[age_groups\link{n}, Inf) for the final group. Human-readable labels are produced:
+"under1" for the 0–0 group, "ageX" for single-year groups, "XtoY" for ranges,
+and "Xplus" for the final open group. The function prints aggregation
+summaries to the console for each group using \code{cat()}.
+}
+\details{
+\itemize{
+\item Group boundaries are inclusive at both ends for finite ranges (i.e. ages
+satisfying lower <= age <= upper). For the last group the upper bound is
+infinite.
+\item If no ages fall into a group the aggregated count for that group is 0
+(because \code{sum(numeric(0)) == 0}).
+\item The function writes progress messages to the console with \code{cat()} for each
+aggregated group (useful for debugging / logging).
+}
+}
+\examples{
+\donttest{
+# Multiple groups example
+ages <- 0:100
+pops <- rep(100, length(ages))
+aggregateByAgeGroups(ages, pops, c(0, 5, 18, 65))
+
+# Single open-ended group (65plus)
+aggregateByAgeGroups(ages, pops, 65)
+}
+}
