@@ -18,18 +18,19 @@ This directory contains example U.S. Census Bureau population estimate data file
 ### County Data
 
 Data downloaded from the U.S. Census Bureau Population Estimates Program:
-https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/counties/asrh/
+<https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/counties/asrh/>
 
 ### City Data
 
 Data downloaded from the U.S. Census Bureau American Community Survey (ACS) 5-Year Estimates:
+
 - Table S0101: Age and Sex
 - 2019-2023 ACS 5-Year Estimates
-- https://data.census.gov/
+- <https://data.census.gov/>
 
 ## Usage
 
-### County Data
+### Using County Data
 
 Access county-level data in your code using:
 
@@ -48,7 +49,7 @@ slc_data <- getCensusData(
 )
 ```
 
-### City Data
+### Using City Data
 
 Access city-level data in your code using:
 
@@ -78,6 +79,7 @@ hildale_custom <- getCityData(
 ## Purpose
 
 These files are included to:
+
 1. Enable package examples and vignettes to run without internet access
 2. Support `R CMD check` and `pkgdown` building processes
 3. Allow offline testing and development
@@ -89,6 +91,7 @@ These files are included to:
 ### County Data Format
 
 The county CSV file contains the following columns:
+
 - `SUMLEV` - Summary level (50 = county)
 - `STATE` - State FIPS code
 - `COUNTY` - County FIPS code
@@ -103,6 +106,7 @@ The county CSV file contains the following columns:
 ### City Data Format
 
 The city CSV files contain ACS 5-year estimates with the following key columns:
+
 - `GEO_ID` - Geographic identifier
 - `NAME` - Geographic area name (e.g., "Hildale city, Utah")
 - `S0101_C01_001E` - Total population
@@ -130,7 +134,7 @@ See the metadata files (`*_metadata.csv`) for complete column descriptions.
 
 ## Updating
 
-### County Data
+### Updating County Data
 
 To update county data with newer estimates:
 
@@ -140,17 +144,18 @@ url <- "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/count
 download.file(url, "inst/extdata/cc-est2024-syasex-49.csv")
 ```
 
-### City Data
+### Updating City Data
 
 To update city data with newer ACS estimates:
 
-1. Visit https://data.census.gov/
+1. Visit <https://data.census.gov/>
 2. Search for Table S0101 (Age and Sex)
 3. Select the desired geography (place/city)
 4. Download the latest 5-Year ACS estimates
 5. Save to `inst/extdata/` with appropriate naming
 
 Example for Hildale:
+
 ```r
 # After downloading from data.census.gov
 # Save as inst/extdata/hildale_ut_2023.csv
