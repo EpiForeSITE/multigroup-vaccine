@@ -1,3 +1,5 @@
+#' TODO: Add documentation and @internal flag unless we want it to be exported
+#' @internal
 getFinalSizeDistEscape <- function(n, transmrates, recoveryrate, popsize, initR, initI, initV) {
   fsODE <- round(getFinalSizeODE(transmrates, recoveryrate, popsize, initR, initI, initV)$totalSize)
 

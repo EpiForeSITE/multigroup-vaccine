@@ -1,3 +1,12 @@
+#' Gets full histogram of final sizes for an age-structured population
+#' @param R0 basic reproduction number
+#' @param agelims Vector of age group limits
+#' @param agepops Vector of population sizes for each age group
+#' @param agecovr Vector of vaccination coverage rates for each age group
+#' @param ageveff Vector of vaccine effectiveness rates for each age group
+#' @param initgrp Index of the age group where the initial infection occurs
+#' @returns A data frame with columns for final size and frequency
+#' @internal
 getFullHistogram <- function(R0, agelims, agepops, agecovr, ageveff, initgrp) {
 
   agevacimmune <- round(agepops * agecovr * ageveff)
