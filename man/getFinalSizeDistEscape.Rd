@@ -2,7 +2,7 @@
 % Please edit documentation in R/getFinalSizeDistEscape.R
 \name{getFinalSizeDistEscape}
 \alias{getFinalSizeDistEscape}
-\title{TODO: Add documentation and @internal flag unless we want it to be exported}
+\title{TODO: Add documentation and @keywords internal flag unless we want it to be exported}
 \usage{
 getFinalSizeDistEscape(
   n,
@@ -15,5 +15,6 @@ getFinalSizeDistEscape(
 )
 }
 \description{
-TODO: Add documentation and @internal flag unless we want it to be exported
+TODO: Add documentation and @keywords internal flag unless we want it to be exported
 }
+\keyword{internal}

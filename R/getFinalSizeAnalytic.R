@@ -1,5 +1,5 @@
-#' TODO: Add documentation and @internal flag unless we want it to be exported
-#' @internal
+#' TODO: Add documentation and @keywords internal flag unless we want it to be exported
+#' @keywords internal
 getFinalSizeAnalytic <- function(Rinit, Iinit, Vinit, N, R0, a, eps, q) {
   if (sum(Iinit) == 0)
     Iinit <- N / sum(N)

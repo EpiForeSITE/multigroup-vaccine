@@ -3,13 +3,14 @@
 \name{odeSIR}
 \alias{odeSIR}
 \title{ODE system for multi-group SIR model
-TODO: Add documentation and @internal flag unless we want it to be exported
+TODO: Add documentation and @keywords internal flag unless we want it to be exported
 time parameter doesn't seem to be used, can this be removed safely?}
 \usage{
 odeSIR(time, state, par)
 }
 \description{
 ODE system for multi-group SIR model
-TODO: Add documentation and @internal flag unless we want it to be exported
+TODO: Add documentation and @keywords internal flag unless we want it to be exported
 time parameter doesn't seem to be used, can this be removed safely?
 }
+\keyword{internal}

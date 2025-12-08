@@ -6,7 +6,7 @@
 #' @param ageveff Vector of vaccine effectiveness rates for each age group
 #' @param initgrp Index of the age group where the initial infection occurs
 #' @returns A data frame with columns for final size and frequency
-#' @internal
+#' @keywords internal
 getFullHistogram <- function(R0, agelims, agepops, agecovr, ageveff, initgrp) {
 
   agevacimmune <- round(agepops * agecovr * ageveff)

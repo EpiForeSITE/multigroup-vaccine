@@ -2,12 +2,13 @@
 % Please edit documentation in R/getR0dist.R
 \name{getR0dist}
 \alias{getR0dist}
-\title{TODO: Add documentation and @internal flag
+\title{TODO: Add documentation and @keywords internal flag
 DETERMINE IF THIS IS UNUSED AND CAN BE DELETED}
 \usage{
 getR0dist(n, popsize, recoveryrate, transmrates, initV)
 }
 \description{
-TODO: Add documentation and @internal flag
+TODO: Add documentation and @keywords internal flag
 DETERMINE IF THIS IS UNUSED AND CAN BE DELETED
 }
+\keyword{internal}

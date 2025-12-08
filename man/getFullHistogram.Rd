@@ -25,3 +25,4 @@ A data frame with columns for final size and frequency
 \description{
 Gets full histogram of final sizes for an age-structured population
 }
+\keyword{internal}
