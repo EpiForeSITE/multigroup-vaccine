@@ -28,6 +28,13 @@ table {
 }
 ```
 
+## Important Disclaimer
+
+**WARNING: This vignette is for demonstration purposes only.**
+
+This analysis includes many assumptions about vaccination rates, vaccination efficacy, contact rates, populations, and other epidemiological parameters. The results presented here should **NOT** be used to guide public health decision making. This vignette is meant solely to demonstrate the functionality of the `multigroup.vaccine` package and illustrate modeling techniques. Any public health decisions should be based on comprehensive analyses conducted by qualified epidemiologists and public health officials using validated data and methods.
+
+## Introduction
 ```{r setup}
 if (!requireNamespace("ggplot2", quietly = TRUE)) {
   stop("Package 'ggplot2' is needed for this vignette. Please install it.")
