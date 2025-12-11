@@ -330,9 +330,9 @@ trend_data <- data.frame(
 )
 
 ggplot() +
-  geom_line(data = r0_data, aes(x = R0, y = Percentage, color = City), size = 1) +
+  geom_line(data = r0_data, aes(x = R0, y = Percentage, color = City), linewidth = 1) +
   geom_point(data = r0_data, aes(x = R0, y = Percentage, color = City), size = 3) +
-  geom_line(data = trend_data, aes(x = R0, y = Trend, color = City), linetype = "dashed", size = 1) +
+  geom_line(data = trend_data, aes(x = R0, y = Trend, color = City), linetype = "dashed", linewidth = 1) +
   scale_color_manual(values = c("Hildale, UT" = "blue", "Colorado City, AZ" = "red", "Combined" = "purple")) +
   labs(title = "Outbreak Size vs R0 Value\n(Current Vaccination Coverage)",
        x = "R0 Value",

@@ -665,10 +665,12 @@ disaggregateCityAges <- function(acs_age_pops) {
   acs_age_starts <- c(0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85)
   acs_age_widths <- c(rep(5, 17), 1)  # 85+ treated as a single year for simplicity
 
-  ages <- numeric()
-  age_pops <- numeric()
-  age_labels <- character()
+  # Preallocate vectors for ages 0-85 (86 total)
+  ages <- numeric(86)
+  age_pops <- numeric(86)
+  age_labels <- character(86)
 
+  idx <- 1
   for (i in seq_along(acs_age_pops)) {
     start_age <- acs_age_starts[i]
     width <- acs_age_widths[i]
@@ -679,14 +681,15 @@ disaggregateCityAges <- function(acs_age_pops) {
 
     for (j in 0:(width - 1)) {
       age <- start_age + j
-      ages <- c(ages, age)
-      age_pops <- c(age_pops, pop_per_year)
+      ages[idx] <- age
+      age_pops[idx] <- pop_per_year
 
       if (age < 85) {
-        age_labels <- c(age_labels, sprintf("age%d", age))
+        age_labels[idx] <- sprintf("age%d", age)
       } else {
-        age_labels <- c(age_labels, "age85plus")
+        age_labels[idx] <- "age85plus"
       }
+      idx <- idx + 1
     }
   }
 
