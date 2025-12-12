@@ -12,3 +12,5 @@
 ^\.github$
 ^.lintr$
 ^data-raw$
+^figure$
+^README\.Rmd$

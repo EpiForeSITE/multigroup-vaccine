@@ -1,3 +1,6 @@
+#' TODO: Add documentation and @keywords internal flag
+#' DETERMINE IF THIS IS UNUSED AND CAN BE DELETED
+#' @keywords internal
 getR0dist <- function(n, popsize, recoveryrate, transmrates, initV) {
   g <- length(popsize) # number of groups
   e <- g * 2           # number of distinct events
