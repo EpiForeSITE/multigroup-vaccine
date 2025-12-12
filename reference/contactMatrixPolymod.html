@@ -58,16 +58,16 @@
 
 <dl><dt id="arg-agelims">agelims<a class="anchor" aria-label="anchor" href="#arg-agelims"></a></dt>
 <dd><p>minimum age in years for each age group. The maximum valid
-age limit is 70, as the Polymod survey data only covers ages 0-69. Age
-limits greater than 70 will be replaced with 70 and a warning will be
-issued.</p></dd>
+age limit is 90, as the socialmixr contact_matrix function supports ages
+up to 90. Age limits greater than 90 will be replaced with 90 and a
+warning will be issued.</p></dd>
 
 
 <dt id="arg-agepops">agepops<a class="anchor" aria-label="anchor" href="#arg-agepops"></a></dt>
 <dd><p>population size of each group, defaulting to demography of
 Polymod survey population. If provided, must match the length of the
 age groups defined by <code>agelims</code> (after any adjustments for exceeding
-the 70-year limit).</p></dd>
+the 90-year limit).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -77,9 +77,9 @@ the age groups.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The Polymod survey data only contains participants aged 0-69.
-Any age limits above 70 will be adjusted to 70 with a warning, and the
-corresponding populations will be aggregated into a single "70+" group.</p>
+    <p>The socialmixr contact_matrix function supports age limits up to 90.
+Any age limits above 90 will be adjusted to 90 with a warning, and the
+corresponding populations will be aggregated into a single "90+" group.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

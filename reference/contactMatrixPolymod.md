@@ -14,15 +14,16 @@ contactMatrixPolymod(agelims, agepops = NULL)
 - agelims:
 
   minimum age in years for each age group. The maximum valid age limit
-  is 70, as the Polymod survey data only covers ages 0-69. Age limits
-  greater than 70 will be replaced with 70 and a warning will be issued.
+  is 90, as the socialmixr contact_matrix function supports ages up
+  to 90. Age limits greater than 90 will be replaced with 90 and a
+  warning will be issued.
 
 - agepops:
 
   population size of each group, defaulting to demography of Polymod
   survey population. If provided, must match the length of the age
   groups defined by `agelims` (after any adjustments for exceeding the
-  70-year limit).
+  90-year limit).
 
 ## Value
 
@@ -31,6 +32,6 @@ groups.
 
 ## Details
 
-The Polymod survey data only contains participants aged 0-69. Any age
-limits above 70 will be adjusted to 70 with a warning, and the
-corresponding populations will be aggregated into a single "70+" group.
+The socialmixr contact_matrix function supports age limits up to 90. Any
+age limits above 90 will be adjusted to 90 with a warning, and the
+corresponding populations will be aggregated into a single "90+" group.
