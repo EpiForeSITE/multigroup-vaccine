@@ -43,6 +43,7 @@ library(ggplot2)
 # Load city data files
 hildale_path <- system.file("extdata", "hildale_ut_2023.csv", package = "multigroup.vaccine")
 colorado_city_path <- system.file("extdata", "colorado_city_az_2023.csv", package = "multigroup.vaccine")
+centennial_park_path <- system.file("extdata", "centennial_park_az_2023.csv", package = "multigroup.vaccine")
 ```
 
 ## Measles Model Setup
@@ -64,12 +65,12 @@ initgrp <- 6
 
 ## Getting Combined City Population Data
 
-We'll combine the populations of Hildale, UT and Colorado City, AZ by disaggregating their ACS 5-year age groups into single-year ages, then summing across both cities, and finally aggregating into school age groups.
+We'll combine the populations of Hildale, UT and Colorado City, AZ. The Short Creek community spans these two cities plus Centennial Park, AZ (a CDP that is part of the Arizona portion). We'll first combine Hildale + Colorado City, then create a second dataset that includes Centennial Park to represent the full Short Creek community.
 
 ```{r get-combined-data}
-# Get single-year age data for both cities
-cities <- c("Hildale city, Utah", "Colorado City town, Arizona")
-city_paths <- c(hildale_path, colorado_city_path)
+# Get single-year age data for all three areas
+cities <- c("Hildale city, Utah", "Colorado City town, Arizona", "Centennial Park CDP, Arizona")
+city_paths <- c(hildale_path, colorado_city_path, centennial_park_path)
 
 single_year_data <- list()
 
@@ -82,44 +83,151 @@ for (i in seq_along(cities)) {
   single_year_data[[cities[i]]] <- data
 }
 
-# Combine populations by summing across cities for each age
-combined_ages <- single_year_data[[1]]$age_pops * 0  # Initialize with zeros
-age_labels <- single_year_data[[1]]$age_labels
-total_pop <- 0
+# Combine Hildale + Colorado City (without Centennial Park)
+combined_ages_no_centennial <- single_year_data[[1]]$age_pops * 0  # Initialize with zeros
+total_pop_no_centennial <- 0
 
-for (city_data in single_year_data) {
-  combined_ages <- combined_ages + city_data$age_pops
-  total_pop <- total_pop + city_data$total_pop
+for (city_name in cities[1:2]) {  # Only first two cities
+  city_data <- single_year_data[[city_name]]
+  combined_ages_no_centennial <- combined_ages_no_centennial + city_data$age_pops
+  total_pop_no_centennial <- total_pop_no_centennial + city_data$total_pop
 }
 
-# Now aggregate into school age groups
+# Aggregate into school age groups (without Centennial Park)
 ages_numeric <- 0:85  # Ages 0 through 85
-grouped <- aggregateByAgeGroups(ages_numeric, combined_ages, agelims)
+grouped_no_centennial <- aggregateByAgeGroups(ages_numeric, combined_ages_no_centennial, agelims)
 
-combined_data <- list(
-  city = "Combined Hildale, UT and Colorado City, AZ",
+combined_data_no_centennial <- list(
+  city = "Hildale, UT + Colorado City, AZ (without Centennial Park)",
   year = 2023,
-  total_pop = total_pop,
-  age_pops = grouped$pops,
-  age_labels = grouped$labels,
-  data = NULL  # No single data frame for combined
+  total_pop = total_pop_no_centennial,
+  age_pops = grouped_no_centennial$pops,
+  age_labels = grouped_no_centennial$labels,
+  data = NULL
 )
 
-cat("Combined Population Data:\n")
-cat("Total population:", format(combined_data$total_pop, big.mark = ","), "\n")
+# Combine all three areas (with Centennial Park)
+combined_ages_with_centennial <- single_year_data[[1]]$age_pops * 0  # Initialize with zeros
+total_pop_with_centennial <- 0
+
+for (city_name in cities) {  # All three areas
+  city_data <- single_year_data[[city_name]]
+  combined_ages_with_centennial <- combined_ages_with_centennial + city_data$age_pops
+  total_pop_with_centennial <- total_pop_with_centennial + city_data$total_pop
+}
+
+# Aggregate into school age groups (with Centennial Park)
+grouped_with_centennial <- aggregateByAgeGroups(ages_numeric, combined_ages_with_centennial, agelims)
+
+combined_data_with_centennial <- list(
+  city = "Short Creek (Hildale, UT + Colorado City, AZ + Centennial Park, AZ)",
+  year = 2023,
+  total_pop = total_pop_with_centennial,
+  age_pops = grouped_with_centennial$pops,
+  age_labels = grouped_with_centennial$labels,
+  data = NULL
+)
+
+cat("Population Data WITHOUT Centennial Park:\n")
+cat("Total population:", format(combined_data_no_centennial$total_pop, big.mark = ","), "\n")
 cat("Age distribution:\n")
-for (i in seq_along(combined_data$age_labels)) {
-  pct <- 100 * combined_data$age_pops[i] / combined_data$total_pop
+for (i in seq_along(combined_data_no_centennial$age_labels)) {
+  pct <- 100 * combined_data_no_centennial$age_pops[i] / combined_data_no_centennial$total_pop
   cat(sprintf("  %s: %s (%.1f%%)\n",
-              combined_data$age_labels[i],
-              format(combined_data$age_pops[i], big.mark = ","),
+              combined_data_no_centennial$age_labels[i],
+              format(combined_data_no_centennial$age_pops[i], big.mark = ","),
               pct))
 }
+
+cat("\n")
+cat("Population Data WITH Centennial Park:\n")
+cat("Total population:", format(combined_data_with_centennial$total_pop, big.mark = ","), "\n")
+cat("Age distribution:\n")
+for (i in seq_along(combined_data_with_centennial$age_labels)) {
+  pct <- 100 * combined_data_with_centennial$age_pops[i] / combined_data_with_centennial$total_pop
+  cat(sprintf("  %s: %s (%.1f%%)\n",
+              combined_data_with_centennial$age_labels[i],
+              format(combined_data_with_centennial$age_pops[i], big.mark = ","),
+              pct))
+}
+
+# Calculate the difference
+cat("\n")
+cat("Centennial Park contribution:\n")
+cat("Additional population:", format(total_pop_with_centennial - total_pop_no_centennial, big.mark = ","), "\n")
+cat("School-age children (5-17):\n")
+school_age_idx <- 2:4  # Indices for 5-11, 12-13, 14-17
+school_age_no_centennial <- sum(combined_data_no_centennial$age_pops[school_age_idx])
+school_age_with_centennial <- sum(combined_data_with_centennial$age_pops[school_age_idx])
+cat(sprintf("  Without Cen: %s\n", format(school_age_no_centennial, big.mark = ",")))
+cat(sprintf("  With Cen: %s\n", format(school_age_with_centennial, big.mark = ",")))
+cat(sprintf("  Difference: %s (%.1f%% increase)\n", 
+            format(school_age_with_centennial - school_age_no_centennial, big.mark = ","),
+            100 * (school_age_with_centennial - school_age_no_centennial) / school_age_no_centennial))
 ```
 
-## Scenario 1: Current Vaccination Coverage (95% adult rate)
+## Age Distribution Comparison
 
-Let's model outbreaks under estimated vaccination coverage levels for the combined community.
+Let's visualize how the age distributions differ across the three communities.
+
+```{r age-distribution-plot}
+# Prepare data for plotting
+age_dist_data <- data.frame()
+
+for (i in seq_along(cities)) {
+  city_name <- cities[i]
+  city_data <- single_year_data[[city_name]]
+  
+  # Calculate percentage of total population for each age
+  pct_pops <- 100 * city_data$age_pops / city_data$total_pop
+  
+  # Create a data frame for this city
+  city_df <- data.frame(
+    Age = 0:85,  # Ages 0 through 85
+    Percentage = pct_pops,
+    City = gsub(" CDP, Arizona", "", gsub(" town, Arizona", "", gsub(" city, Utah", "", city_name)))
+  )
+  
+  age_dist_data <- rbind(age_dist_data, city_df)
+}
+
+# Create the overlaid area plot
+ggplot(age_dist_data, aes(x = Age, y = Percentage, fill = City, color = City)) +
+  geom_area(alpha = 0.4, position = "identity") +
+  geom_line(size = 1, alpha = 0.8) +
+  scale_fill_manual(values = c("Hildale" = "#f7b360", 
+                                "Colorado City" = "#9dd7da",
+                                "Centennial Park" = "#b8a9c9")) +
+  scale_color_manual(values = c("Hildale" = "#f7b360", 
+                                 "Colorado City" = "#9dd7da",
+                                 "Centennial Park" = "#b8a9c9")) +
+  labs(title = "Age Distribution Comparison Across Short Creek Communities",
+       subtitle = "Percentage of each community's total population by single-year age (ACS 2019-2023)",
+       x = "Age (years)",
+       y = "% of Population",
+       fill = "Community",
+       color = "Community") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+        plot.subtitle = element_text(hjust = 0.5, size = 10),
+        legend.position = "right",
+        legend.title = element_text(face = "bold")) +
+  scale_x_continuous(breaks = seq(0, 85, by = 10))
+```
+
+The age distribution chart reveals key demographic patterns:
+
+- **Hildale (orange)** has the largest overall population with notable peaks in school-age and young adult groups
+- **Colorado City (blue)** shows a similar but smaller population structure
+- **Centennial Park (purple)** has a distinctly younger profile with pronounced peaks in childhood ages, particularly notable in the 5-15 age range
+
+This visualization explains why including Centennial Park significantly increases the school-age population - it has a disproportionately young demographic compared to the other two communities.
+
+```
+
+## Scenario 1: Current Vaccination Coverage (WITHOUT Centennial Park)
+
+Let's model outbreaks under estimated vaccination coverage levels for Hildale + Colorado City only.
 
 ```{r scenario1-setup}
 # Vaccination coverage rates
@@ -141,32 +249,64 @@ current_coverage_95 <- vaxcov  # For compatibility with interpolation code
 ```
 
 ```{r scenario1-model}
-# Run the measles model using getOutputTable
-results1 <- getOutputTable(
+# Run the measles model using getOutputTable (without Centennial Park)
+results1_no_centennial <- getOutputTable(
   agelims = agelims,
-  agepops = combined_data$age_pops,
+  agepops = combined_data_no_centennial$age_pops,
   agecovr = vaxcov,
   ageveff = ageveff,
   initgrp = initgrp
 )
 
-cat("Combined Cities - Current Vaccination Coverage\n")
-print(as.data.frame(results1), row.names = FALSE)
+cat("Hildale + Colorado City (WITHOUT Centennial Park) - Current Vaccination Coverage\n")
+print(as.data.frame(results1_no_centennial), row.names = FALSE)
 
 # Extract results for R0=15 (typical measles R0)
-r0_15_idx <- which(results1[, "R0"] == 15)
-final_size1 <- results1[r0_15_idx, "escapeInfTot"]
-percent_infected1 <- 100 * final_size1 / combined_data$total_pop
+r0_15_idx <- which(results1_no_centennial[, "R0"] == 15)
+final_size1_no_centennial <- results1_no_centennial[r0_15_idx, "escapeInfTot"]
+percent_infected1_no_centennial <- 100 * final_size1_no_centennial / combined_data_no_centennial$total_pop
 
-cat("Final outbreak size (R0=15):", format(final_size1, big.mark = ","), "\n")
-cat("Overall % infected:", sprintf("%.2f%%", percent_infected1), "\n")
+cat("Final outbreak size (R0=15):", format(final_size1_no_centennial, big.mark = ","), "\n")
+cat("Overall % infected:", sprintf("%.2f%%", percent_infected1_no_centennial), "\n")
 ```
 
-## Scenario 2: Linear Interpolation of Adult Vaccination Rates
+## Scenario 2: Current Vaccination Coverage (WITH Centennial Park)
 
-Now let's examine the impact using linear interpolation of adult vaccination rates (similar to the individual city analysis).
+Now let's see the impact of including Centennial Park's population in the analysis.
 
-```{r scenario2-setup}
+```{r scenario2-model}
+# Run the measles model using getOutputTable (with Centennial Park)
+results1_with_centennial <- getOutputTable(
+  agelims = agelims,
+  agepops = combined_data_with_centennial$age_pops,
+  agecovr = vaxcov,
+  ageveff = ageveff,
+  initgrp = initgrp
+)
+
+cat("Short Creek (WITH Centennial Park) - Current Vaccination Coverage\n")
+print(as.data.frame(results1_with_centennial), row.names = FALSE)
+
+final_size1_with_centennial <- results1_with_centennial[r0_15_idx, "escapeInfTot"]
+percent_infected1_with_centennial <- 100 * final_size1_with_centennial / combined_data_with_centennial$total_pop
+
+cat("Final outbreak size (R0=15):", format(final_size1_with_centennial, big.mark = ","), "\n")
+cat("Overall % infected:", sprintf("%.2f%%", percent_infected1_with_centennial), "\n")
+
+# Compare the two
+cat("\n")
+cat("Impact of including Centennial Park:\n")
+cat(sprintf("  Additional infections: %s\n", 
+            format(final_size1_with_centennial - final_size1_no_centennial, big.mark = ",")))
+cat(sprintf("  Increase: %.1f%%\n", 
+            100 * (final_size1_with_centennial - final_size1_no_centennial) / final_size1_no_centennial))
+```
+
+## Scenario 3: Linear Interpolation of Adult Vaccination Rates
+
+Now let's examine the impact using linear interpolation of adult vaccination rates (similar to the individual city analysis) for both population definitions.
+
+```{r scenario3-setup}
 # Linear interpolation of adult vaccination rates
 # Interpolate between 45% (end of high school) and 95% (older adults)
 adult_ages <- c(15, 20, 25, 30, 35, 40, 45, 50)
@@ -183,52 +323,126 @@ for (i in seq_along(adult_ages)) {
   }
 }
 
-cat("Scenario 2: Linear interpolated adult vaccination coverage\n")
+cat("Scenario 3: Linear interpolated adult vaccination coverage\n")
 cat("Vaccination coverage rates:", paste0(100 * vaxcov2, "%", collapse = ", "), "\n")
 ```
 
-```{r scenario2-model}
-results2 <- getOutputTable(
+```{r scenario3-model-no-cp}
+# Without Centennial Park
+results2_no_centennial <- getOutputTable(
   agelims = agelims,
-  agepops = combined_data$age_pops,
+  agepops = combined_data_no_centennial$age_pops,
   agecovr = vaxcov2,
   ageveff = ageveff,
   initgrp = initgrp
 )
 
-cat("Combined Cities - Linear Interpolated Adult Vaccination Coverage\n")
-print(as.data.frame(results2), row.names = FALSE)
+cat("Hildale + Colorado City (WITHOUT Centennial Park) - Linear Interpolated Coverage\n")
+print(as.data.frame(results2_no_centennial), row.names = FALSE)
 
-final_size2 <- results2[r0_15_idx, "escapeInfTot"]
-percent_infected2 <- 100 * final_size2 / combined_data$total_pop
+final_size2_no_centennial <- results2_no_centennial[r0_15_idx, "escapeInfTot"]
+percent_infected2_no_centennial <- 100 * final_size2_no_centennial / combined_data_no_centennial$total_pop
 
-cat("Final outbreak size (R0=15):", format(final_size2, big.mark = ","), "\n")
-cat("Overall % infected:", sprintf("%.2f%%", percent_infected2), "\n")
+cat("Final outbreak size (R0=15):", format(final_size2_no_centennial, big.mark = ","), "\n")
+cat("Overall % infected:", sprintf("%.2f%%", percent_infected2_no_centennial), "\n")
+```
+
+```{r scenario3-model-with-cp}
+# With Centennial Park
+results2_with_centennial <- getOutputTable(
+  agelims = agelims,
+  agepops = combined_data_with_centennial$age_pops,
+  agecovr = vaxcov2,
+  ageveff = ageveff,
+  initgrp = initgrp
+)
+
+cat("Short Creek (WITH Centennial Park) - Linear Interpolated Coverage\n")
+print(as.data.frame(results2_with_centennial), row.names = FALSE)
+
+final_size2_with_centennial <- results2_with_centennial[r0_15_idx, "escapeInfTot"]
+percent_infected2_with_centennial <- 100 * final_size2_with_centennial / combined_data_with_centennial$total_pop
+
+cat("Final outbreak size (R0=15):", format(final_size2_with_centennial, big.mark = ","), "\n")
+cat("Overall % infected:", sprintf("%.2f%%", percent_infected2_with_centennial), "\n")
 ```
 
 ## Scenario Comparison
 
-Let's compare the two scenarios side by side.
+Let's compare all scenarios side by side, highlighting the impact of including Centennial Park.
 
 ```{r scenario-comparison-plot}
 # Create data frame for ggplot
 comparison_data <- data.frame(
-  Scenario = factor(c("95% Adult Coverage", "Linear Interpolated Adult Coverage"), 
-                   levels = c("95% Adult Coverage", "Linear Interpolated Adult Coverage")),
-  Percent_Infected = c(percent_infected1, percent_infected2),
-  Final_Size = c(final_size1, final_size2),
-  Color = c("#f7b360", "#9dd7da")
+  Scenario = factor(c("Without Cen: 95% Adult", 
+                     "With Cen: 95% Adult",
+                     "Without Cen: Linear Adult", 
+                     "With Cen: Linear Adult"), 
+                   levels = c("Without Cen: 95% Adult", 
+                             "With Cen: 95% Adult",
+                             "Without Cen: Linear Adult", 
+                             "With Cen: Linear Adult")),
+  Percent_Infected = c(percent_infected1_no_centennial, 
+                       percent_infected1_with_centennial,
+                       percent_infected2_no_centennial, 
+                       percent_infected2_with_centennial),
+  Final_Size = c(final_size1_no_centennial, 
+                 final_size1_with_centennial,
+                 final_size2_no_centennial, 
+                 final_size2_with_centennial),
+  Population = rep(c("Without Centennial Park", "With Centennial Park"), 2),
+  Coverage = rep(c("95% Adult", "Linear Adult"), each = 2)
 )
 
-ggplot(comparison_data, aes(x = Scenario, y = Percent_Infected, fill = Color)) +
+ggplot(comparison_data, aes(x = Scenario, y = Percent_Infected, fill = Population)) +
   geom_bar(stat = "identity", width = 0.7) +
-  geom_text(aes(label = sprintf("%.1f%%", Percent_Infected)), vjust = -0.5, size = 4) +
-  scale_fill_identity() +
-  labs(title = "Combined Cities: % Infected by Vaccination Scenario (R0=15)",
-       x = "Vaccination Scenario",
-       y = "% Infected") +
+  geom_text(aes(label = sprintf("%.1f%%", Percent_Infected)), vjust = -0.5, size = 3.5) +
+  scale_fill_manual(values = c("Without Centennial Park" = "#f7b360", 
+                                "With Centennial Park" = "#9dd7da")) +
+  labs(title = "Impact of Centennial Park on Measles Outbreak Size (R0=15)",
+       subtitle = "Comparing population definitions and vaccination scenarios",
+       x = "Scenario",
+       y = "% Infected",
+       fill = "Population Definition") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        plot.title = element_text(hjust = 0.5)) +
-  ylim(0, max(comparison_data$Percent_Infected) * 1.1)
+        plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5)) +
+  ylim(0, max(comparison_data$Percent_Infected) * 1.15)
+```
+
+```{r centennial-park-impact}
+# Summary table showing Centennial Park impact
+cat("\n")
+cat("Summary: Impact of Including Centennial Park\n")
+cat("==============================================\n\n")
+
+cat("Population:\n")
+cat(sprintf("  Without Cen: %s\n", format(combined_data_no_centennial$total_pop, big.mark = ",")))
+cat(sprintf("  With Cen: %s\n", format(combined_data_with_centennial$total_pop, big.mark = ",")))
+cat(sprintf("  Difference: %s (%.1f%% larger)\n\n",
+            format(combined_data_with_centennial$total_pop - combined_data_no_centennial$total_pop, big.mark = ","),
+            100 * (combined_data_with_centennial$total_pop - combined_data_no_centennial$total_pop) / combined_data_no_centennial$total_pop))
+
+cat("95% Adult Coverage Scenario:\n")
+cat(sprintf("  Without Cen: %s infections (%.2f%%)\n", 
+            format(final_size1_no_centennial, big.mark = ","), 
+            percent_infected1_no_centennial))
+cat(sprintf("  With Cen: %s infections (%.2f%%)\n",
+            format(final_size1_with_centennial, big.mark = ","),
+            percent_infected1_with_centennial))
+cat(sprintf("  Additional: %s infections (%.1f%% more)\n\n",
+            format(final_size1_with_centennial - final_size1_no_centennial, big.mark = ","),
+            100 * (final_size1_with_centennial - final_size1_no_centennial) / final_size1_no_centennial))
+
+cat("Linear Adult Coverage Scenario:\n")
+cat(sprintf("  Without Cen: %s infections (%.2f%%)\n",
+            format(final_size2_no_centennial, big.mark = ","),
+            percent_infected2_no_centennial))
+cat(sprintf("  With Cen: %s infections (%.2f%%)\n",
+            format(final_size2_with_centennial, big.mark = ","),
+            percent_infected2_with_centennial))
+cat(sprintf("  Additional: %s infections (%.1f%% more)\n",
+            format(final_size2_with_centennial - final_size2_no_centennial, big.mark = ","),
+            100 * (final_size2_with_centennial - final_size2_no_centennial) / final_size2_no_centennial))
 ```

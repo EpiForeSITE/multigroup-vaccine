@@ -1,19 +1,38 @@
 # Example Census Data
 
-This directory contains example U.S. Census Bureau population estimate data files included with the package.
+This directory contains example U.S. Census Bureau population estimate data files and city-specific American Community Survey (ACS) data included with the package.
 
-## Files
+### County-Level Census Data
 
 - `cc-est2024-syasex-49.csv` - Utah (FIPS code 49) county-level population estimates by single-year age and sex, 2020-2024
 
+### City-Level ACS Data
+
+- `hildale_ut_2023.csv` - Hildale city, Utah population by age from ACS 5-Year Estimates (2019-2023)
+- `hildale_ut_2023_metadata.csv` - Metadata for Hildale ACS data (variable descriptions)
+- `colorado_city_az_2023.csv` - Colorado City town, Arizona population by age from ACS 5-Year Estimates (2019-2023)
+- `colorado_city_az_2023_metadata.csv` - Metadata for Colorado City ACS data (variable descriptions)
+- `centennial_park_az_2023.csv` - Centennial Park, AZ population by age from ACS 5-Year Estimates (2019-2023)
+
 ## Source
+
+### County-Level Data
 
 Data downloaded from the U.S. Census Bureau Population Estimates Program:
 https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/counties/asrh/
 
+### City-Level Data
+
+Data downloaded from the U.S. Census Bureau American Community Survey (ACS) 5-Year Estimates via data.census.gov:
+- **Hildale, UT**: Table S0101 (Age and Sex), 2019-2023 ACS 5-Year Estimates
+- **Colorado City, AZ**: Table S0101 (Age and Sex), 2019-2023 ACS 5-Year Estimates
+- **Centennial Park, AZ**: Table S0101 (Age and Sex), 2019-2023 ACS 5-Year Estimates
+
 ## Usage
 
-Access this file in your code using:
+### County-Level Census Data
+
+Access county data in your code using:
 
 ```r
 library(multigroup.vaccine)
@@ -27,6 +46,36 @@ slc_data <- getCensusData(
   county_name = "Salt Lake County",
   year = 2024,
   csv_path = getCensusDataPath()
+)
+```
+
+### City-Level ACS Data
+
+Access city data using:
+
+```r
+library(multigroup.vaccine)
+
+# Load Hildale data with default 5-year age groups
+hildale_data <- getCityData(
+  city_name = "Hildale city, Utah",
+  csv_path = system.file("extdata", "hildale_ut_2023.csv", 
+                         package = "multigroup.vaccine")
+)
+
+# Load Colorado City data
+colorado_city_data <- getCityData(
+  city_name = "Colorado City town, Arizona",
+  csv_path = system.file("extdata", "colorado_city_az_2023.csv",
+                         package = "multigroup.vaccine")
+)
+
+# Load with custom age groups
+hildale_custom <- getCityData(
+  city_name = "Hildale city, Utah",
+  csv_path = system.file("extdata", "hildale_ut_2023.csv",
+                         package = "multigroup.vaccine"),
+  age_groups = c(0, 5, 18, 65)
 )
 ```
 
