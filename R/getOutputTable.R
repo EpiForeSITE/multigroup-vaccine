@@ -1,3 +1,18 @@
+#' Generate Output Table for Vaccine Model Scenarios
+#'
+#' This function generates a comprehensive output table showing R0 values,
+#' vaccine effectiveness, and escape probabilities for different vaccination
+#' scenarios in a multigroup population model.
+#'
+#' @param agelims Vector of age group limits (lower bounds)
+#' @param agepops Vector of population sizes for each age group
+#' @param agecovr Vector of vaccination coverage rates for each age group
+#' @param ageveff Vector of vaccine effectiveness rates for each age group
+#' @param initgrp Index of the age group where the initial infection occurs
+#'
+#' @return A matrix with columns for R0, R0local, Rv, pEscape, escapeInfTot,
+#'   and infection counts by age group
+#' @export
 getOutputTable <- function(agelims, agepops, agecovr, ageveff, initgrp) {
 
   grpnames <- c(

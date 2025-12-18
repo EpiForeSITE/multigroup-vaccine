@@ -1,3 +1,7 @@
+#' ODE system for multi-group SIR model
+#' TODO: Add documentation and @keywords internal flag unless we want it to be exported
+#' time parameter doesn't seem to be used, can this be removed safely?
+#' @keywords internal
 odeSIR <- function(time, state, par) {
   ngrp <- length(state) / 3
   S <- state[1:ngrp]

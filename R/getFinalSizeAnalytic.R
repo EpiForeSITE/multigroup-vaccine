@@ -1,3 +1,14 @@
+#' Calculate final size of outbreak: the total number of infections in each group,
+#' by solving the analytic final size equation
+#' @param Rinit initial number already infected, recovered, and immune in each group
+#' @param Iinit initial number actively infectious in each group
+#' @param Vinit initial number vaccinated and immunized in each group
+#' @param N population size of each group
+#' @param R0 overall basic reproduction number
+#' @param a relative overall contact rate of each group
+#' @param eps fraction of each group's contacts that exclusively within-group
+#' @param q relative susceptibility to infection per contact of each group
+#' @export
 getFinalSizeAnalytic <- function(Rinit, Iinit, Vinit, N, R0, a, eps, q) {
   if (sum(Iinit) == 0)
     Iinit <- N / sum(N)
