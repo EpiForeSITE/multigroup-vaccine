@@ -1,7 +1,11 @@
-#' ODE system for multi-group SIR model
-#' TODO: Add documentation and @keywords internal flag unless we want it to be exported
-#' time parameter doesn't seem to be used, can this be removed safely?
-#' @keywords internal
+#' Ordinary differential equation function for multi-group susceptible-infectious-removed (SIR) model
+#' used as "func" argument passed to the ode() function from deSolve package
+#' @param time vector of times at which the function will be evaluated
+#' @param state vector of number of individuals in each group at each state: S states
+#' followed by I states followed by R states
+#' @param par vector of parameter values: group-to-group transmission rate matrix elements (row-wise)
+#' followed by recovery rate
+#' @export
 odeSIR <- function(time, state, par) {
   ngrp <- length(state) / 3
   S <- state[1:ngrp]
