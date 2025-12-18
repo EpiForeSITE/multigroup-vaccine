@@ -12,6 +12,8 @@ vaxrepnum(meaninf, popsize, trmat, initR, initV, vaxeff)
 
 \item{popsize}{the population size of each group}
 
+\item{trmat}{matrix of group-to-group (column-to-row) transmission rates}
+
 \item{initR}{initial number of each group already infected and immune}
 
 \item{initV}{initial number of each group vaccinated}
