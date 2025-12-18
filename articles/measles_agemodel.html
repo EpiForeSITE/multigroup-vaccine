@@ -33,8 +33,10 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/contact_matrix_examples.html">Contact Matrix Examples</a></li>
+<li><a class="dropdown-item" href="../articles/combined_cities.html">Combined City Population: Measles Outbreak Modeling</a></li>
+    <li><a class="dropdown-item" href="../articles/contact_matrix_examples.html">Contact Matrix Examples</a></li>
     <li><a class="dropdown-item" href="../articles/epiworld_comparison.html">Comparison to epiworld</a></li>
+    <li><a class="dropdown-item" href="../articles/hildale_and_colorado_city.html">City Population Data: Measles Outbreak Modeling Comparison</a></li>
     <li><a class="dropdown-item" href="../articles/measles_agemodel.html">Measles Age-Structured Model</a></li>
     <li><a class="dropdown-item" href="../articles/measles_example.html">Measles Outbreak Example</a></li>
     <li><a class="dropdown-item" href="../articles/measles_example2.html">Measles Outbreak Example 2</a></li>
@@ -83,7 +85,7 @@
 <span><span class="va">agecovr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.83</span>, <span class="fl">0.852</span>, <span class="fl">0.879</span>, <span class="fl">0.9</span>, <span class="fl">0.925</span>, <span class="fl">0.95</span>, <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">initgrp</span> <span class="op">&lt;-</span> <span class="fl">6</span> <span class="co"># assume first case in 25-44 group</span></span>
 <span></span>
-<span><span class="va">ot1</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu">getOutputTable</span><span class="op">(</span></span>
+<span><span class="va">ot1</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu"><a href="../reference/getOutputTable.html">getOutputTable</a></span><span class="op">(</span></span>
 <span>  agelims <span class="op">=</span> <span class="va">agelims</span>,</span>
 <span>  agepops <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2354</span>, <span class="fl">9418</span>, <span class="fl">19835</span>, <span class="fl">17001</span>, <span class="fl">19219</span>, <span class="fl">47701</span>, <span class="fl">53956</span>, <span class="fl">32842</span><span class="op">)</span>,</span>
 <span>  agecovr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.83</span>, <span class="fl">0.852</span>, <span class="fl">0.879</span>, <span class="fl">0.9</span>, <span class="fl">0.925</span>, <span class="fl">0.95</span>, <span class="fl">1</span><span class="op">)</span>,</span>
@@ -113,7 +115,7 @@
 <span><span class="co">#&gt;    3782   2572   0</span></span>
 <span><span class="co">#&gt;    3927   2716   0</span></span></code></pre></div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ot2</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu">getOutputTable</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">ot2</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu"><a href="../reference/getOutputTable.html">getOutputTable</a></span><span class="op">(</span></span>
 <span>  agelims <span class="op">=</span> <span class="va">agelims</span>,</span>
 <span>  agepops <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">11981</span>, <span class="fl">47922</span>, <span class="fl">86718</span>, <span class="fl">77302</span>, <span class="fl">120132</span>, <span class="fl">199914</span>, <span class="fl">136997</span>, <span class="fl">38206</span><span class="op">)</span>,</span>
 <span>  agecovr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.86</span>, <span class="fl">0.899</span>, <span class="fl">0.933</span>, <span class="fl">0.95</span>, <span class="fl">0.95</span>, <span class="fl">0.95</span>, <span class="fl">1</span><span class="op">)</span>,</span>
@@ -143,7 +145,7 @@
 <span><span class="co">#&gt;   11738   6087   0</span></span>
 <span><span class="co">#&gt;   12236   6460   0</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ot3</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu">getOutputTable</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">ot3</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu"><a href="../reference/getOutputTable.html">getOutputTable</a></span><span class="op">(</span></span>
 <span>  agelims <span class="op">=</span> <span class="va">agelims</span>,</span>
 <span>  agepops <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">14527</span>, <span class="fl">58108</span>, <span class="fl">114156</span>, <span class="fl">106006</span>, <span class="fl">118837</span>, <span class="fl">367597</span>, <span class="fl">310945</span>, <span class="fl">95637</span><span class="op">)</span>,</span>
 <span>  agecovr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.89</span>, <span class="fl">0.949</span>, <span class="fl">0.950</span>, <span class="fl">0.95</span>, <span class="fl">0.95</span>, <span class="fl">0.95</span>, <span class="fl">1</span><span class="op">)</span>,</span>
@@ -178,7 +180,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Damon Toth, Willy Ray, Centers for Disease Control and Prevention’s Center for Forecasting and Outbreak Analytics.</p>
+  <p>Developed by Damon Toth, Jake Wagoner, Centers for Disease Control and Prevention’s Center for Forecasting and Outbreak Analytics.</p>
 </div>
 
 <div class="pkgdown-footer-right">

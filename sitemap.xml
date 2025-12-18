@@ -2,8 +2,10 @@
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/404.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/LICENSE-text.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/LICENSE.html</loc></url>
+<url><loc>https://epiforesite.github.io/multigroup-vaccine/articles/combined_cities.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/articles/contact_matrix_examples.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/articles/epiworld_comparison.html</loc></url>
+<url><loc>https://epiforesite.github.io/multigroup-vaccine/articles/hildale_and_colorado_city.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/articles/index.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/articles/measles_agemodel.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/articles/measles_example.html</loc></url>
@@ -19,18 +21,25 @@
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/contactMatrixAgeSchool.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/contactMatrixPolymod.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/contactMatrixPropPref.html</loc></url>
+<url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/disaggregateCityAges.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/getCensusData.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/getCensusDataPath.html</loc></url>
+<url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/getCityData.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/getFinalSize.html</loc></url>
+<url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/getFinalSizeAnalytic.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/getFinalSizeDist.html</loc></url>
+<url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/getFinalSizeDistEscape.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/getFinalSizeODE.html</loc></url>
+<url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/getOutputTable.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/getSizeAtTime.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/getStateFIPS.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/index.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/listCounties.html</loc></url>
+<url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/odeSIR.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/processCensusDataBySex.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/processCensusDataTotal.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/run_my_app.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/transmissionRates.html</loc></url>
+<url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/vaxrepnum.html</loc></url>
 </urlset>
 

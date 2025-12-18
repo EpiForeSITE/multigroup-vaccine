@@ -33,8 +33,10 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/contact_matrix_examples.html">Contact Matrix Examples</a></li>
+<li><a class="dropdown-item" href="../articles/combined_cities.html">Combined City Population: Measles Outbreak Modeling</a></li>
+    <li><a class="dropdown-item" href="../articles/contact_matrix_examples.html">Contact Matrix Examples</a></li>
     <li><a class="dropdown-item" href="../articles/epiworld_comparison.html">Comparison to epiworld</a></li>
+    <li><a class="dropdown-item" href="../articles/hildale_and_colorado_city.html">City Population Data: Measles Outbreak Modeling Comparison</a></li>
     <li><a class="dropdown-item" href="../articles/measles_agemodel.html">Measles Age-Structured Model</a></li>
     <li><a class="dropdown-item" href="../articles/measles_example.html">Measles Outbreak Example</a></li>
     <li><a class="dropdown-item" href="../articles/measles_example2.html">Measles Outbreak Example 2</a></li>
@@ -224,7 +226,7 @@ levels in Utah.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">slc_data</span> <span class="op">&lt;-</span> <span class="va">county_data_list</span><span class="op">[[</span><span class="st">"Salt Lake County"</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
-<span><span class="va">slc_current</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu">getOutputTable</span><span class="op">(</span></span>
+<span><span class="va">slc_current</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu"><a href="../reference/getOutputTable.html">getOutputTable</a></span><span class="op">(</span></span>
 <span>  agelims <span class="op">=</span> <span class="va">agelims</span>,</span>
 <span>  agepops <span class="op">=</span> <span class="va">slc_data</span><span class="op">$</span><span class="va">age_pops</span>,</span>
 <span>  agecovr <span class="op">=</span> <span class="va">current_coverage</span>,</span>
@@ -262,7 +264,7 @@ levels in Utah.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">utah_data</span> <span class="op">&lt;-</span> <span class="va">county_data_list</span><span class="op">[[</span><span class="st">"Utah County"</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
-<span><span class="va">utah_current</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu">getOutputTable</span><span class="op">(</span></span>
+<span><span class="va">utah_current</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu"><a href="../reference/getOutputTable.html">getOutputTable</a></span><span class="op">(</span></span>
 <span>  agelims <span class="op">=</span> <span class="va">agelims</span>,</span>
 <span>  agepops <span class="op">=</span> <span class="va">utah_data</span><span class="op">$</span><span class="va">age_pops</span>,</span>
 <span>  agecovr <span class="op">=</span> <span class="va">current_coverage</span>,</span>
@@ -301,7 +303,7 @@ levels in Utah.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wash_data</span> <span class="op">&lt;-</span> <span class="va">county_data_list</span><span class="op">[[</span><span class="st">"Washington County"</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
-<span><span class="va">wash_current</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu">getOutputTable</span><span class="op">(</span></span>
+<span><span class="va">wash_current</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu"><a href="../reference/getOutputTable.html">getOutputTable</a></span><span class="op">(</span></span>
 <span>  agelims <span class="op">=</span> <span class="va">agelims</span>,</span>
 <span>  agepops <span class="op">=</span> <span class="va">wash_data</span><span class="op">$</span><span class="va">age_pops</span>,</span>
 <span>  agecovr <span class="op">=</span> <span class="va">current_coverage</span>,</span>
@@ -385,7 +387,7 @@ groups?</p>
 <code class="sourceCode R"><span><span class="va">reduced_coverage</span> <span class="op">&lt;-</span> <span class="va">current_coverage</span> <span class="op">*</span> <span class="fl">0.9</span>  <span class="co"># 10% reduction</span></span>
 <span><span class="va">reduced_coverage</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">0</span>  <span class="co"># Keep under-1 at 0</span></span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">slc_reduced</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu">getOutputTable</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">slc_reduced</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu"><a href="../reference/getOutputTable.html">getOutputTable</a></span><span class="op">(</span></span>
 <span>  agelims <span class="op">=</span> <span class="va">agelims</span>,</span>
 <span>  agepops <span class="op">=</span> <span class="va">slc_data</span><span class="op">$</span><span class="va">age_pops</span>,</span>
 <span>  agecovr <span class="op">=</span> <span class="va">reduced_coverage</span>,</span>
@@ -393,7 +395,7 @@ groups?</p>
 <span>  initgrp <span class="op">=</span> <span class="va">initgrp</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">utah_reduced</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu">getOutputTable</span><span class="op">(</span></span>
+<span><span class="va">utah_reduced</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu"><a href="../reference/getOutputTable.html">getOutputTable</a></span><span class="op">(</span></span>
 <span>  agelims <span class="op">=</span> <span class="va">agelims</span>,</span>
 <span>  agepops <span class="op">=</span> <span class="va">utah_data</span><span class="op">$</span><span class="va">age_pops</span>,</span>
 <span>  agecovr <span class="op">=</span> <span class="va">reduced_coverage</span>,</span>
@@ -401,7 +403,7 @@ groups?</p>
 <span>  initgrp <span class="op">=</span> <span class="va">initgrp</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">wash_reduced</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu">getOutputTable</span><span class="op">(</span></span>
+<span><span class="va">wash_reduced</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu"><a href="../reference/getOutputTable.html">getOutputTable</a></span><span class="op">(</span></span>
 <span>  agelims <span class="op">=</span> <span class="va">agelims</span>,</span>
 <span>  agepops <span class="op">=</span> <span class="va">wash_data</span><span class="op">$</span><span class="va">age_pops</span>,</span>
 <span>  agecovr <span class="op">=</span> <span class="va">reduced_coverage</span>,</span>
@@ -481,7 +483,7 @@ children (5-17)?</p>
 <span><span class="va">school_gap_coverage</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">0.75</span>  <span class="co"># 5-11: reduced from 85.2% to 75%</span></span>
 <span><span class="va">school_gap_coverage</span><span class="op">[</span><span class="fl">4</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">0.75</span>  <span class="co"># 12-17: reduced from 87.9% to 75%</span></span></code></pre></div>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">slc_schoolgap</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu">getOutputTable</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">slc_schoolgap</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu"><a href="../reference/getOutputTable.html">getOutputTable</a></span><span class="op">(</span></span>
 <span>  agelims <span class="op">=</span> <span class="va">agelims</span>,</span>
 <span>  agepops <span class="op">=</span> <span class="va">slc_data</span><span class="op">$</span><span class="va">age_pops</span>,</span>
 <span>  agecovr <span class="op">=</span> <span class="va">school_gap_coverage</span>,</span>
@@ -489,7 +491,7 @@ children (5-17)?</p>
 <span>  initgrp <span class="op">=</span> <span class="va">initgrp</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">utah_schoolgap</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu">getOutputTable</span><span class="op">(</span></span>
+<span><span class="va">utah_schoolgap</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu"><a href="../reference/getOutputTable.html">getOutputTable</a></span><span class="op">(</span></span>
 <span>  agelims <span class="op">=</span> <span class="va">agelims</span>,</span>
 <span>  agepops <span class="op">=</span> <span class="va">utah_data</span><span class="op">$</span><span class="va">age_pops</span>,</span>
 <span>  agecovr <span class="op">=</span> <span class="va">school_gap_coverage</span>,</span>
@@ -497,7 +499,7 @@ children (5-17)?</p>
 <span>  initgrp <span class="op">=</span> <span class="va">initgrp</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">wash_schoolgap</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu">getOutputTable</span><span class="op">(</span></span>
+<span><span class="va">wash_schoolgap</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu"><a href="../reference/getOutputTable.html">getOutputTable</a></span><span class="op">(</span></span>
 <span>  agelims <span class="op">=</span> <span class="va">agelims</span>,</span>
 <span>  agepops <span class="op">=</span> <span class="va">wash_data</span><span class="op">$</span><span class="va">age_pops</span>,</span>
 <span>  agecovr <span class="op">=</span> <span class="va">school_gap_coverage</span>,</span>
@@ -562,7 +564,7 @@ children (5-17)?</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Damon Toth, Willy Ray, Centers for Disease Control and Prevention’s Center for Forecasting and Outbreak Analytics.</p>
+  <p>Developed by Damon Toth, Jake Wagoner, Centers for Disease Control and Prevention’s Center for Forecasting and Outbreak Analytics.</p>
 </div>
 
 <div class="pkgdown-footer-right">

@@ -18,8 +18,10 @@
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/contact_matrix_examples.html">Contact Matrix Examples</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/combined_cities.html">Combined City Population: Measles Outbreak Modeling</a></li>
+    <li><a class="dropdown-item" href="../articles/contact_matrix_examples.html">Contact Matrix Examples</a></li>
     <li><a class="dropdown-item" href="../articles/epiworld_comparison.html">Comparison to epiworld</a></li>
+    <li><a class="dropdown-item" href="../articles/hildale_and_colorado_city.html">City Population Data: Measles Outbreak Modeling Comparison</a></li>
     <li><a class="dropdown-item" href="../articles/measles_agemodel.html">Measles Age-Structured Model</a></li>
     <li><a class="dropdown-item" href="../articles/measles_example.html">Measles Outbreak Example</a></li>
     <li><a class="dropdown-item" href="../articles/measles_example2.html">Measles Outbreak Example 2</a></li>
@@ -60,6 +62,13 @@
 
         <dt>
 
+          <code><a href="aggregateByAgeGroups.html">aggregateByAgeGroups()</a></code>
+
+        </dt>
+        <dd>Aggregate population counts into age groups</dd>
+
+        <dt>
+
           <code><a href="contactMatrixAgeSchool.html">contactMatrixAgeSchool()</a></code>
 
         </dt>
@@ -95,10 +104,24 @@
 
         <dt>
 
+          <code><a href="getCityData.html">getCityData()</a></code>
+
+        </dt>
+        <dd>Get City Population Data by Age</dd>
+
+        <dt>
+
           <code><a href="getFinalSize.html">getFinalSize()</a></code>
 
         </dt>
         <dd>Calculate final size of outbreak: the total number of infections in each group</dd>
+
+        <dt>
+
+          <code><a href="getFinalSizeAnalytic.html">getFinalSizeAnalytic()</a></code>
+
+        </dt>
+        <dd>Calculate final size of outbreak: the total number of infections in each group, by solving the analytic final size equation</dd>
 
         <dt>
 
@@ -109,10 +132,24 @@
 
         <dt>
 
+          <code><a href="getFinalSizeDistEscape.html">getFinalSizeDistEscape()</a></code>
+
+        </dt>
+        <dd>Estimate the distribution of final outbreak sizes by group using a hybrid model: stochastic simulations for smaller-sized outbreaks and deterministic ordinary differential equation model for "escaped" outbreaks</dd>
+
+        <dt>
+
           <code><a href="getFinalSizeODE.html">getFinalSizeODE()</a></code>
 
         </dt>
         <dd>Calculate outbreak final size, the total number of infections in each group, by numerically solving the multi-group ordinary differential equation</dd>
+
+        <dt>
+
+          <code><a href="getOutputTable.html">getOutputTable()</a></code>
+
+        </dt>
+        <dd>Generate Output Table for Vaccine Model Scenarios</dd>
 
         <dt>
 
@@ -148,12 +185,19 @@
 
         </dt>
         <dd>Calculate transmission rate matrix for multi-group model with specified R0</dd>
+
+        <dt>
+
+          <code><a href="vaxrepnum.html">vaxrepnum()</a></code>
+
+        </dt>
+        <dd>Calculate reproduction number for a multigroup model with a given state of vaccination and immunity</dd>
       </dl></div>
   </main></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Damon Toth, Willy Ray, Centers for Disease Control and Prevention’s Center for Forecasting and Outbreak Analytics.</p>
+  <p>Developed by Damon Toth, Jake Wagoner, Centers for Disease Control and Prevention’s Center for Forecasting and Outbreak Analytics.</p>
 </div>
 
 <div class="pkgdown-footer-right">

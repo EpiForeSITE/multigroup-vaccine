@@ -5,7 +5,10 @@
 - **Damon Toth**. Author, contributor.
   [](https://orcid.org/0000-0001-7393-4814)
 
-- **Willy Ray**. Maintainer, contributor.
+- **Jake Wagoner**. Maintainer, contributor.
+  [](https://orcid.org/0009-0000-5053-2281)
+
+- **Willy Ray**. Contributor.
 
 - **Centers for Disease Control and Prevention's Center for Forecasting
   and Outbreak Analytics**. Funder.  

@@ -4,6 +4,8 @@
 
 - [`UtahAgeCountyPop`](https://epiforesite.github.io/multigroup-vaccine/reference/UtahAgeCountyPop.md)
   : Population size by age group for counties in Utah
+- [`aggregateByAgeGroups()`](https://epiforesite.github.io/multigroup-vaccine/reference/aggregateByAgeGroups.md)
+  : Aggregate population counts into age groups
 - [`contactMatrixAgeSchool()`](https://epiforesite.github.io/multigroup-vaccine/reference/contactMatrixAgeSchool.md)
   : Calculate a contact matrix for age groups and schools
 - [`contactMatrixPolymod()`](https://epiforesite.github.io/multigroup-vaccine/reference/contactMatrixPolymod.md)
@@ -16,16 +18,28 @@
   : Get Census Population Data by Age and County
 - [`getCensusDataPath()`](https://epiforesite.github.io/multigroup-vaccine/reference/getCensusDataPath.md)
   : Get path to example census data file
+- [`getCityData()`](https://epiforesite.github.io/multigroup-vaccine/reference/getCityData.md)
+  : Get City Population Data by Age
 - [`getFinalSize()`](https://epiforesite.github.io/multigroup-vaccine/reference/getFinalSize.md)
   : Calculate final size of outbreak: the total number of infections in
   each group
+- [`getFinalSizeAnalytic()`](https://epiforesite.github.io/multigroup-vaccine/reference/getFinalSizeAnalytic.md)
+  : Calculate final size of outbreak: the total number of infections in
+  each group, by solving the analytic final size equation
 - [`getFinalSizeDist()`](https://epiforesite.github.io/multigroup-vaccine/reference/getFinalSizeDist.md)
   : Estimate the distribution of final outbreak sizes by group using
   stochastic simulations of multi-group model
+- [`getFinalSizeDistEscape()`](https://epiforesite.github.io/multigroup-vaccine/reference/getFinalSizeDistEscape.md)
+  : Estimate the distribution of final outbreak sizes by group using a
+  hybrid model: stochastic simulations for smaller-sized outbreaks and
+  deterministic ordinary differential equation model for "escaped"
+  outbreaks
 - [`getFinalSizeODE()`](https://epiforesite.github.io/multigroup-vaccine/reference/getFinalSizeODE.md)
   : Calculate outbreak final size, the total number of infections in
   each group, by numerically solving the multi-group ordinary
   differential equation
+- [`getOutputTable()`](https://epiforesite.github.io/multigroup-vaccine/reference/getOutputTable.md)
+  : Generate Output Table for Vaccine Model Scenarios
 - [`getSizeAtTime()`](https://epiforesite.github.io/multigroup-vaccine/reference/getSizeAtTime.md)
   : Calculate outbreak size at a given time
 - [`getStateFIPS()`](https://epiforesite.github.io/multigroup-vaccine/reference/getStateFIPS.md)
@@ -37,3 +51,6 @@
 - [`transmissionRates()`](https://epiforesite.github.io/multigroup-vaccine/reference/transmissionRates.md)
   : Calculate transmission rate matrix for multi-group model with
   specified R0
+- [`vaxrepnum()`](https://epiforesite.github.io/multigroup-vaccine/reference/vaxrepnum.md)
+  : Calculate reproduction number for a multigroup model with a given
+  state of vaccination and immunity
