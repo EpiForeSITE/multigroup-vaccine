@@ -2,7 +2,8 @@
 % Please edit documentation in R/getFinalSizeDistEscape.R
 \name{getFinalSizeDistEscape}
 \alias{getFinalSizeDistEscape}
-\title{TODO: Add documentation and @keywords internal flag unless we want it to be exported}
+\title{Estimate the distribution of final outbreak sizes by group using a hybrid model: stochastic simulations
+for smaller-sized outbreaks and deterministic ordinary differential equation model for "escaped" outbreaks}
 \usage{
 getFinalSizeDistEscape(
   n,
@@ -14,7 +15,25 @@ getFinalSizeDistEscape(
   initV
 )
 }
-\description{
-TODO: Add documentation and @keywords internal flag unless we want it to be exported
+\arguments{
+\item{n}{the number of simulations to run}
+
+\item{transmrates}{matrix of group-to-group (column-to-row) transmission rates}
+
+\item{recoveryrate}{inverse of mean infectious period}
+
+\item{popsize}{the population size of each group}
+
+\item{initR}{initial number of each group already infected and removed (included in size result)}
+
+\item{initI}{initial number of each group infectious}
+
+\item{initV}{initial number of each group vaccinated}
 }
-\keyword{internal}
+\value{
+a matrix with the final number infected from each group (column) in each simulation (row)
+}
+\description{
+Estimate the distribution of final outbreak sizes by group using a hybrid model: stochastic simulations
+for smaller-sized outbreaks and deterministic ordinary differential equation model for "escaped" outbreaks
+}

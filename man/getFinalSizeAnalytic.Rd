@@ -2,10 +2,29 @@
 % Please edit documentation in R/getFinalSizeAnalytic.R
 \name{getFinalSizeAnalytic}
 \alias{getFinalSizeAnalytic}
-\title{TODO: Add documentation and @internal flag unless we want it to be exported}
+\title{Calculate final size of outbreak: the total number of infections in each group,
+by solving the analytic final size equation}
 \usage{
 getFinalSizeAnalytic(Rinit, Iinit, Vinit, N, R0, a, eps, q)
 }
+\arguments{
+\item{Rinit}{initial number already infected, recovered, and immune in each group}
+
+\item{Iinit}{initial number actively infectious in each group}
+
+\item{Vinit}{initial number vaccinated and immunized in each group}
+
+\item{N}{population size of each group}
+
+\item{R0}{overall basic reproduction number}
+
+\item{a}{relative overall contact rate of each group}
+
+\item{eps}{fraction of each group's contacts that exclusively within-group}
+
+\item{q}{relative susceptibility to infection per contact of each group}
+}
 \description{
-TODO: Add documentation and @internal flag unless we want it to be exported
+Calculate final size of outbreak: the total number of infections in each group,
+by solving the analytic final size equation
 }
