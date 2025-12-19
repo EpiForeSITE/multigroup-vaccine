@@ -14,16 +14,16 @@ getFinalSizeAnalytic <- function(Rinit, Iinit, Vinit, N, R0, a, eps, q) {
     Iinit <- N / sum(N)
 
   Sinit <- N - Rinit - Iinit - Vinit
-  fn <- (1 - eps) * a * N
-  f <- fn / sum(fn)
-  cij <- diag(eps) + outer((1 - eps), f)
 
-  R0i <- R0 / eigen(a * q * cij)$values[1] * a * q
+  cij <- contactMatrixPropPref(N, a, eps)
+  transmMatrix <- q * cij
+  R0i <- R0 / eigen(transmMatrix)$values[1]
 
   Zrhs <- function(Z)
-    c(Sinit * (1 - exp(-R0i * cij %*% ((
-      Z + Iinit
-    ) / N))))
+    c(Sinit * (1 - exp(-R0i * transmMatrix %*% ((Z + Iinit) / N))))
+
+  #Zrhs <- function(Z)
+  #  c(Sinit * (1 - exp(-R0i * cij %*% ((Z + Iinit) / N))))
 
   optfn <- function(x)
     ifelse(all(x > 0), max(abs(x - Zrhs(x))), Inf)
