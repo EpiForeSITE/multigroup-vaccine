@@ -1,37 +1,30 @@
 #' Calculate final size of outbreak: the total number of infections in each group,
 #' by solving the analytic final size equation
-#' @param Rinit initial number already infected, recovered, and immune in each group
-#' @param Iinit initial number actively infectious in each group
-#' @param Vinit initial number vaccinated and immunized in each group
-#' @param N population size of each group
-#' @param R0 overall basic reproduction number
-#' @param a relative overall contact rate of each group
-#' @param eps fraction of each group's contacts that exclusively within-group
-#' @param q relative susceptibility to infection per contact of each group
+#' @param transmrates matrix of group-to-group (column-to-row) transmission rates
+#' @param recoveryrate inverse of mean infectious period
+#' @param popsize the population size of each group
+#' @param initR initial number of each group already infected and removed (included in final size)
+#' @param initI initial number of each group infectious
+#' @param initV initial number of each group vaccinated
 #' @export
-getFinalSizeAnalytic <- function(Rinit, Iinit, Vinit, N, R0, a, eps, q) {
-  if (sum(Iinit) == 0)
-    Iinit <- N / sum(N)
+getFinalSizeAnalytic <- function(transmrates, recoveryrate, popsize, initR, initI, initV) {
+  if (sum(initI) == 0)
+    initI <- popsize / sum(popsize)
 
-  Sinit <- N - Rinit - Iinit - Vinit
-  fn <- (1 - eps) * a * N
-  f <- fn / sum(fn)
-  cij <- diag(eps) + outer((1 - eps), f)
+  initS <- popsize - initR - initI - initV
 
-  R0i <- R0 / eigen(a * q * cij)$values[1] * a * q
+  R0mat <- transmrates / recoveryrate
 
   Zrhs <- function(Z)
-    c(Sinit * (1 - exp(-R0i * cij %*% ((
-      Z + Iinit
-    ) / N))))
+    c(initS * (1 - exp(-R0mat %*% ((Z + initI) / popsize))))
 
   optfn <- function(x)
     ifelse(all(x > 0), max(abs(x - Zrhs(x))), Inf)
 
   optVal <- Inf
   while (optVal > 0.1) {
-    opt <- stats::optim((0.01 + 0.98 * stats::runif(length(N))) * N, optfn)
+    opt <- stats::optim((0.01 + 0.98 * stats::runif(length(popsize))) * popsize, optfn)
     optVal <- opt$value
   }
-  opt$par + Iinit + Rinit
+  opt$par + initI + initR
 }

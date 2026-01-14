@@ -5,24 +5,20 @@
 \title{Calculate final size of outbreak: the total number of infections in each group,
 by solving the analytic final size equation}
 \usage{
-getFinalSizeAnalytic(Rinit, Iinit, Vinit, N, R0, a, eps, q)
+getFinalSizeAnalytic(transmrates, recoveryrate, popsize, initR, initI, initV)
 }
 \arguments{
-\item{Rinit}{initial number already infected, recovered, and immune in each group}
+\item{transmrates}{matrix of group-to-group (column-to-row) transmission rates}
 
-\item{Iinit}{initial number actively infectious in each group}
+\item{recoveryrate}{inverse of mean infectious period}
 
-\item{Vinit}{initial number vaccinated and immunized in each group}
+\item{popsize}{the population size of each group}
 
-\item{N}{population size of each group}
+\item{initR}{initial number of each group already infected and removed (included in final size)}
 
-\item{R0}{overall basic reproduction number}
+\item{initI}{initial number of each group infectious}
 
-\item{a}{relative overall contact rate of each group}
-
-\item{eps}{fraction of each group's contacts that exclusively within-group}
-
-\item{q}{relative susceptibility to infection per contact of each group}
+\item{initV}{initial number of each group vaccinated}
 }
 \description{
 Calculate final size of outbreak: the total number of infections in each group,

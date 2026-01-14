@@ -2,15 +2,21 @@
 % Please edit documentation in R/odeSIR.R
 \name{odeSIR}
 \alias{odeSIR}
-\title{ODE system for multi-group SIR model
-TODO: Add documentation and @keywords internal flag unless we want it to be exported
-time parameter doesn't seem to be used, can this be removed safely?}
+\title{Ordinary differential equation function for multi-group susceptible-infectious-removed (SIR) model
+used as "func" argument passed to the ode() function from deSolve package}
 \usage{
 odeSIR(time, state, par)
 }
-\description{
-ODE system for multi-group SIR model
-TODO: Add documentation and @keywords internal flag unless we want it to be exported
-time parameter doesn't seem to be used, can this be removed safely?
+\arguments{
+\item{time}{vector of times at which the function will be evaluated}
+
+\item{state}{vector of number of individuals in each group at each state: S states
+followed by I states followed by R states}
+
+\item{par}{vector of parameter values: group-to-group transmission rate matrix elements (row-wise)
+followed by recovery rate}
 }
-\keyword{internal}
+\description{
+Ordinary differential equation function for multi-group susceptible-infectious-removed (SIR) model
+used as "func" argument passed to the ode() function from deSolve package
+}
