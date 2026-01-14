@@ -2,17 +2,17 @@ pandoc: 3.1.11
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
-  combined_cities: combined_cities.html
+  age_dist_R0: age_dist_R0.html
+  census_functions_demo: census_functions_demo.html
   contact_matrix_examples: contact_matrix_examples.html
   epiworld_comparison: epiworld_comparison.html
-  hildale_and_colorado_city: hildale_and_colorado_city.html
   measles_agemodel: measles_agemodel.html
   measles_example: measles_example.html
   measles_example2: measles_example2.html
   run_model_on_command_line: run_model_on_command_line.html
   sensitivity_analysis: sensitivity_analysis.html
-  utah_census_comparison: utah_census_comparison.html
-last_built: 2026-01-14T17:33Z
+  shortcreek_age_school: shortcreek_age_school.html
+last_built: 2026-01-14T23:10Z
 urls:
   reference: https://epiforesite.github.io/multigroup-vaccine/reference
   article: https://epiforesite.github.io/multigroup-vaccine/articles
