@@ -54,43 +54,35 @@ by solving the analytic final size equation</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">getFinalSizeAnalytic</span><span class="op">(</span><span class="va">Rinit</span>, <span class="va">Iinit</span>, <span class="va">Vinit</span>, <span class="va">N</span>, <span class="va">R0</span>, <span class="va">a</span>, <span class="va">eps</span>, <span class="va">q</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">getFinalSizeAnalytic</span><span class="op">(</span><span class="va">transmrates</span>, <span class="va">recoveryrate</span>, <span class="va">popsize</span>, <span class="va">initR</span>, <span class="va">initI</span>, <span class="va">initV</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-rinit">Rinit<a class="anchor" aria-label="anchor" href="#arg-rinit"></a></dt>
-<dd><p>initial number already infected, recovered, and immune in each group</p></dd>
+<dl><dt id="arg-transmrates">transmrates<a class="anchor" aria-label="anchor" href="#arg-transmrates"></a></dt>
+<dd><p>matrix of group-to-group (column-to-row) transmission rates</p></dd>
 
 
-<dt id="arg-iinit">Iinit<a class="anchor" aria-label="anchor" href="#arg-iinit"></a></dt>
-<dd><p>initial number actively infectious in each group</p></dd>
+<dt id="arg-recoveryrate">recoveryrate<a class="anchor" aria-label="anchor" href="#arg-recoveryrate"></a></dt>
+<dd><p>inverse of mean infectious period</p></dd>
 
 
-<dt id="arg-vinit">Vinit<a class="anchor" aria-label="anchor" href="#arg-vinit"></a></dt>
-<dd><p>initial number vaccinated and immunized in each group</p></dd>
+<dt id="arg-popsize">popsize<a class="anchor" aria-label="anchor" href="#arg-popsize"></a></dt>
+<dd><p>the population size of each group</p></dd>
 
 
-<dt id="arg-n">N<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
-<dd><p>population size of each group</p></dd>
+<dt id="arg-initr">initR<a class="anchor" aria-label="anchor" href="#arg-initr"></a></dt>
+<dd><p>initial number of each group already infected and removed (included in final size)</p></dd>
 
 
-<dt id="arg-r-">R0<a class="anchor" aria-label="anchor" href="#arg-r-"></a></dt>
-<dd><p>overall basic reproduction number</p></dd>
+<dt id="arg-initi">initI<a class="anchor" aria-label="anchor" href="#arg-initi"></a></dt>
+<dd><p>initial number of each group infectious</p></dd>
 
 
-<dt id="arg-a">a<a class="anchor" aria-label="anchor" href="#arg-a"></a></dt>
-<dd><p>relative overall contact rate of each group</p></dd>
-
-
-<dt id="arg-eps">eps<a class="anchor" aria-label="anchor" href="#arg-eps"></a></dt>
-<dd><p>fraction of each group's contacts that exclusively within-group</p></dd>
-
-
-<dt id="arg-q">q<a class="anchor" aria-label="anchor" href="#arg-q"></a></dt>
-<dd><p>relative susceptibility to infection per contact of each group</p></dd>
+<dt id="arg-initv">initV<a class="anchor" aria-label="anchor" href="#arg-initv"></a></dt>
+<dd><p>initial number of each group vaccinated</p></dd>
 
 </dl></div>
 

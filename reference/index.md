@@ -14,6 +14,10 @@
 - [`contactMatrixPropPref()`](https://epiforesite.github.io/multigroup-vaccine/reference/contactMatrixPropPref.md)
   : Calculate group contact matrix with proportional mixing and
   preferential mixing within group
+- [`finalsize()`](https://epiforesite.github.io/multigroup-vaccine/reference/finalsize.md)
+  : Calculate final outbreak size or distribution of a multigroup
+  transmission model for a given basic reproduction number,
+  contact/transmission assumptions, and initial conditions
 - [`getCensusData()`](https://epiforesite.github.io/multigroup-vaccine/reference/getCensusData.md)
   : Get Census Population Data by Age and County
 - [`getCensusDataPath()`](https://epiforesite.github.io/multigroup-vaccine/reference/getCensusDataPath.md)
@@ -46,6 +50,10 @@
   : Get state FIPS code by state name
 - [`listCounties()`](https://epiforesite.github.io/multigroup-vaccine/reference/listCounties.md)
   : List available counties for a state
+- [`odeSIR()`](https://epiforesite.github.io/multigroup-vaccine/reference/odeSIR.md)
+  : Ordinary differential equation function for multi-group
+  susceptible-infectious-removed (SIR) model used as "func" argument
+  passed to the ode() function from deSolve package
 - [`run_my_app()`](https://epiforesite.github.io/multigroup-vaccine/reference/run_my_app.md)
   : Runs the shiny app
 - [`transmissionRates()`](https://epiforesite.github.io/multigroup-vaccine/reference/transmissionRates.md)

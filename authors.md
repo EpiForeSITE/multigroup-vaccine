@@ -16,13 +16,13 @@
 
 ## Citation
 
-Toth D (2025). *multigroup.vaccine: Multigroup Vaccine Model*. R package
+Toth D (2026). *multigroup.vaccine: Multigroup Vaccine Model*. R package
 version 0.1.0, <https://epiforesite.github.io/multigroup-vaccine/>.
 
     @Manual{,
       title = {multigroup.vaccine: Multigroup Vaccine Model},
       author = {Damon Toth},
-      year = {2025},
+      year = {2026},
       note = {R package version 0.1.0},
       url = {https://epiforesite.github.io/multigroup-vaccine/},
     }

@@ -6,39 +6,32 @@ group, by solving the analytic final size equation
 ## Usage
 
 ``` r
-getFinalSizeAnalytic(Rinit, Iinit, Vinit, N, R0, a, eps, q)
+getFinalSizeAnalytic(transmrates, recoveryrate, popsize, initR, initI, initV)
 ```
 
 ## Arguments
 
-- Rinit:
+- transmrates:
 
-  initial number already infected, recovered, and immune in each group
+  matrix of group-to-group (column-to-row) transmission rates
 
-- Iinit:
+- recoveryrate:
 
-  initial number actively infectious in each group
+  inverse of mean infectious period
 
-- Vinit:
+- popsize:
 
-  initial number vaccinated and immunized in each group
+  the population size of each group
 
-- N:
+- initR:
 
-  population size of each group
+  initial number of each group already infected and removed (included in
+  final size)
 
-- R0:
+- initI:
 
-  overall basic reproduction number
+  initial number of each group infectious
 
-- a:
+- initV:
 
-  relative overall contact rate of each group
-
-- eps:
-
-  fraction of each group's contacts that exclusively within-group
-
-- q:
-
-  relative susceptibility to infection per contact of each group
+  initial number of each group vaccinated
