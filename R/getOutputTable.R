@@ -12,6 +12,25 @@
 #'
 #' @return A matrix with columns for R0, R0local, Rv, pEscape, escapeInfTot,
 #'   and infection counts by age group
+#' @examples
+#' \donttest{
+#' # Define age groups: 0-4, 5-17, 18-64, 65+
+#' agelims <- c(0, 5, 18, 65)
+#' agepops <- c(1000, 3000, 5000, 1500)
+#'
+#' # Vaccination coverage: none for <5, 80% for school-age, 70% for adults, 90% for elderly
+#' agecovr <- c(0, 0.8, 0.7, 0.9)
+#'
+#' # Vaccine effectiveness: 0% for <5 (not vaccinated), 90% for others
+#' ageveff <- c(0, 0.9, 0.9, 0.95)
+#'
+#' # Initial infection in school-age group (index 2)
+#' initgrp <- 2
+#'
+#' # Generate output table
+#' results <- getOutputTable(agelims, agepops, agecovr, ageveff, initgrp)
+#' print(results)
+#' }
 #' @export
 getOutputTable <- function(agelims, agepops, agecovr, ageveff, initgrp) {
 
