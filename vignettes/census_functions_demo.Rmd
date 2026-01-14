@@ -119,7 +119,7 @@ for (i in seq_along(washington_data$age_labels)) {
 
 Let's visualize the age distribution to better understand the population structure.
 
-```{r plot-age-distribution}
+```{r plot-age-distribution, fig.alt="Bar chart showing age distribution percentages for Washington County, Utah. Each bar represents an age group with percentage of total population labeled above."}
 # Create a bar plot of age distribution
 age_percentages <- 100 * washington_data$age_pops / washington_data$total_pop
 
@@ -144,7 +144,7 @@ text(x = seq_along(age_percentages) * 1.2 - 0.5,
 
 Let's compare the age distributions of three different Utah counties.
 
-```{r compare-counties}
+```{r compare-counties, fig.alt="Side-by-side bar chart comparing age distribution percentages across Salt Lake County (coral), Utah County (steel blue), and Washington County (light green). Each age group shows three bars representing the three counties."}
 # Get data for three counties
 counties_to_compare <- c("Salt Lake County", "Utah County", "Washington County")
 county_data_list <- list()
@@ -243,7 +243,7 @@ for (i in seq_along(hildale_school$age_labels)) {
 
 ### Visualizing the Comparison
 
-```{r compare-aggregations}
+```{r compare-aggregations, fig.alt="Two side-by-side bar charts comparing age grouping methods for Hildale, UT. Left panel shows 5-year age groups in steel blue. Right panel shows school-aligned age groups in coral. Both display percentage of population on y-axis."}
 # Create a comparison visualization
 par(mfrow = c(1, 2), mar = c(5, 4, 4, 2))
 
