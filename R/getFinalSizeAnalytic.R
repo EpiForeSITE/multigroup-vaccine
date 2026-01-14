@@ -1,26 +1,30 @@
-getFinalSizeAnalytic <- function(Rinit, Iinit, Vinit, N, R0, a, eps, q) {
-  if (sum(Iinit) == 0)
-    Iinit <- N / sum(N)
+#' Calculate final size of outbreak: the total number of infections in each group,
+#' by solving the analytic final size equation
+#' @param transmrates matrix of group-to-group (column-to-row) transmission rates
+#' @param recoveryrate inverse of mean infectious period
+#' @param popsize the population size of each group
+#' @param initR initial number of each group already infected and removed (included in final size)
+#' @param initI initial number of each group infectious
+#' @param initV initial number of each group vaccinated
+#' @export
+getFinalSizeAnalytic <- function(transmrates, recoveryrate, popsize, initR, initI, initV) {
+  if (sum(initI) == 0)
+    initI <- popsize / sum(popsize)
 
-  Sinit <- N - Rinit - Iinit - Vinit
-  fn <- (1 - eps) * a * N
-  f <- fn / sum(fn)
-  cij <- diag(eps) + outer((1 - eps), f)
+  initS <- popsize - initR - initI - initV
 
-  R0i <- R0 / eigen(a * q * cij)$values[1] * a * q
+  R0mat <- transmrates / recoveryrate
 
   Zrhs <- function(Z)
-    c(Sinit * (1 - exp(-R0i * cij %*% ((
-      Z + Iinit
-    ) / N))))
+    c(initS * (1 - exp(-R0mat %*% ((Z + initI) / popsize))))
 
   optfn <- function(x)
     ifelse(all(x > 0), max(abs(x - Zrhs(x))), Inf)
 
   optVal <- Inf
   while (optVal > 0.1) {
-    opt <- stats::optim((0.01 + 0.98 * stats::runif(length(N))) * N, optfn)
+    opt <- stats::optim((0.01 + 0.98 * stats::runif(length(popsize))) * popsize, optfn)
     optVal <- opt$value
   }
-  opt$par + Iinit + Rinit
+  opt$par + initI + initR
 }
