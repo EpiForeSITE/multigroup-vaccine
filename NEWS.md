@@ -13,7 +13,7 @@ Initial release of multigroup.vaccine, a package for examining the effects of di
 
 ## New features
 
-* Multi-group vaccine modeling functions: `getFinalSize()`, `transmissionRates()`, `getFinalSizeODE()`, `getFinalSizeDist()`, and `getSizeAtTime()`.
+* Multi-group vaccine modeling functions: `finalsize()`, `transmissionRates()`, `getFinalSizeODE()`, `getFinalSizeDist()`, and `getSizeAtTime()`.
 
 * Interactive Shiny application via `run_my_app()` for exploring vaccine scenarios and visualizing effects of differential vaccination rates across population groups.
 
