@@ -42,8 +42,7 @@
     <li><a class="dropdown-item" href="articles/measles_agemodel.html">Measles Age-Structured Model</a></li>
     <li><a class="dropdown-item" href="articles/measles_example.html">Measles Outbreak Example</a></li>
     <li><a class="dropdown-item" href="articles/measles_example2.html">Measles Outbreak Example 2</a></li>
-    <li><a class="dropdown-item" href="articles/run_model_on_command_line.html">Run Model in the console</a></li>
-    <li><a class="dropdown-item" href="articles/sensitivity_analysis.html">Sensitivity Analysis</a></li>
+    <li><a class="dropdown-item" href="articles/run_model_on_command_line.html">Two Group Final Outbreak Size Example</a></li>
     <li><a class="dropdown-item" href="articles/shortcreek_age_school.html">Short Creek model with age and school structure</a></li>
   </ul>
 </li>
@@ -74,7 +73,7 @@
 <li>Different vaccine effectiveness</li>
 <li>Differential contact patterns between and within groups</li>
 </ul>
-<p>The package provides both an interactive Shiny dashboard and programmatic R functions for epidemiological modeling and outbreak forecasting.</p>
+<p>The package provides both an interactive Shiny dashboard for a simple two-group example and programmatic R functions for epidemiological modeling and outbreak forecasting.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -128,17 +127,18 @@
 <h4 id="two-group-population-comparison">Two-Group Population Comparison<a class="anchor" aria-label="anchor" href="#two-group-population-comparison"></a>
 </h4>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Compare populations with different vaccination rates</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/getFinalSize.html">getFinalSize</a></span><span class="op">(</span></span>
-<span>  vacPortion <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.9</span>, <span class="fl">0.3</span><span class="op">)</span>,      <span class="co"># 90% vs 30% vaccinated</span></span>
-<span>  popSize <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10000</span>, <span class="fl">10000</span><span class="op">)</span>,      <span class="co"># Equal population sizes</span></span>
-<span>  R0 <span class="op">=</span> <span class="fl">15</span>,                        <span class="co"># Basic reproduction number</span></span>
-<span>  recoveryRate <span class="op">=</span> <span class="fl">0.1</span>,             <span class="co"># 1/recovery rate = 10 days</span></span>
-<span>  relContact <span class="op">=</span> <span class="fl">0.05</span>,              <span class="co"># 5% contact between groups</span></span>
-<span>  contactWithinGroup <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.8</span>, <span class="fl">0.8</span><span class="op">)</span>, <span class="co"># 80% within-group contact</span></span>
-<span>  relSusc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">1</span><span class="op">)</span>            <span class="co"># 10% relative susceptibility if vaccinated</span></span>
+<code class="sourceCode R"><span><span class="co"># Compare two populations with different vaccination rates</span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/finalsize.html">finalsize</a></span><span class="op">(</span></span>
+<span>  popsize <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10000</span>, <span class="fl">10000</span><span class="op">)</span>,         <span class="co"># Equal population sizes</span></span>
+<span>  R0 <span class="op">=</span> <span class="fl">2</span>,                            <span class="co"># Basic reproduction number</span></span>
+<span>  contactmatrix <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>,   <span class="co"># Equal and symmetric group-to-group contact </span></span>
+<span>  relsusc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,                 <span class="co"># Equal group susceptibility per at-risk contact</span></span>
+<span>  reltransm <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,               <span class="co"># Equal group transmissibility per at-risk contact</span></span>
+<span>  initR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span>,                   <span class="co"># Initially none previously infected &amp; immune (R)</span></span>
+<span>  initI <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span>,                   <span class="co"># One initial infectious case (I) in first group</span></span>
+<span>  initV <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1000</span>, <span class="fl">2000</span><span class="op">)</span>,             <span class="co"># Initial numbers immune by vaccination (V)</span></span>
+<span>  method <span class="op">=</span> <span class="st">"analytic"</span>                <span class="co"># Solve for final size analytically</span></span>
 <span><span class="op">)</span></span>
-<span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
@@ -174,19 +174,15 @@
 </h2>
 <ul>
 <li>
-<code><a href="reference/getOutputTable.html">getOutputTable()</a></code>: Run age-structured outbreak simulations with vaccination</li>
+<code><a href="reference/finalsize.html">finalsize()</a></code>: Master function for final outbreak size calculations and simulations</li>
 <li>
-<code><a href="reference/getFinalSize.html">getFinalSize()</a></code>: Calculate final outbreak size for two-group populations</li>
-<li>
-<code><a href="reference/getFinalSizeDist.html">getFinalSizeDist()</a></code>: Stochastic outbreak simulations with distributional results</li>
-<li>
-<code><a href="reference/transmissionRates.html">transmissionRates()</a></code>: Calculate transmission rate matrices from R0 and contact patterns</li>
+<code><a href="reference/contactMatrixPropPref.html">contactMatrixPropPref()</a></code>: Generate contact matrices from proportionate mixing and preferential contact assumptions</li>
 <li>
 <code><a href="reference/contactMatrixPolymod.html">contactMatrixPolymod()</a></code>: Generate age-structured contact matrices from POLYMOD data</li>
 <li>
-<code><a href="reference/getCensusData.html">getCensusData()</a></code>: Download and process US Census Bureau population data</li>
+<code><a href="reference/getCensusData.html">getCensusData()</a></code>: Download and process US Census Bureau population data for age group-structured models</li>
 <li>
-<code><a href="reference/run_my_app.html">run_my_app()</a></code>: Launch the interactive Shiny dashboard</li>
+<code><a href="reference/run_my_app.html">run_my_app()</a></code>: Launch the interactive Shiny dashboard for a two-group model</li>
 </ul>
 </div>
 <div class="section level2">

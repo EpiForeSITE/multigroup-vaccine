@@ -16,9 +16,7 @@
   Example](https://epiforesite.github.io/multigroup-vaccine/articles/measles_example.md):
 - [Measles Outbreak Example
   2](https://epiforesite.github.io/multigroup-vaccine/articles/measles_example2.md):
-- [Run Model in the
-  console](https://epiforesite.github.io/multigroup-vaccine/articles/run_model_on_command_line.md):
-- [Sensitivity
-  Analysis](https://epiforesite.github.io/multigroup-vaccine/articles/sensitivity_analysis.md):
+- [Two Group Final Outbreak Size
+  Example](https://epiforesite.github.io/multigroup-vaccine/articles/run_model_on_command_line.md):
 - [Short Creek model with age and school
   structure](https://epiforesite.github.io/multigroup-vaccine/articles/shortcreek_age_school.md):

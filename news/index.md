@@ -19,7 +19,7 @@ sizes, contact rates, and other epidemiological parameters.
 ### New features
 
 - Multi-group vaccine modeling functions:
-  [`getFinalSize()`](https://epiforesite.github.io/multigroup-vaccine/reference/getFinalSize.md),
+  [`finalsize()`](https://epiforesite.github.io/multigroup-vaccine/reference/finalsize.md),
   [`transmissionRates()`](https://epiforesite.github.io/multigroup-vaccine/reference/transmissionRates.md),
   [`getFinalSizeODE()`](https://epiforesite.github.io/multigroup-vaccine/reference/getFinalSizeODE.md),
   [`getFinalSizeDist()`](https://epiforesite.github.io/multigroup-vaccine/reference/getFinalSizeDist.md),

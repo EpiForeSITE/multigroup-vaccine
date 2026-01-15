@@ -9,9 +9,9 @@ with multiple distinct subgroups that have:
 - Different vaccine effectiveness
 - Differential contact patterns between and within groups
 
-The package provides both an interactive Shiny dashboard and
-programmatic R functions for epidemiological modeling and outbreak
-forecasting.
+The package provides both an interactive Shiny dashboard for a simple
+two-group example and programmatic R functions for epidemiological
+modeling and outbreak forecasting.
 
 ## Installation
 
@@ -65,17 +65,18 @@ example of comparing populations with different vaccination rates:
 #### Two-Group Population Comparison
 
 ``` r
-# Compare populations with different vaccination rates
-results <- getFinalSize(
-  vacPortion = c(0.9, 0.3),      # 90% vs 30% vaccinated
-  popSize = c(10000, 10000),      # Equal population sizes
-  R0 = 15,                        # Basic reproduction number
-  recoveryRate = 0.1,             # 1/recovery rate = 10 days
-  relContact = 0.05,              # 5% contact between groups
-  contactWithinGroup = c(0.8, 0.8), # 80% within-group contact
-  relSusc = c(0.1, 1)            # 10% relative susceptibility if vaccinated
+# Compare two populations with different vaccination rates
+results <- finalsize(
+  popsize = c(10000, 10000),         # Equal population sizes
+  R0 = 2,                            # Basic reproduction number
+  contactmatrix = matrix(1, 2, 2),   # Equal and symmetric group-to-group contact 
+  relsusc = c(1, 1),                 # Equal group susceptibility per at-risk contact
+  reltransm = c(1, 1),               # Equal group transmissibility per at-risk contact
+  initR = c(0, 0),                   # Initially none previously infected & immune (R)
+  initI = c(1, 0),                   # One initial infectious case (I) in first group
+  initV = c(1000, 2000),             # Initial numbers immune by vaccination (V)
+  method = "analytic"                # Solve for final size analytically
 )
-
 print(results)
 ```
 
@@ -104,20 +105,18 @@ browseVignettes("multigroup.vaccine")
 
 ## Core Functions
 
-- [`getOutputTable()`](https://epiforesite.github.io/multigroup-vaccine/reference/getOutputTable.md):
-  Run age-structured outbreak simulations with vaccination
-- [`getFinalSize()`](https://epiforesite.github.io/multigroup-vaccine/reference/getFinalSize.md):
-  Calculate final outbreak size for two-group populations
-- [`getFinalSizeDist()`](https://epiforesite.github.io/multigroup-vaccine/reference/getFinalSizeDist.md):
-  Stochastic outbreak simulations with distributional results
-- [`transmissionRates()`](https://epiforesite.github.io/multigroup-vaccine/reference/transmissionRates.md):
-  Calculate transmission rate matrices from R0 and contact patterns
+- [`finalsize()`](https://epiforesite.github.io/multigroup-vaccine/reference/finalsize.md):
+  Master function for final outbreak size calculations and simulations
+- [`contactMatrixPropPref()`](https://epiforesite.github.io/multigroup-vaccine/reference/contactMatrixPropPref.md):
+  Generate contact matrices from proportionate mixing and preferential
+  contact assumptions
 - [`contactMatrixPolymod()`](https://epiforesite.github.io/multigroup-vaccine/reference/contactMatrixPolymod.md):
   Generate age-structured contact matrices from POLYMOD data
 - [`getCensusData()`](https://epiforesite.github.io/multigroup-vaccine/reference/getCensusData.md):
-  Download and process US Census Bureau population data
+  Download and process US Census Bureau population data for age
+  group-structured models
 - [`run_my_app()`](https://epiforesite.github.io/multigroup-vaccine/reference/run_my_app.md):
-  Launch the interactive Shiny dashboard
+  Launch the interactive Shiny dashboard for a two-group model
 
 ## Getting Help
 

@@ -24,9 +24,6 @@
   : Get path to example census data file
 - [`getCityData()`](https://epiforesite.github.io/multigroup-vaccine/reference/getCityData.md)
   : Get City Population Data by Age
-- [`getFinalSize()`](https://epiforesite.github.io/multigroup-vaccine/reference/getFinalSize.md)
-  : Calculate final size of outbreak: the total number of infections in
-  each group
 - [`getFinalSizeAnalytic()`](https://epiforesite.github.io/multigroup-vaccine/reference/getFinalSizeAnalytic.md)
   : Calculate final size of outbreak: the total number of infections in
   each group, by solving the analytic final size equation

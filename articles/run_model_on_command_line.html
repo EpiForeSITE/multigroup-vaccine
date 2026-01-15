@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Run Model in the console • multigroup.vaccine</title>
+<title>Two Group Final Outbreak Size Example • multigroup.vaccine</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Run Model in the console">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Two Group Final Outbreak Size Example">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -40,8 +40,7 @@
     <li><a class="dropdown-item" href="../articles/measles_agemodel.html">Measles Age-Structured Model</a></li>
     <li><a class="dropdown-item" href="../articles/measles_example.html">Measles Outbreak Example</a></li>
     <li><a class="dropdown-item" href="../articles/measles_example2.html">Measles Outbreak Example 2</a></li>
-    <li><a class="dropdown-item" href="../articles/run_model_on_command_line.html">Run Model in the console</a></li>
-    <li><a class="dropdown-item" href="../articles/sensitivity_analysis.html">Sensitivity Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/run_model_on_command_line.html">Two Group Final Outbreak Size Example</a></li>
     <li><a class="dropdown-item" href="../articles/shortcreek_age_school.html">Short Creek model with age and school structure</a></li>
   </ul>
 </li>
@@ -64,7 +63,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Run Model in the console</h1>
+      <h1>Two Group Final Outbreak Size Example</h1>
             
       
 
@@ -77,37 +76,89 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://epiforesite.github.io/multigroup-vaccine/">multigroup.vaccine</a></span><span class="op">)</span></span></code></pre></div>
 <p>Consider a population with the following parameters:</p>
 <ul>
-<li><p>Two sub-populations, one with size 80000 (A) and the other with
-size 20000 (B)</p></li>
-<li><p>At time 0, vaccinate 30% of A and 20% of B</p></li>
-<li><p>Set the reproductive number 1.75</p></li>
-<li><p>Recovery rate of 1/7 creates a time to symptom resolution of 1
-week.</p></li>
-<li><p>Relative contact rates are 1 and 1.7. This is the overall contact
-rates of groups A and B relative to each other. This means that an
-individual in Group B makes 1.7 contacts for every 1 made by an
-individual in group A.</p></li>
-<li><p>Contact within group is set to 0.2 for A, 0.5 for B. This is the
-fraction of all contacts that are A-&gt;A, or B-&gt;B
-respectively.</p></li>
-<li><p>Relative susceptibility is the susceptibility to infection per
-contact of individuals in each group relative to each other. With
-relative susceptibility = (1, 1), they are equally susceptible.</p></li>
+<li>Two sub-populations, one with size 80000 (A) and the other with size
+20000 (B)</li>
 </ul>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">multigroup.vaccine</span><span class="fu">::</span><span class="fu"><a href="../reference/getFinalSize.html">getFinalSize</a></span><span class="op">(</span>vacTime <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  vacPortion <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.3</span>, <span class="fl">0.2</span><span class="op">)</span>,</span>
-<span>  popSize <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">80000</span>, <span class="fl">20000</span><span class="op">)</span>,</span>
-<span>  R0 <span class="op">=</span> <span class="fl">1.75</span>,</span>
-<span>  recoveryRate <span class="op">=</span> <span class="fl">1</span> <span class="op">/</span> <span class="fl">7</span>,</span>
-<span>  relContact <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1.7</span><span class="op">)</span>,</span>
-<span>  contactWithinGroup <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0.5</span><span class="op">)</span>,</span>
-<span>  relSusc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 15145.987  8710.351</span></span></code></pre></div>
-<pre><code>[1] 15145.987  8710.351</code></pre>
-<p>More than half as many individuals in population B are infected at
-the end of the simulation, despite the fact that they are outnumbered 4
-to 1 by population A.</p>
+<code class="sourceCode R"><span><span class="va">popsize</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">80000</span>, <span class="fl">20000</span><span class="op">)</span></span></code></pre></div>
+<ul>
+<li>Set the basic reproduction number
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mn>0</mn></msub><annotation encoding="application/x-tex">R_0</annotation></semantics></math>)
+to 1.75</li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">R0</span> <span class="op">&lt;-</span> <span class="fl">1.75</span></span></code></pre></div>
+<ul>
+<li>For group-to-group contact rates, we use a model for proportionate
+contacts with preferential mixing, making use of our
+<code><a href="../reference/contactMatrixPropPref.html">contactMatrixPropPref()</a></code> function. This contact model allows
+for different overall contact rates of members of each group. Here we
+assume the relative contact rates are 1 and 1.7 for groups A and B. This
+means that an individual in Group B makes 1.7 contacts for every 1 made
+by an individual in group A.</li>
+</ul>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">relcontact</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1.7</span><span class="op">)</span></span></code></pre></div>
+<ul>
+<li>The contact model also assumes preferential mixing within one’s own
+group. We assume that the fraction of contacts that are exclusively
+within-group is 0.2 for group A, and 0.5 for group B. For group A, this
+means that 20% of their contacts are exclusively with other members of
+group A, and the remaining 80% of contacts are split between both groups
+A and B at rates proportional to the population sizes and overall
+contact rates of each group. The latter element ensures that the overall
+number of A-to-B and B-to-A contacts are equal, for contact
+symmetry.</li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">incontact</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0.5</span><span class="op">)</span></span></code></pre></div>
+<ul>
+<li>With the above elements, we calculate the contact matrix as
+follows</li>
+</ul>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">contactmatrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/contactMatrixPropPref.html">contactMatrixPropPref</a></span><span class="op">(</span><span class="va">popsize</span>, <span class="va">relcontact</span>, <span class="va">incontact</span><span class="op">)</span></span></code></pre></div>
+<ul>
+<li>Not every contact between an infectious and a susceptible individual
+necessarily leads to a transmission. The two groups may differ in
+average susceptibility to infection per contact. With relative
+susceptibility 1 and 1.05, members of group B are 5% more susceptible to
+acquiring infection from an infectious contact than group A.</li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">relsusc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1.05</span><span class="op">)</span></span></code></pre></div>
+<ul>
+<li>The two groups may also differ in transmissibility per contact when
+infectious. With relative transmissibility 1 and 1.01, infectious
+members of group B are 1% more likely transmit infection to a
+susceptible contact compared to infectious members of group A.</li>
+</ul>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">reltransm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1.01</span><span class="op">)</span></span></code></pre></div>
+<ul>
+<li>For initial conditions, we assume no one is immune due to prior
+infection (compartment R), and one individual from group A is an initial
+infectious case (compartment I). We also assume that 30% of group A and
+20% of group B are initially immune due to vaccination (compartment
+V).</li>
+</ul>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">initR</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="va">initI</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="va">initV</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.3</span>, <span class="fl">0.2</span><span class="op">)</span> <span class="op">*</span> <span class="va">popsize</span></span></code></pre></div>
+<ul>
+<li>The <code><a href="../reference/finalsize.html">finalsize()</a></code> function computes the final number of
+infected people in each group at the end of the outbreak, by default
+using a deterministic differential equation model and numerically
+solving the equations.</li>
+</ul>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finalsize.html">finalsize</a></span><span class="op">(</span><span class="va">popsize</span>, <span class="va">R0</span>, <span class="va">contactmatrix</span>, <span class="va">relsusc</span>, <span class="va">reltransm</span>, <span class="va">initR</span>, <span class="va">initI</span>, <span class="va">initV</span><span class="op">)</span></span>
+<span><span class="va">fs</span><span class="op">$</span><span class="va">totalSize</span></span>
+<span><span class="co">#&gt; [1] 14140.46  8748.82</span></span></code></pre></div>
+<p>Over one third of the infected individuals are from population B,
+despite the fact that they comprise only one fifth of the
+population.</p>
   </main>
 </div>
 

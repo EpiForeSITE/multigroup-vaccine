@@ -25,8 +25,7 @@
     <li><a class="dropdown-item" href="../articles/measles_agemodel.html">Measles Age-Structured Model</a></li>
     <li><a class="dropdown-item" href="../articles/measles_example.html">Measles Outbreak Example</a></li>
     <li><a class="dropdown-item" href="../articles/measles_example2.html">Measles Outbreak Example 2</a></li>
-    <li><a class="dropdown-item" href="../articles/run_model_on_command_line.html">Run Model in the console</a></li>
-    <li><a class="dropdown-item" href="../articles/sensitivity_analysis.html">Sensitivity Analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/run_model_on_command_line.html">Two Group Final Outbreak Size Example</a></li>
     <li><a class="dropdown-item" href="../articles/shortcreek_age_school.html">Short Creek model with age and school structure</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -56,7 +55,7 @@
 <p>Initial release of multigroup.vaccine, a package for examining the effects of differential vaccination rates in populations with different sizes, contact rates, and other epidemiological parameters.</p>
 <div class="section level3">
 <h3 id="new-features-0-1-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-1-0"></a></h3>
-<ul><li><p>Multi-group vaccine modeling functions: <code><a href="../reference/getFinalSize.html">getFinalSize()</a></code>, <code><a href="../reference/transmissionRates.html">transmissionRates()</a></code>, <code><a href="../reference/getFinalSizeODE.html">getFinalSizeODE()</a></code>, <code><a href="../reference/getFinalSizeDist.html">getFinalSizeDist()</a></code>, and <code><a href="../reference/getSizeAtTime.html">getSizeAtTime()</a></code>.</p></li>
+<ul><li><p>Multi-group vaccine modeling functions: <code><a href="../reference/finalsize.html">finalsize()</a></code>, <code><a href="../reference/transmissionRates.html">transmissionRates()</a></code>, <code><a href="../reference/getFinalSizeODE.html">getFinalSizeODE()</a></code>, <code><a href="../reference/getFinalSizeDist.html">getFinalSizeDist()</a></code>, and <code><a href="../reference/getSizeAtTime.html">getSizeAtTime()</a></code>.</p></li>
 <li><p>Interactive Shiny application via <code><a href="../reference/run_my_app.html">run_my_app()</a></code> for exploring vaccine scenarios and visualizing effects of differential vaccination rates across population groups.</p></li>
 <li><p>U.S. Census data integration: <code><a href="../reference/getCensusData.html">getCensusData()</a></code> downloads and processes Census Bureau population estimates by age and county, with support for age-structured populations, sex disaggregation, and built-in caching. Helper functions include <code><a href="../reference/getCensusDataPath.html">getCensusDataPath()</a></code>, <code><a href="../reference/getStateFIPS.html">getStateFIPS()</a></code>, and <code><a href="../reference/listCounties.html">listCounties()</a></code>.</p></li>
 <li><p>Contact matrix functionality using POLYMOD contact survey data via the <code>socialmixr</code> package for realistic age-structured epidemic modeling.</p></li>
