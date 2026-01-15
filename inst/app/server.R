@@ -11,7 +11,8 @@ server <- function(input, output, session) {
     contactRatio <- as.numeric(input$contactRatio)
     contactWithinGroup <- c(as.numeric(input$contactWithinGroup_a), as.numeric(input$contactWithinGroup_b))
     suscRatio <- as.numeric(input$suscRatio)
-    vacP <- c(as.numeric(input$vacPortion_a), as.numeric(input$vacPortion_b))
+    transmRatio <- as.numeric(input$transmRatio)
+    vacPortion <- c(as.numeric(input$vacPortion_a), as.numeric(input$vacPortion_b))
     vacTime <- as.numeric(input$vacTime)
     hospProb <- c(input$hospProb_a, input$hospProb_b)
     hospDeath <- c(input$hospDeathProb_a, input$hospDeathProb_b)
@@ -19,22 +20,44 @@ server <- function(input, output, session) {
 
     # input validation
     validate(
-      need(all(vacP >= 0 & vacP <= 1), "Vaccination portion must be between 0 and 1"),
+      need(all(vacPortion >= 0 & vacPortion <= 1), "Vaccination portion must be between 0 and 1"),
       need(all(hospProb >= 0 & hospProb <= 1), "Hospitalization probability must be between 0 and 1"),
       need(all(hospDeath >= 0 & hospDeath <= 1), "Hospitalization death probability must be between 0 and 1"),
       need(all(nonHospDeath >= 0 & nonHospDeath <= 1), "Non-hospitalization death probability must be between 0 and 1")
     )
 
-    fs <- getFinalSize(
-      vacTime = vacTime, vacPortion = vacP, popSize = popSize, R0 = R0,
-      recoveryRate = recoveryRate, relContact = c(1, contactRatio),
-      contactWithinGroup = contactWithinGroup, relSusc = c(1, suscRatio)
+    relcontact <- c(1, contactRatio)
+    relsusc <- c(1, suscRatio)
+    reltransm <- c(1, transmRatio)
+
+    Isim1 <- popSize / sum(popSize)
+    Rsim1 <- rep(0, length(popSize))
+    Vsim1 <- rep(0, length(popSize))
+
+    contactmatrix <- contactMatrixPropPref(popSize, relcontact, contactWithinGroup)
+    transmrates <- transmissionRates(R0,
+                                     1 / recoveryRate,
+                                     relsusc * t(reltransm * t(contactmatrix)))
+
+    if (vacTime > 0) {
+      sizeAtVacTime <- getSizeAtTime(vacTime, transmrates, recoveryRate, popSize, Rsim1, Isim1, Vsim1)
+      Isim1 <- sizeAtVacTime$activeSize
+      Rsim1 <- sizeAtVacTime$totalSize - Isim1
+    }
+
+    fs <- getFinalSizeAnalytic(
+      transmrates = transmrates,
+      recoveryrate = recoveryRate,
+      popsize = popSize,
+      initR = Rsim1,
+      initI = Isim1,
+      initV = popSize * vacPortion
     )
 
     hosp <- hospProb * fs
     death <- hosp * hospDeath + (1 - hosp) * nonHospDeath
 
-    numVax <- vacP * popSize
+    numVax <- vacPortion * popSize
     tblVax <- c(sum(numVax), numVax)
     tblVaxCov <- tblVax / c(sum(popSize), popSize)
     tblInf <- c(sum(fs), fs)

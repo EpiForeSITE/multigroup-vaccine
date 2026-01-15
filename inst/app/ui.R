@@ -146,6 +146,10 @@ ui <- page_fluid(
             single_input_row("suscRatio", "Susceptibility Ratio", 1.2,
               tip =
                 "The ratio of the susceptibility of the second group to the first group"
+            ),
+            single_input_row("transmRatio", "Transmissibility Ratio", 1.05,
+                             tip =
+                               "The ratio of the transmissibility of the second group to the first group"
             )
             # ,single_input_row("vaccineCostRatio", "Vaccine cost ratio", 1.3, tip =
             #  "The ratio of the cost of the vaccine for the second group to the first group")
