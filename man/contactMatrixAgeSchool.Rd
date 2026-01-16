@@ -26,3 +26,6 @@ contactMatrixAgeSchool(
 \description{
 Calculate a contact matrix for age groups and schools
 }
+\examples{
+contactMatrixAgeSchool(agelims = c(0, 5, 18), agepops = c(500, 1300, 8200), schoolagegroups = c(2, 2), schoolpops = c(600, 700), schportion = 0.7)
+}
