@@ -16,3 +16,7 @@ contactMatrixPropPref(popsize, contactrate, ingroup)
 \description{
 Calculate group contact matrix with proportional mixing and preferential mixing within group
 }
+\examples{
+contactMatrixPropPref(popsize = c(100, 150, 200), contactrate = c(1.1, 1, 0.9),
+ingroup = c(0.2, 0.25, 0.22))
+}
