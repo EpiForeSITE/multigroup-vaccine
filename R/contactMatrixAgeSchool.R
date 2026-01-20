@@ -4,6 +4,8 @@
 #' @param schoolagegroups index of the age group covered by each school
 #' @param schoolpops population size of each school
 #' @param schportion portion of within-age-group contacts that are exclusively within school
+#' @returns a square matrix with the contact rate of each group (row) with members of each
+#' other group (column)
 #' @examples
 #' contactMatrixAgeSchool(agelims = c(0, 5, 18), agepops = c(500, 1300, 8200),
 #' schoolagegroups = c(2, 2), schoolpops = c(600, 700), schportion = 0.7)
