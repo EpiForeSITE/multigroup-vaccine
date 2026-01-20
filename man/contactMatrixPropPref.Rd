@@ -13,6 +13,10 @@ contactMatrixPropPref(popsize, contactrate, ingroup)
 
 \item{ingroup}{fraction of each group's contacts that are exclusively in-group}
 }
+\value{
+a square matrix with the contact rate of each group (row) with members of each
+other group (column)
+}
 \description{
 Calculate group contact matrix with proportional mixing and preferential mixing within group
 }
