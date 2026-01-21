@@ -20,7 +20,7 @@
 #' initR <- c(0, 0)
 #' initI <- c(1, 0)
 #' initV <- 0.2 * popsize
-#' # Default method "ODE" numerical solves ordinary differential equations until activeSize is close to 0
+#' # Default method "ODE" numerical solves ordinary differential equations until infectious count is close to 0
 #' finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV)
 #' finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV, method = "analytic")
 #' finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV, method = "stochastic", nsims = 10)

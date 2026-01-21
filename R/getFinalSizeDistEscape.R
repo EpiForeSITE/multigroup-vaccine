@@ -10,7 +10,7 @@
 #' @returns a matrix with the final number infected from each group (column) in each simulation (row)
 #' @export
 getFinalSizeDistEscape <- function(n, transmrates, recoveryrate, popsize, initR, initI, initV) {
-  fsODE <- round(getFinalSizeODE(transmrates, recoveryrate, popsize, initR, initI, initV)$totalSize)
+  fsODE <- round(getFinalSizeODE(transmrates, recoveryrate, popsize, initR, initI, initV))
 
   g <- length(popsize) # number of groups
   e <- g * 2           # number of distinct events

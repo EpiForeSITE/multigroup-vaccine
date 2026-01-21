@@ -23,5 +23,5 @@ getFinalSizeODE <- function(transmrates, recoveryrate, popsize, initR, initI, in
   Isim <- as.numeric(sim[, -1][nrow(sim), (length(popsize) + 1):(length(popsize) * 2)])
   Rsim <- as.numeric(sim[, -1][nrow(sim), (length(popsize) * 2 + 1):(length(popsize) * 3)])
 
-  list(totalSize = Isim + Rsim, activeSize = Isim)
+  Isim + Rsim
 }

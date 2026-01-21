@@ -81,7 +81,7 @@ getOutputTable <- function(agelims, agepops, agecovr, ageveff, initgrp) {
         initR = initR,
         initI = initI,
         initV = initV
-      )$totalSize
+      )
     }
     escapesizetot <- rowSums(escapesize)
   }
