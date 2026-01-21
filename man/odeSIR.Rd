@@ -16,7 +16,18 @@ followed by I states followed by R states}
 \item{par}{vector of parameter values: group-to-group transmission rate matrix elements (row-wise)
 followed by recovery rate}
 }
+\value{
+a list of three vectors of derivatives dS, dI, and dR for each group, evaluated at the
+given state values
+}
 \description{
 Ordinary differential equation function for multi-group susceptible-infectious-removed (SIR) model
 used as "func" argument passed to the ode() function from deSolve package
+}
+\examples{
+# Intended only for use as the func argument to the ode() function from the deSolve package:
+y0 <- c(S1 = 79999, S2 = 20000, I1 = 1, I2 = 0, R1 = 0, R2 = 0)
+parms <- c(beta11 = 1.6e-6, beta21 = 1.5e-6, beta12 = 1.4e-6, beta22 = 8.7e-6, recoveryrate = 1/7)
+times <- seq(0, 350, len = 10)
+deSolve::ode(y0, times, odeSIR, parms)
 }
