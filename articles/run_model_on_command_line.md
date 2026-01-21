@@ -91,7 +91,7 @@ initV <- c(0.3, 0.2) * popsize
 
 ``` r
 fs <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV)
-fs$totalSize
+fs
 #> [1] 14140.46  8748.82
 ```
 

@@ -113,9 +113,56 @@ reproduction number, contact/transmission assumptions, and initial conditions</p
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>a matrix with the final number infected from each group (column) in each simulation (row)</p>
+    <p>a vector (nsims = 1) or matrix (nsims &gt; 1) with the final number infected from each group (column) in each simulation (row)</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">popsize</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">800</span>, <span class="fl">200</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">R0</span> <span class="op">&lt;-</span> <span class="fl">2</span></span></span>
+<span class="r-in"><span><span class="va">contactmatrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="contactMatrixPropPref.html">contactMatrixPropPref</a></span><span class="op">(</span>popsize <span class="op">=</span> <span class="va">popsize</span>, contactrate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>ingroup <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0.2</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">relsusc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">reltransm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">initR</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">initI</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">initV</span> <span class="op">&lt;-</span> <span class="fl">0.2</span> <span class="op">*</span> <span class="va">popsize</span></span></span>
+<span class="r-in"><span><span class="co"># Default method "ODE" numerical solves ordinary differential equations until infectious count</span></span></span>
+<span class="r-in"><span><span class="co"># is close to 0</span></span></span>
+<span class="r-in"><span><span class="fu">finalsize</span><span class="op">(</span><span class="va">popsize</span>, <span class="va">R0</span>, <span class="va">contactmatrix</span>, <span class="va">relsusc</span>, <span class="va">reltransm</span>, <span class="va">initR</span>, <span class="va">initI</span>, <span class="va">initV</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 411.6173 102.8034</span>
+<span class="r-in"><span><span class="fu">finalsize</span><span class="op">(</span><span class="va">popsize</span>, <span class="va">R0</span>, <span class="va">contactmatrix</span>, <span class="va">relsusc</span>, <span class="va">reltransm</span>, <span class="va">initR</span>, <span class="va">initI</span>, <span class="va">initV</span>,</span></span>
+<span class="r-in"><span>method <span class="op">=</span> <span class="st">"analytic"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 411.6174 102.8034</span>
+<span class="r-in"><span><span class="fu">finalsize</span><span class="op">(</span><span class="va">popsize</span>, <span class="va">R0</span>, <span class="va">contactmatrix</span>, <span class="va">relsusc</span>, <span class="va">reltransm</span>, <span class="va">initR</span>, <span class="va">initI</span>, <span class="va">initV</span>,</span></span>
+<span class="r-in"><span>method <span class="op">=</span> <span class="st">"stochastic"</span>, nsims <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       [,1] [,2]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]  424  114</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]  402   98</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]    1    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]    1    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]    1    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]    1    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,]    1    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]    2    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]    6    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]    1    0</span>
+<span class="r-in"><span><span class="co"># All "escaped" outbreaks set to deterministic final size:</span></span></span>
+<span class="r-in"><span><span class="fu">finalsize</span><span class="op">(</span><span class="va">popsize</span>, <span class="va">R0</span>, <span class="va">contactmatrix</span>, <span class="va">relsusc</span>, <span class="va">reltransm</span>, <span class="va">initR</span>, <span class="va">initI</span>, <span class="va">initV</span>,</span></span>
+<span class="r-in"><span>method <span class="op">=</span> <span class="st">"hybrid"</span>, nsims <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       [,1] [,2]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]  412  103</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]  412  103</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]  412  103</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]  412  103</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]    1    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]    4    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,]  412  103</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]    1    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]  412  103</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]  412  103</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

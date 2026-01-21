@@ -45,7 +45,7 @@ ode_size <- multigroup.vaccine::getFinalSizeODE(
   initV = initV
 )
 
-fsODE <- sum(ode_size$totalSize)
+fsODE <- sum(ode_size)
 ```
 
 ``` r

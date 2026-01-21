@@ -34,7 +34,7 @@ ode_size <- multigroup.vaccine::getFinalSizeODE(
   initV = initV
 )
 
-fsODE <- sum(ode_size$totalSize)
+fsODE <- sum(ode_size)
 ```
 
 ``` r
@@ -123,7 +123,7 @@ getdiststats <- function(sd) {
     meanHigh = apply(sd, 2, function(x) mean(x[x > max(x) / 2])))
 }
 
-c(finalSizeODE = ode_size$totalSize)
+c(finalSizeODE = ode_size)
 #> finalSizeODE1 finalSizeODE2 finalSizeODE3 
 #>      35.80713      58.32235     291.61177
 cbind(finalSizeGillespie = getdiststats(size_dist), finalSizeEpiworld = getdiststats(size_dist2))

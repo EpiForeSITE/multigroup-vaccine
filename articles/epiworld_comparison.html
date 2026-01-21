@@ -104,7 +104,7 @@
 <span>  initV <span class="op">=</span> <span class="va">initV</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fsODE</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">ode_size</span><span class="op">$</span><span class="va">totalSize</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">fsODE</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">ode_size</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">numsims</span> <span class="op">&lt;-</span> <span class="fl">1000</span></span>
 <span><span class="va">size_dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/getFinalSizeDist.html">getFinalSizeDist</a></span><span class="op">(</span></span>
@@ -189,7 +189,7 @@
 <span>    meanHigh <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">sd</span>, <span class="fl">2</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span><span class="op">[</span><span class="va">x</span> <span class="op">&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">/</span> <span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>finalSizeODE <span class="op">=</span> <span class="va">ode_size</span><span class="op">$</span><span class="va">totalSize</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>finalSizeODE <span class="op">=</span> <span class="va">ode_size</span><span class="op">)</span></span>
 <span><span class="co">#&gt; finalSizeODE1 finalSizeODE2 finalSizeODE3 </span></span>
 <span><span class="co">#&gt;      35.80713      58.32235     291.61177</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span>finalSizeGillespie <span class="op">=</span> <span class="fu">getdiststats</span><span class="op">(</span><span class="va">size_dist</span><span class="op">)</span>, finalSizeEpiworld <span class="op">=</span> <span class="fu">getdiststats</span><span class="op">(</span><span class="va">size_dist2</span><span class="op">)</span><span class="op">)</span></span>

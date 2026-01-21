@@ -74,7 +74,43 @@ followed by I states followed by R states</p></dd>
 followed by recovery rate</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>a list of three vectors of derivatives dS, dI, and dR for each group, evaluated at the
+given state values</p>
+    </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Intended only for use as the func argument to the ode() function from the deSolve package:</span></span></span>
+<span class="r-in"><span><span class="va">y0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>S1 <span class="op">=</span> <span class="fl">79999</span>, S2 <span class="op">=</span> <span class="fl">20000</span>, I1 <span class="op">=</span> <span class="fl">1</span>, I2 <span class="op">=</span> <span class="fl">0</span>, R1 <span class="op">=</span> <span class="fl">0</span>, R2 <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">parms</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>beta11 <span class="op">=</span> <span class="fl">1.6e-6</span>, beta21 <span class="op">=</span> <span class="fl">1.5e-6</span>, beta12 <span class="op">=</span> <span class="fl">1.4e-6</span>, beta22 <span class="op">=</span> <span class="fl">8.7e-6</span>, recoveryrate <span class="op">=</span> <span class="fl">1</span><span class="op">/</span><span class="fl">7</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">times</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">350</span>, len <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">deSolve</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/deSolve/man/ode.html" class="external-link">ode</a></span><span class="op">(</span><span class="va">y0</span>, <span class="va">times</span>, <span class="va">odeSIR</span>, <span class="va">parms</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         time       S1        S2          I1           I2          R1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    0.00000 79999.00 20000.000    1.000000    0.0000000     0.00000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   38.88889 79984.16 19989.787    4.975792    3.6986953    10.86294</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   77.77778 79771.32 19828.414   74.789785   56.6351586   153.88662</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  116.66667 76939.51 17797.233  934.695537  653.2043915  2125.79825</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  155.55556 63215.65 10509.650 2913.095501 1316.4542701 13871.25231</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  194.44444 52939.96  7091.470 1192.639210  343.1435922 25867.40030</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7  233.33333 50542.72  6483.209  234.716452   57.3523993 29222.56349</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8  272.22222 50124.64  6384.202   39.798837    9.3542408 29835.56224</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9  311.11111 50055.32  6368.013    6.567328    1.5317087 29938.11225</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10 350.00000 50043.93  6365.358    1.078526    0.2511921 29954.99428</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              R2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1      0.000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      6.514157</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    114.950838</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   1549.562676</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   8173.895260</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  12565.386624</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7  13459.438235</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8  13606.443445</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9  13630.455665</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10 13634.390347</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

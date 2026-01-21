@@ -39,8 +39,6 @@
   : Calculate outbreak final size, the total number of infections in
   each group, by numerically solving the multi-group ordinary
   differential equation
-- [`getOutputTable()`](https://epiforesite.github.io/multigroup-vaccine/reference/getOutputTable.md)
-  : Generate Output Table for Vaccine Model Scenarios
 - [`getSizeAtTime()`](https://epiforesite.github.io/multigroup-vaccine/reference/getSizeAtTime.md)
   : Calculate outbreak size at a given time
 - [`getStateFIPS()`](https://epiforesite.github.io/multigroup-vaccine/reference/getStateFIPS.md)

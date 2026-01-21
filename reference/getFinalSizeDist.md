@@ -44,3 +44,21 @@ getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
 
 a matrix with the final number infected from each group (column) in each
 simulation (row)
+
+## Examples
+
+``` r
+getFinalSizeDist(n = 10, transmrates = matrix(0.2, 2 ,2), recoveryrate = 0.3,
+popsize = c(100, 150), initR = c(0, 0), initI = c(0, 1), initV = c(10, 10))
+#>       [,1] [,2]
+#>  [1,]   17   33
+#>  [2,]    0    1
+#>  [3,]    0    2
+#>  [4,]    0    1
+#>  [5,]    0    1
+#>  [6,]   52   86
+#>  [7,]    0    1
+#>  [8,]    0    1
+#>  [9,]    0    1
+#> [10,]   13   19
+```

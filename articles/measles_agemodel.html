@@ -76,6 +76,90 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://epiforesite.github.io/multigroup-vaccine/">multigroup.vaccine</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/epiforecasts/socialmixr" class="external-link">socialmixr</a></span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">getOutputTable</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">agelims</span>, <span class="va">agepops</span>, <span class="va">agecovr</span>, <span class="va">ageveff</span>, <span class="va">initgrp</span><span class="op">)</span> <span class="op">{</span></span>
+<span></span>
+<span>  <span class="va">grpnames</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"under"</span>, <span class="va">agelims</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">agelims</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">agelims</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span><span class="op">]</span>, <span class="st">"to"</span>, <span class="va">agelims</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">agelims</span><span class="op">)</span><span class="op">]</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">agelims</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">agelims</span><span class="op">)</span><span class="op">]</span>, <span class="st">"+"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">agevacimmune</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">agepops</span> <span class="op">*</span> <span class="va">agecovr</span> <span class="op">*</span> <span class="va">ageveff</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">mijpolymod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/contactMatrixPolymod.html">contactMatrixPolymod</a></span><span class="op">(</span><span class="va">agelims</span><span class="op">)</span></span>
+<span>  <span class="va">mijlocal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/contactMatrixPolymod.html">contactMatrixPolymod</a></span><span class="op">(</span><span class="va">agelims</span>, <span class="va">agepops</span><span class="op">)</span></span>
+<span>  <span class="va">R0factor</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">mijlocal</span><span class="op">)</span><span class="op">$</span><span class="va">values</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">mijpolymod</span><span class="op">)</span><span class="op">$</span><span class="va">values</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
+<span></span>
+<span>  <span class="va">pops</span> <span class="op">&lt;-</span> <span class="va">agepops</span></span>
+<span>  <span class="va">initV</span> <span class="op">&lt;-</span> <span class="va">agevacimmune</span></span>
+<span></span>
+<span>  <span class="va">initI</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">pops</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">initI</span><span class="op">[</span><span class="va">initgrp</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
+<span>  <span class="va">initR</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">pops</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">R0vals</span> <span class="op">&lt;-</span> <span class="fl">10</span><span class="op">:</span><span class="fl">18</span></span>
+<span>  <span class="va">meaninf</span> <span class="op">&lt;-</span> <span class="fl">7</span></span>
+<span></span>
+<span>  <span class="va">R0local</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">R0vals</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">Rv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">R0vals</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">escapesize</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">R0vals</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">pops</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">R0vals</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">R0local</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">R0vals</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">*</span> <span class="va">R0factor</span></span>
+<span></span>
+<span>    <span class="va">betaij</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/transmissionRates.html">transmissionRates</a></span><span class="op">(</span></span>
+<span>      R0 <span class="op">=</span> <span class="va">R0local</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>,</span>
+<span>      meaninf <span class="op">=</span> <span class="va">meaninf</span>,</span>
+<span>      reltransm <span class="op">=</span> <span class="va">mijlocal</span></span>
+<span>    <span class="op">)</span></span>
+<span></span>
+<span>    <span class="va">Rv</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vaxrepnum.html">vaxrepnum</a></span><span class="op">(</span><span class="va">meaninf</span>, <span class="va">agepops</span>, <span class="va">betaij</span>, <span class="va">initR</span>, <span class="va">agecovr</span> <span class="op">*</span> <span class="va">agepops</span>, <span class="va">ageveff</span><span class="op">)</span></span>
+<span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="va">Rv</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="va">escapesize</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">pops</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>      <span class="va">escapesize</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/getFinalSizeODE.html">getFinalSizeODE</a></span><span class="op">(</span></span>
+<span>        transmrates <span class="op">=</span> <span class="va">betaij</span>,</span>
+<span>        recoveryrate <span class="op">=</span> <span class="fl">1</span> <span class="op">/</span> <span class="va">meaninf</span>,</span>
+<span>        popsize <span class="op">=</span> <span class="va">pops</span>,</span>
+<span>        initR <span class="op">=</span> <span class="va">initR</span>,</span>
+<span>        initI <span class="op">=</span> <span class="va">initI</span>,</span>
+<span>        initV <span class="op">=</span> <span class="va">initV</span></span>
+<span>      <span class="op">)</span></span>
+<span>    <span class="op">}</span></span>
+<span>    <span class="va">escapesizetot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">escapesize</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span></span>
+<span>  <span class="va">numsims</span> <span class="op">&lt;-</span> <span class="fl">1000</span></span>
+<span></span>
+<span>  <span class="va">probescape</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">R0vals</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">R0vals</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="va">Rv</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="va">probescape</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">0</span></span>
+<span>    <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>      <span class="va">betaij</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/transmissionRates.html">transmissionRates</a></span><span class="op">(</span></span>
+<span>        R0 <span class="op">=</span> <span class="va">R0local</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>,</span>
+<span>        meaninf <span class="op">=</span> <span class="va">meaninf</span>,</span>
+<span>        reltransm <span class="op">=</span> <span class="va">mijlocal</span></span>
+<span>      <span class="op">)</span></span>
+<span>      <span class="va">size_dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/getFinalSizeDistEscape.html">getFinalSizeDistEscape</a></span><span class="op">(</span></span>
+<span>        n <span class="op">=</span> <span class="va">numsims</span>,</span>
+<span>        transmrates <span class="op">=</span> <span class="va">betaij</span>,</span>
+<span>        recoveryrate <span class="op">=</span> <span class="fl">1</span> <span class="op">/</span> <span class="va">meaninf</span>,</span>
+<span>        popsize <span class="op">=</span> <span class="va">pops</span>,</span>
+<span>        initR <span class="op">=</span> <span class="va">initR</span>,</span>
+<span>        initV <span class="op">=</span> <span class="va">initV</span>,</span>
+<span>        initI <span class="op">=</span> <span class="va">initI</span></span>
+<span>      <span class="op">)</span></span>
+<span>      <span class="va">probescape</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">size_dist</span><span class="op">)</span> <span class="op">&gt;</span> <span class="va">escapesizetot</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">*</span> <span class="fl">0.9</span><span class="op">)</span> <span class="op">/</span> <span class="va">numsims</span></span>
+<span>    <span class="op">}</span></span>
+<span>  <span class="op">}</span></span>
+<span></span>
+<span>  <span class="va">tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">R0vals</span>, <span class="va">R0local</span>, <span class="va">Rv</span>, <span class="va">probescape</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">escapesizetot</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">escapesize</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">tbl</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"R0"</span>, <span class="st">"R0local"</span>, <span class="st">"Rv"</span>, <span class="st">"pEscape"</span>, <span class="st">"escapeInfTot"</span>, <span class="va">grpnames</span><span class="op">)</span></span>
+<span>  <span class="va">tbl</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># under 1, 1-4, 5-11, 12-17, 18-24, 25-44, 45-69, 70 plus</span></span>
 <span><span class="va">agelims</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">5</span>, <span class="fl">12</span>, <span class="fl">18</span>, <span class="fl">25</span>, <span class="fl">45</span>, <span class="fl">70</span><span class="op">)</span></span>
 <span><span class="va">ageveff</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.93</span>, <span class="fl">0.93</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.97</span>, <span class="fl">5</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span></span>
@@ -84,7 +168,7 @@
 <span><span class="va">agecovr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.83</span>, <span class="fl">0.852</span>, <span class="fl">0.879</span>, <span class="fl">0.9</span>, <span class="fl">0.925</span>, <span class="fl">0.95</span>, <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">initgrp</span> <span class="op">&lt;-</span> <span class="fl">6</span> <span class="co"># assume first case in 25-44 group</span></span>
 <span></span>
-<span><span class="va">ot1</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu"><a href="../reference/getOutputTable.html">getOutputTable</a></span><span class="op">(</span></span>
+<span><span class="va">ot1</span> <span class="op">&lt;-</span> <span class="fu">getOutputTable</span><span class="op">(</span></span>
 <span>  agelims <span class="op">=</span> <span class="va">agelims</span>,</span>
 <span>  agepops <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2354</span>, <span class="fl">9418</span>, <span class="fl">19835</span>, <span class="fl">17001</span>, <span class="fl">19219</span>, <span class="fl">47701</span>, <span class="fl">53956</span>, <span class="fl">32842</span><span class="op">)</span>,</span>
 <span>  agecovr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.83</span>, <span class="fl">0.852</span>, <span class="fl">0.879</span>, <span class="fl">0.9</span>, <span class="fl">0.925</span>, <span class="fl">0.95</span>, <span class="fl">1</span><span class="op">)</span>,</span>
@@ -113,8 +197,8 @@
 <span><span class="co">#&gt;    3612   2413   0</span></span>
 <span><span class="co">#&gt;    3782   2572   0</span></span>
 <span><span class="co">#&gt;    3927   2716   0</span></span></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ot2</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu"><a href="../reference/getOutputTable.html">getOutputTable</a></span><span class="op">(</span></span>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ot2</span> <span class="op">&lt;-</span> <span class="fu">getOutputTable</span><span class="op">(</span></span>
 <span>  agelims <span class="op">=</span> <span class="va">agelims</span>,</span>
 <span>  agepops <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">11981</span>, <span class="fl">47922</span>, <span class="fl">86718</span>, <span class="fl">77302</span>, <span class="fl">120132</span>, <span class="fl">199914</span>, <span class="fl">136997</span>, <span class="fl">38206</span><span class="op">)</span>,</span>
 <span>  agecovr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.86</span>, <span class="fl">0.899</span>, <span class="fl">0.933</span>, <span class="fl">0.95</span>, <span class="fl">0.95</span>, <span class="fl">0.95</span>, <span class="fl">1</span><span class="op">)</span>,</span>
@@ -143,8 +227,8 @@
 <span><span class="co">#&gt;   11158   5677   0</span></span>
 <span><span class="co">#&gt;   11738   6087   0</span></span>
 <span><span class="co">#&gt;   12236   6460   0</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ot3</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu"><a href="../reference/getOutputTable.html">getOutputTable</a></span><span class="op">(</span></span>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ot3</span> <span class="op">&lt;-</span> <span class="fu">getOutputTable</span><span class="op">(</span></span>
 <span>  agelims <span class="op">=</span> <span class="va">agelims</span>,</span>
 <span>  agepops <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">14527</span>, <span class="fl">58108</span>, <span class="fl">114156</span>, <span class="fl">106006</span>, <span class="fl">118837</span>, <span class="fl">367597</span>, <span class="fl">310945</span>, <span class="fl">95637</span><span class="op">)</span>,</span>
 <span>  agecovr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.89</span>, <span class="fl">0.949</span>, <span class="fl">0.950</span>, <span class="fl">0.95</span>, <span class="fl">0.95</span>, <span class="fl">0.95</span>, <span class="fl">1</span><span class="op">)</span>,</span>

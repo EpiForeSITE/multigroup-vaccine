@@ -83,6 +83,24 @@ Any age limits above 90 will be adjusted to 90 with a warning, and the
 corresponding populations will be aggregated into a single "90+" group.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">#Default population distribution uses population data from POLYMOD survey locations:</span></span></span>
+<span class="r-in"><span><span class="fu">contactMatrixPolymod</span><span class="op">(</span>agelims <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5</span>, <span class="fl">18</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          contact.age.group</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> age.group    under5    5to17       18+</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    under5 2.2370031 1.504903  6.086132</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    5to17  0.5148409 9.846792  7.272662</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    18+    0.3754707 1.311486 10.828758</span>
+<span class="r-in"><span><span class="co">#Specifying the age distribution will lead to an adjusted version:</span></span></span>
+<span class="r-in"><span><span class="fu">contactMatrixPolymod</span><span class="op">(</span>agelims <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5</span>, <span class="fl">18</span><span class="op">)</span>, agepops <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">500</span>, <span class="fl">1300</span>, <span class="fl">8200</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          contact.age.group</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> age.group    under5    5to17       18+</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    under5 2.2518104 1.347447  6.198479</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    5to17  0.5182488 8.816532  7.406912</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    18+    0.3779560 1.174266 11.028652</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

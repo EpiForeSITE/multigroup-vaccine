@@ -54,3 +54,21 @@ getFinalSizeDistEscape(
 
 a matrix with the final number infected from each group (column) in each
 simulation (row)
+
+## Examples
+
+``` r
+getFinalSizeDistEscape(n = 10, transmrates = matrix(0.2, 2 ,2), recoveryrate = 0.3,
+popsize = c(100, 150), initR = c(0, 0), initI = c(0, 1), initV = c(10, 10))
+#>       [,1] [,2]
+#>  [1,]    2    1
+#>  [2,]    0    1
+#>  [3,]   46   77
+#>  [4,]    4    3
+#>  [5,]    0    1
+#>  [6,]    0    1
+#>  [7,]    0    2
+#>  [8,]    0    3
+#>  [9,]    0    1
+#> [10,]    0    2
+```

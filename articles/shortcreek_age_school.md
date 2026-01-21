@@ -201,7 +201,7 @@ for (i in seq_along(R0vals)) {
       initR = initR,
       initI = initI,
       initV = groupimm
-    )$totalSize
+    )
   }
   escapesizetot <- rowSums(escapesize)
 }

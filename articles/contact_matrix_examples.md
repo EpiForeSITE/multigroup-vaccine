@@ -72,11 +72,7 @@ occurred at school:
 
 ``` r
 cmAll <- contact_matrix(socialmixr::polymod, age.limits = agelims)$matrix
-#> Removing participants without age information. To change this behaviour, set the 'missing.participant.age' option
-#> Removing participants that have contacts without age information. To change this behaviour, set the 'missing.contact.age' option
 cmSchool <- contact_matrix(socialmixr::polymod, age.limits = agelims, filter = list(cnt_school = 1))$matrix
-#> Removing participants without age information. To change this behaviour, set the 'missing.participant.age' option
-#> Removing participants that have contacts without age information. To change this behaviour, set the 'missing.contact.age' option
 
 round(cmAll, 2)
 #>          contact.age.group

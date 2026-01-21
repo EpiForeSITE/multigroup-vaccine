@@ -83,7 +83,23 @@
 <dd><p>portion of within-age-group contacts that are exclusively within school</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>a square matrix with the contact rate of each group (row) with members of each
+other group (column)</p>
+    </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">contactMatrixAgeSchool</span><span class="op">(</span>agelims <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5</span>, <span class="fl">18</span><span class="op">)</span>, agepops <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">500</span>, <span class="fl">1300</span>, <span class="fl">8200</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>schoolagegroups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>, schoolpops <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">600</span>, <span class="fl">700</span><span class="op">)</span>, schportion <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            under5   5to17s1   5to17s2       18+</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> under5  2.2518104 0.6218986 0.7255483  6.198479</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5to17s1 0.5182488 7.3923228 1.4242090  7.406912</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5to17s2 0.5182488 1.2207506 7.5957812  7.406912</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18+     0.3779560 0.5419691 0.6322973 11.028652</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
