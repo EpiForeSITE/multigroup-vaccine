@@ -49,14 +49,15 @@ reproduction number, contact/transmission assumptions, and initial conditions
 \examples{
 popsize <- c(800, 200)
 R0 <- 2
-contactmatrix <- contactMatrixPropPref(popsize = popsize, contactrate = c(1, 1), ingroup = c(0.2, 0.2))
+contactmatrix <- contactMatrixPropPref(popsize = popsize, contactrate = c(1, 1),
+ingroup = c(0.2, 0.2))
 relsusc <- c(1, 1)
 reltransm <- c(1, 1)
 initR <- c(0, 0)
 initI <- c(1, 0)
 initV <- 0.2 * popsize
 # Default method "ODE" numerical solves ordinary differential equations until infectious count
-is close to 0
+# is close to 0
 finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV)
 finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
 method = "analytic")
