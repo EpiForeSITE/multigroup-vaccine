@@ -20,12 +20,16 @@
 #' initR <- c(0, 0)
 #' initI <- c(1, 0)
 #' initV <- 0.2 * popsize
-#' # Default method "ODE" numerical solves ordinary differential equations until infectious count is close to 0
+#' # Default method "ODE" numerical solves ordinary differential equations until infectious count
+#' is close to 0
 #' finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV)
-#' finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV, method = "analytic")
-#' finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV, method = "stochastic", nsims = 10)
+#' finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
+#' method = "analytic")
+#' finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
+#' method = "stochastic", nsims = 10)
 #' # All "escaped" outbreaks set to deterministic final size:
-#' finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV, method = "hybrid", nsims = 10)
+#' finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
+#' method = "hybrid", nsims = 10)
 #' @export
 finalsize <- function(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV, method = "ODE", nsims = 1) {
 
