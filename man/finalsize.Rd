@@ -40,9 +40,30 @@ finalsize(
 \item{nsims}{the number of simulations to run for stochastic methods}
 }
 \value{
-a matrix with the final number infected from each group (column) in each simulation (row)
+a vector (nsims = 1) or matrix (nsims > 1) with the final number infected from each group (column) in each simulation (row)
 }
 \description{
 Calculate final outbreak size or distribution of a multigroup transmission model for a given basic
 reproduction number, contact/transmission assumptions, and initial conditions
+}
+\examples{
+popsize <- c(800, 200)
+R0 <- 2
+contactmatrix <- contactMatrixPropPref(popsize = popsize, contactrate = c(1, 1),
+ingroup = c(0.2, 0.2))
+relsusc <- c(1, 1)
+reltransm <- c(1, 1)
+initR <- c(0, 0)
+initI <- c(1, 0)
+initV <- 0.2 * popsize
+# Default method "ODE" numerical solves ordinary differential equations until infectious count
+# is close to 0
+finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV)
+finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
+method = "analytic")
+finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
+method = "stochastic", nsims = 10)
+# All "escaped" outbreaks set to deterministic final size:
+finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
+method = "hybrid", nsims = 10)
 }

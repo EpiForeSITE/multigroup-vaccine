@@ -21,15 +21,13 @@ test_that("determinisitc final size calculations agree: 2 groups, vax at time 0"
   fsODE <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV, method = "ODE")
   fsAnalytic <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV, method = "analytic")
 
-  expect_equal(length(fsODE$totalSize), length(popsize))
-  expect_equal(length(fsODE$activeSize), length(popsize))
+  expect_equal(length(fsODE), length(popsize))
   expect_equal(length(fsAnalytic), length(popsize))
 
   #f <- (1 - incontact) * relcontact * popsize
   #contactmatrix <- (diag(incontact) + outer((1 - incontact), f / sum(f)))
 
-  expect_equal(max(abs(fsODE$activeSize)), 0, tolerance = sqrt(.Machine$double.eps))
-  expect_equal(max(abs(fsODE$totalSize - fsAnalytic)), 0, tolerance = 1)
+  expect_equal(max(abs(fsODE - fsAnalytic)), 0, tolerance = 1)
 })
 
 test_that("deterministic final size calculations agree: 2 groups, delayed vax", {
@@ -61,11 +59,9 @@ test_that("deterministic final size calculations agree: 2 groups, delayed vax", 
   fsODE <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, vacR, vacI, vacV, method = "ODE")
   fsAnalytic <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, vacR, vacI, vacV, method = "analytic")
 
-  expect_equal(length(fsODE$totalSize), length(popsize))
-  expect_equal(length(fsODE$activeSize), length(popsize))
+  expect_equal(length(fsODE), length(popsize))
   expect_equal(length(fsAnalytic), length(popsize))
-  expect_equal(max(abs(fsODE$activeSize)), 0, tolerance = sqrt(.Machine$double.eps))
-  expect_equal(max(abs(fsODE$totalSize - fsAnalytic)), 0, tolerance = 1)
+  expect_equal(max(abs(fsODE - fsAnalytic)), 0, tolerance = 1)
 })
 
 test_that("final size calculation works: 3 groups, vax at time 0", {
@@ -85,10 +81,8 @@ test_that("final size calculation works: 3 groups, vax at time 0", {
   fsODE <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV, method = "ODE")
   fsAnalytic <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV, method = "analytic")
 
-  expect_equal(length(fsODE$totalSize), length(popsize))
-  expect_equal(length(fsODE$activeSize), length(popsize))
+  expect_equal(length(fsODE), length(popsize))
   expect_equal(length(fsAnalytic), length(popsize))
 
-  expect_equal(max(abs(fsODE$activeSize)), 0, tolerance = sqrt(.Machine$double.eps))
-  expect_equal(max(abs(fsODE$totalSize - fsAnalytic)), 0, tolerance = 1)
+  expect_equal(max(abs(fsODE - fsAnalytic)), 0, tolerance = 1)
 })

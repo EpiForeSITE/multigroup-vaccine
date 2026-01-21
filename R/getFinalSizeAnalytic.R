@@ -6,6 +6,10 @@
 #' @param initR initial number of each group already infected and removed (included in final size)
 #' @param initI initial number of each group infectious
 #' @param initV initial number of each group vaccinated
+#' @returns vector of final sizes (number of infected over whole outbreak) for each group
+#' @examples
+#' getFinalSizeAnalytic(transmrates = matrix(0.2, 2 ,2), recoveryrate = 0.3,
+#' popsize = c(100, 150), initR = c(0, 0), initI = c(0, 1), initV = c(10, 10))
 #' @export
 getFinalSizeAnalytic <- function(transmrates, recoveryrate, popsize, initR, initI, initV) {
   if (sum(initI) == 0)

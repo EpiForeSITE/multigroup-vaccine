@@ -20,6 +20,92 @@ library(socialmixr)
 ```
 
 ```{r}
+getOutputTable <- function(agelims, agepops, agecovr, ageveff, initgrp) {
+
+  grpnames <- c(
+    paste0("under", agelims[2]),
+    paste0(agelims[2:(length(agelims) - 1)], "to", agelims[3:length(agelims)] - 1),
+    paste0(agelims[length(agelims)], "+")
+  )
+
+  agevacimmune <- round(agepops * agecovr * ageveff)
+
+  mijpolymod <- contactMatrixPolymod(agelims)
+  mijlocal <- contactMatrixPolymod(agelims, agepops)
+  R0factor <- eigen(mijlocal)$values[1] / eigen(mijpolymod)$values[1]
+
+  pops <- agepops
+  initV <- agevacimmune
+
+  initI <- rep(0, length(pops))
+  initI[initgrp] <- 1
+  initR <- rep(0, length(pops))
+
+  R0vals <- 10:18
+  meaninf <- 7
+
+  R0local <- rep(0, length(R0vals))
+  Rv <- rep(0, length(R0vals))
+  escapesize <- matrix(0, length(R0vals), length(pops))
+
+  for (i in seq_along(R0vals)) {
+    R0local[i] <- R0vals[i] * R0factor
+
+    betaij <- transmissionRates(
+      R0 = R0local[i],
+      meaninf = meaninf,
+      reltransm = mijlocal
+    )
+
+    Rv[i] <- vaxrepnum(meaninf, agepops, betaij, initR, agecovr * agepops, ageveff)
+
+    if (Rv[i] < 1) {
+      escapesize[i, ] <- rep(0, length(pops))
+    } else {
+      escapesize[i, ] <- getFinalSizeODE(
+        transmrates = betaij,
+        recoveryrate = 1 / meaninf,
+        popsize = pops,
+        initR = initR,
+        initI = initI,
+        initV = initV
+      )
+    }
+    escapesizetot <- rowSums(escapesize)
+  }
+
+  numsims <- 1000
+
+  probescape <- rep(0, length(R0vals))
+  for (i in seq_along(R0vals)) {
+    if (Rv[i] < 1) {
+      probescape[i] <- 0
+    } else {
+      betaij <- transmissionRates(
+        R0 = R0local[i],
+        meaninf = meaninf,
+        reltransm = mijlocal
+      )
+      size_dist <- getFinalSizeDistEscape(
+        n = numsims,
+        transmrates = betaij,
+        recoveryrate = 1 / meaninf,
+        popsize = pops,
+        initR = initR,
+        initV = initV,
+        initI = initI
+      )
+      probescape[i] <- sum(rowSums(size_dist) > escapesizetot[i] * 0.9) / numsims
+    }
+  }
+
+  tbl <- cbind(R0vals, R0local, Rv, probescape, round(escapesizetot), round(escapesize))
+  colnames(tbl) <- c("R0", "R0local", "Rv", "pEscape", "escapeInfTot", grpnames)
+  tbl
+}
+```
+
+```{r}
 # under 1, 1-4, 5-11, 12-17, 18-24, 25-44, 45-69, 70 plus
 agelims <- c(0, 1, 5, 12, 18, 25, 45, 70)
 ageveff <- c(0.93, 0.93, rep(0.97, 5), 1)
@@ -28,7 +114,7 @@ agepops <- c(2354, 9418, 19835, 17001, 19219, 47701, 53956, 32842)
 agecovr <- c(0, 0.83, 0.852, 0.879, 0.9, 0.925, 0.95, 1)
 initgrp <- 6 # assume first case in 25-44 group
 
-ot1 <- multigroup.vaccine:::getOutputTable(
+ot1 <- getOutputTable(
   agelims = agelims,
   agepops = c(2354, 9418, 19835, 17001, 19219, 47701, 53956, 32842),
   agecovr = c(0, 0.83, 0.852, 0.879, 0.9, 0.925, 0.95, 1),
@@ -39,7 +125,7 @@ ot1 <- multigroup.vaccine:::getOutputTable(
 print(as.data.frame(ot1), row.names = FALSE)
 ```
 ```{r}
-ot2 <- multigroup.vaccine:::getOutputTable(
+ot2 <- getOutputTable(
   agelims = agelims,
   agepops = c(11981, 47922, 86718, 77302, 120132, 199914, 136997, 38206),
   agecovr = c(0, 0.86, 0.899, 0.933, 0.95, 0.95, 0.95, 1),
@@ -51,7 +137,7 @@ print(as.data.frame(ot2), row.names = FALSE)
 ```
 
 ```{r}
-ot3 <- multigroup.vaccine:::getOutputTable(
+ot3 <- getOutputTable(
   agelims = agelims,
   agepops = c(14527, 58108, 114156, 106006, 118837, 367597, 310945, 95637),
   agecovr = c(0, 0.89, 0.949, 0.950, 0.95, 0.95, 0.95, 1),

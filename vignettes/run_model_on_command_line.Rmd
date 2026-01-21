@@ -73,6 +73,6 @@ initV <- c(0.3, 0.2) * popsize
 
 ```{r}
 fs <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV)
-fs$totalSize
+fs
 ```
 Over one third of the infected individuals are from population B, despite the fact that they comprise only one fifth of the population.

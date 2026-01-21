@@ -4,6 +4,11 @@
 #' @param schoolagegroups index of the age group covered by each school
 #' @param schoolpops population size of each school
 #' @param schportion portion of within-age-group contacts that are exclusively within school
+#' @returns a square matrix with the contact rate of each group (row) with members of each
+#' other group (column)
+#' @examples
+#' contactMatrixAgeSchool(agelims = c(0, 5, 18), agepops = c(500, 1300, 8200),
+#' schoolagegroups = c(2, 2), schoolpops = c(600, 700), schportion = 0.7)
 #' @export
 contactMatrixAgeSchool <- function(agelims, agepops, schoolagegroups, schoolpops, schportion) {
   cmp <- contactMatrixPolymod(agelims, agepops)
@@ -26,8 +31,6 @@ contactMatrixAgeSchool <- function(agelims, agepops, schoolagegroups, schoolpops
   for(s in sag){
     inds <- which(schoolagegroups == s)
     nums <- length(inds)
-    #cmps[1:npre, npre + inds] <- cmp[1:npre, s] * schoolpops[inds] / agepops[s]
-    #cmps[nrow(cmps)-(1:npost)+1, npre + inds] <- cmp[nrow(cmp)-(1:npost)+1, s] * schoolpops[inds] / agepops[s]
     for(i in 1:npre){
       cmps[i, npre + inds] <- cmp[i, s] * schoolpops[inds] / agepops[s]
       cmps[npre + inds, i] <- cmp[s, i]

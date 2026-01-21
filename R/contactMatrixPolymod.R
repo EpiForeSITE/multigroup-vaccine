@@ -13,6 +13,11 @@
 #' @details The socialmixr contact_matrix function supports age limits up to 90.
 #'   Any age limits above 90 will be adjusted to 90 with a warning, and the
 #'   corresponding populations will be aggregated into a single "90+" group.
+#' @examples
+#' #Default population distribution uses population data from POLYMOD survey locations:
+#' contactMatrixPolymod(agelims = c(0, 5, 18))
+#' #Specifying the age distribution will lead to an adjusted version:
+#' contactMatrixPolymod(agelims = c(0, 5, 18), agepops = c(500, 1300, 8200))
 #' @export
 contactMatrixPolymod <- function(agelims, agepops = NULL) {
 

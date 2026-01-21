@@ -27,3 +27,7 @@ a matrix with the final number infected from each group (column) in each simulat
 \description{
 Estimate the distribution of final outbreak sizes by group using stochastic simulations of multi-group model
 }
+\examples{
+getFinalSizeDist(n = 10, transmrates = matrix(0.2, 2 ,2), recoveryrate = 0.3,
+popsize = c(100, 150), initR = c(0, 0), initI = c(0, 1), initV = c(10, 10))
+}
