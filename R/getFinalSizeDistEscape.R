@@ -8,6 +8,9 @@
 #' @param initI initial number of each group infectious
 #' @param initV initial number of each group vaccinated
 #' @returns a matrix with the final number infected from each group (column) in each simulation (row)
+#' @examples
+#' getFinalSizeDistEscape(n = 10, transmrates = matrix(0.2, 2 ,2), recoveryrate = 0.3,
+#' popsize = c(100, 150), initR = c(0, 0), initI = c(0, 1), initV = c(10, 10))
 #' @export
 getFinalSizeDistEscape <- function(n, transmrates, recoveryrate, popsize, initR, initI, initV) {
   fsODE <- round(getFinalSizeODE(transmrates, recoveryrate, popsize, initR, initI, initV))
