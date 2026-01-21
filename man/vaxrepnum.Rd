@@ -20,7 +20,20 @@ vaxrepnum(meaninf, popsize, trmat, initR, initV, vaxeff)
 
 \item{vaxeff}{effectiveness (0 to 1) of vaccine in producing immunity to infection}
 }
+\value{
+the reproduction number
+}
 \description{
 Calculate reproduction number for a multigroup model with a given state of
 vaccination and immunity
+}
+\examples{
+meaninf <- 7
+popsize <- c(200, 800)
+initR <- c(0, 0)
+initV <- c(0, 0)
+vaxeff <- 1
+trmat <- matrix(c(0.63, 0.31, 0.19, 1.2), 2, 2)
+vaxrepnum(meaninf, popsize, trmat, initR, initV, vaxeff)
+vaxrepnum(meaninf, popsize, trmat, initR, initV = c(160, 750), vaxeff)
 }
