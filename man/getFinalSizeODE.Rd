@@ -20,7 +20,14 @@ getFinalSizeODE(transmrates, recoveryrate, popsize, initR, initI, initV)
 
 \item{initV}{initial number of each group vaccinated}
 }
+\value{
+vector of final sizes (number of infected over whole outbreak) for each group
+}
 \description{
 Calculate outbreak final size, the total number of infections in each group, by numerically
 solving the multi-group ordinary differential equation
+}
+\examples{
+getFinalSizeODE(transmrates = matrix(0.2, 2 ,2), recoveryrate = 0.3,
+popsize = c(100, 150), initR = c(0, 0), initI = c(0, 1), initV = c(10, 10))
 }
