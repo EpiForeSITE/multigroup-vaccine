@@ -1,3 +1,19 @@
 url: https://epiforesite.github.io/multigroup-vaccine
 template:
   bootstrap: 5
+
+articles:
+- title: Tutorials
+  contents:
+  - census_functions_demo
+  - contact_matrix_examples
+  - measles_agemodel
+  - measles_example
+  - measles_example2
+  - run_model_on_command_line
+- title: Experiments/Research
+  contents:
+  - experiments/age_dist_R0
+  - experiments/epiworld_comparison
+  - experiments/shortcreek_age_school
+  
