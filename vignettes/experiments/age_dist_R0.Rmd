@@ -1,5 +1,5 @@
 ---
-title: "Age distribution effect on $R_0$"
+title: "Age distribution effect on R0"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Age distribution effect on R0}
