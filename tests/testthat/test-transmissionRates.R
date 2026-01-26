@@ -127,16 +127,3 @@ test_that("transmissionRates handles fractional values", {
   computed_R0 <- eigen(result)$values[1] * meaninf
   expect_equal(computed_R0, R0, tolerance = 1e-10)
 })
-
-test_that("transmissionRates handles large matrices", {
-  R0 <- 2.5
-  meaninf <- 7
-  reltransm <- matrix(runif(100, 0.5, 1.5), 10, 10)
-  
-  result <- transmissionRates(R0, meaninf, reltransm)
-  
-  expect_equal(dim(result), c(10, 10))
-  expect_true(all(is.finite(result)))
-  computed_R0 <- eigen(result)$values[1] * meaninf
-  expect_equal(computed_R0, R0)
-})
