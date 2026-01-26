@@ -57,7 +57,6 @@ utah_counties <- listCounties(
   state_fips = utah_fips,
   csv_path = census_csv
 )
-#> Reading census data from: /home/runner/work/_temp/Library/multigroup.vaccine/extdata/cc-est2024-syasex-49.csv
 
 cat("Counties in Utah:\n")
 #> Counties in Utah:
@@ -98,13 +97,6 @@ washington_data <- getCensusData(
   age_groups = age_limits,
   csv_path = census_csv
 )
-#> Reading census data from: /home/runner/work/_temp/Library/multigroup.vaccine/extdata/cc-est2024-syasex-49.csv
-#> Aggregating ages 0 to 4: sum = 11950
-#> Aggregating ages 5 to 11: sum = 18808
-#> Aggregating ages 12 to 17: sum = 18446
-#> Aggregating ages 18 to 24: sum = 19948
-#> Aggregating ages 25 to 44: sum = 49399
-#> Aggregating ages 45 to 64: sum = 42661
 
 # Display the results
 cat("County:", washington_data$county, "\n")
@@ -181,27 +173,6 @@ for (county in counties_to_compare) {
     csv_path = census_csv
   )
 }
-#> Reading census data from: /home/runner/work/_temp/Library/multigroup.vaccine/extdata/cc-est2024-syasex-49.csv
-#> Aggregating ages 0 to 4: sum = 72443
-#> Aggregating ages 5 to 11: sum = 111884
-#> Aggregating ages 12 to 17: sum = 108100
-#> Aggregating ages 18 to 24: sum = 125472
-#> Aggregating ages 25 to 44: sum = 379015
-#> Aggregating ages 45 to 64: sum = 267064
-#> Reading census data from: /home/runner/work/_temp/Library/multigroup.vaccine/extdata/cc-est2024-syasex-49.csv
-#> Aggregating ages 0 to 4: sum = 60649
-#> Aggregating ages 5 to 11: sum = 88402
-#> Aggregating ages 12 to 17: sum = 78366
-#> Aggregating ages 18 to 24: sum = 125580
-#> Aggregating ages 25 to 44: sum = 210551
-#> Aggregating ages 45 to 64: sum = 122888
-#> Reading census data from: /home/runner/work/_temp/Library/multigroup.vaccine/extdata/cc-est2024-syasex-49.csv
-#> Aggregating ages 0 to 4: sum = 11950
-#> Aggregating ages 5 to 11: sum = 18808
-#> Aggregating ages 12 to 17: sum = 18446
-#> Aggregating ages 18 to 24: sum = 19948
-#> Aggregating ages 25 to 44: sum = 49399
-#> Aggregating ages 45 to 64: sum = 42661
 
 # Create comparison matrix
 comparison_matrix <- matrix(0, nrow = length(counties_to_compare), 
@@ -250,23 +221,6 @@ hildale_5yr <- getCityData(
   city_name = "Hildale city, Utah",
   csv_path = hildale_path
 )
-#> Aggregating ages 0 to 4: sum = 57
-#> Aggregating ages 5 to 9: sum = 110
-#> Aggregating ages 10 to 14: sum = 181
-#> Aggregating ages 15 to 19: sum = 157
-#> Aggregating ages 20 to 24: sum = 134
-#> Aggregating ages 25 to 29: sum = 128
-#> Aggregating ages 30 to 34: sum = 55
-#> Aggregating ages 35 to 39: sum = 110
-#> Aggregating ages 40 to 44: sum = 59
-#> Aggregating ages 45 to 49: sum = 105
-#> Aggregating ages 50 to 54: sum = 64
-#> Aggregating ages 55 to 59: sum = 32
-#> Aggregating ages 60 to 64: sum = 29
-#> Aggregating ages 65 to 69: sum = 35
-#> Aggregating ages 70 to 74: sum = 0
-#> Aggregating ages 75 to 79: sum = 27
-#> Aggregating ages 80 to 84: sum = 18
 
 cat("Hildale, UT - 5-year Age Groups\n")
 #> Hildale, UT - 5-year Age Groups
@@ -319,13 +273,6 @@ hildale_school <- getCityData(
   csv_path = hildale_path,
   age_groups = school_age_groups
 )
-#> Aggregating ages 0 to 4: sum = 57
-#> Aggregating ages 5 to 11: sum = 182.4
-#> Aggregating ages 12 to 13: sum = 72.4
-#> Aggregating ages 14 to 17: sum = 130.4
-#> Aggregating ages 18 to 24: sum = 196.8
-#> Aggregating ages 25 to 44: sum = 352
-#> Aggregating ages 45 to 64: sum = 230
 
 cat("\nHildale, UT - School-Aligned Age Groups\n")
 #> 

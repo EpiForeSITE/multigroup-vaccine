@@ -123,7 +123,6 @@ state. This is useful for exploring available data.</p>
 <span>  state_fips <span class="op">=</span> <span class="va">utah_fips</span>,</span>
 <span>  csv_path <span class="op">=</span> <span class="va">census_csv</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Reading census data from: /home/runner/work/_temp/Library/multigroup.vaccine/extdata/cc-est2024-syasex-49.csv</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Counties in Utah:\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Counties in Utah:</span></span>
@@ -161,13 +160,6 @@ for a specific county, organized by age groups.</p>
 <span>  age_groups <span class="op">=</span> <span class="va">age_limits</span>,</span>
 <span>  csv_path <span class="op">=</span> <span class="va">census_csv</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Reading census data from: /home/runner/work/_temp/Library/multigroup.vaccine/extdata/cc-est2024-syasex-49.csv</span></span>
-<span><span class="co">#&gt; Aggregating ages 0 to 4: sum = 11950</span></span>
-<span><span class="co">#&gt; Aggregating ages 5 to 11: sum = 18808</span></span>
-<span><span class="co">#&gt; Aggregating ages 12 to 17: sum = 18446</span></span>
-<span><span class="co">#&gt; Aggregating ages 18 to 24: sum = 19948</span></span>
-<span><span class="co">#&gt; Aggregating ages 25 to 44: sum = 49399</span></span>
-<span><span class="co">#&gt; Aggregating ages 45 to 64: sum = 42661</span></span>
 <span></span>
 <span><span class="co"># Display the results</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"County:"</span>, <span class="va">washington_data</span><span class="op">$</span><span class="va">county</span>, <span class="st">"\n"</span><span class="op">)</span></span>
@@ -239,27 +231,6 @@ counties.</p>
 <span>    csv_path <span class="op">=</span> <span class="va">census_csv</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span></span>
-<span><span class="co">#&gt; Reading census data from: /home/runner/work/_temp/Library/multigroup.vaccine/extdata/cc-est2024-syasex-49.csv</span></span>
-<span><span class="co">#&gt; Aggregating ages 0 to 4: sum = 72443</span></span>
-<span><span class="co">#&gt; Aggregating ages 5 to 11: sum = 111884</span></span>
-<span><span class="co">#&gt; Aggregating ages 12 to 17: sum = 108100</span></span>
-<span><span class="co">#&gt; Aggregating ages 18 to 24: sum = 125472</span></span>
-<span><span class="co">#&gt; Aggregating ages 25 to 44: sum = 379015</span></span>
-<span><span class="co">#&gt; Aggregating ages 45 to 64: sum = 267064</span></span>
-<span><span class="co">#&gt; Reading census data from: /home/runner/work/_temp/Library/multigroup.vaccine/extdata/cc-est2024-syasex-49.csv</span></span>
-<span><span class="co">#&gt; Aggregating ages 0 to 4: sum = 60649</span></span>
-<span><span class="co">#&gt; Aggregating ages 5 to 11: sum = 88402</span></span>
-<span><span class="co">#&gt; Aggregating ages 12 to 17: sum = 78366</span></span>
-<span><span class="co">#&gt; Aggregating ages 18 to 24: sum = 125580</span></span>
-<span><span class="co">#&gt; Aggregating ages 25 to 44: sum = 210551</span></span>
-<span><span class="co">#&gt; Aggregating ages 45 to 64: sum = 122888</span></span>
-<span><span class="co">#&gt; Reading census data from: /home/runner/work/_temp/Library/multigroup.vaccine/extdata/cc-est2024-syasex-49.csv</span></span>
-<span><span class="co">#&gt; Aggregating ages 0 to 4: sum = 11950</span></span>
-<span><span class="co">#&gt; Aggregating ages 5 to 11: sum = 18808</span></span>
-<span><span class="co">#&gt; Aggregating ages 12 to 17: sum = 18446</span></span>
-<span><span class="co">#&gt; Aggregating ages 18 to 24: sum = 19948</span></span>
-<span><span class="co">#&gt; Aggregating ages 25 to 44: sum = 49399</span></span>
-<span><span class="co">#&gt; Aggregating ages 45 to 64: sum = 42661</span></span>
 <span></span>
 <span><span class="co"># Create comparison matrix</span></span>
 <span><span class="va">comparison_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, nrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">counties_to_compare</span><span class="op">)</span>, </span>
@@ -303,23 +274,6 @@ estimates. Let’s demonstrate using Hildale, UT as an example.</p>
 <span>  city_name <span class="op">=</span> <span class="st">"Hildale city, Utah"</span>,</span>
 <span>  csv_path <span class="op">=</span> <span class="va">hildale_path</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Aggregating ages 0 to 4: sum = 57</span></span>
-<span><span class="co">#&gt; Aggregating ages 5 to 9: sum = 110</span></span>
-<span><span class="co">#&gt; Aggregating ages 10 to 14: sum = 181</span></span>
-<span><span class="co">#&gt; Aggregating ages 15 to 19: sum = 157</span></span>
-<span><span class="co">#&gt; Aggregating ages 20 to 24: sum = 134</span></span>
-<span><span class="co">#&gt; Aggregating ages 25 to 29: sum = 128</span></span>
-<span><span class="co">#&gt; Aggregating ages 30 to 34: sum = 55</span></span>
-<span><span class="co">#&gt; Aggregating ages 35 to 39: sum = 110</span></span>
-<span><span class="co">#&gt; Aggregating ages 40 to 44: sum = 59</span></span>
-<span><span class="co">#&gt; Aggregating ages 45 to 49: sum = 105</span></span>
-<span><span class="co">#&gt; Aggregating ages 50 to 54: sum = 64</span></span>
-<span><span class="co">#&gt; Aggregating ages 55 to 59: sum = 32</span></span>
-<span><span class="co">#&gt; Aggregating ages 60 to 64: sum = 29</span></span>
-<span><span class="co">#&gt; Aggregating ages 65 to 69: sum = 35</span></span>
-<span><span class="co">#&gt; Aggregating ages 70 to 74: sum = 0</span></span>
-<span><span class="co">#&gt; Aggregating ages 75 to 79: sum = 27</span></span>
-<span><span class="co">#&gt; Aggregating ages 80 to 84: sum = 18</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Hildale, UT - 5-year Age Groups\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Hildale, UT - 5-year Age Groups</span></span>
@@ -371,13 +325,6 @@ pre-school (0-4), elementary (5-11), middle school (12-13), high school
 <span>  csv_path <span class="op">=</span> <span class="va">hildale_path</span>,</span>
 <span>  age_groups <span class="op">=</span> <span class="va">school_age_groups</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Aggregating ages 0 to 4: sum = 57</span></span>
-<span><span class="co">#&gt; Aggregating ages 5 to 11: sum = 182.4</span></span>
-<span><span class="co">#&gt; Aggregating ages 12 to 13: sum = 72.4</span></span>
-<span><span class="co">#&gt; Aggregating ages 14 to 17: sum = 130.4</span></span>
-<span><span class="co">#&gt; Aggregating ages 18 to 24: sum = 196.8</span></span>
-<span><span class="co">#&gt; Aggregating ages 25 to 44: sum = 352</span></span>
-<span><span class="co">#&gt; Aggregating ages 45 to 64: sum = 230</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nHildale, UT - School-Aligned Age Groups\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>

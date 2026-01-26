@@ -5,7 +5,13 @@ List available counties for a state
 ## Usage
 
 ``` r
-listCounties(state_fips, year = 2024, csv_path = NULL, cache_dir = NULL)
+listCounties(
+  state_fips,
+  year = 2024,
+  csv_path = NULL,
+  cache_dir = NULL,
+  verbose = FALSE
+)
 ```
 
 ## Arguments
@@ -26,6 +32,10 @@ listCounties(state_fips, year = 2024, csv_path = NULL, cache_dir = NULL)
 
   Optional directory path for caching downloaded census files
 
+- verbose:
+
+  Logical, if TRUE prints messages about data loading. Default is FALSE.
+
 ## Value
 
 Character vector of county names
@@ -39,7 +49,6 @@ utah_counties <- listCounties(
   year = 2024,
   csv_path = getCensusDataPath()
 )
-#> Reading census data from: /home/runner/work/_temp/Library/multigroup.vaccine/extdata/cc-est2024-syasex-49.csv
 
 if (FALSE) { # \dontrun{
 # Download from web (requires internet)

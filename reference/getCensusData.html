@@ -52,7 +52,8 @@ optional sex disaggregation.</p>
 <span>  age_groups <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  by_sex <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  csv_path <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  cache_dir <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  cache_dir <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -93,6 +94,11 @@ the function will check for an existing cached file and use it, or download and 
 a new one. Default is NULL (no caching). Use "." for current directory or specify
 a custom path like "~/census_cache"</p></dd>
 
+
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
+<dd><p>Logical, if TRUE prints messages about data loading and age aggregation.
+Default is FALSE.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -132,7 +138,6 @@ a custom path like "~/census_cache"</p></dd>
 <span class="r-in"><span>  year <span class="op">=</span> <span class="fl">2024</span>,</span></span>
 <span class="r-in"><span>  csv_path <span class="op">=</span> <span class="fu"><a href="getCensusDataPath.html">getCensusDataPath</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Reading census data from: /home/runner/work/_temp/Library/multigroup.vaccine/extdata/cc-est2024-syasex-49.csv</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Get age groups without sex disaggregation</span></span></span>
 <span class="r-in"><span><span class="va">slc_grouped</span> <span class="op">&lt;-</span> <span class="fu">getCensusData</span><span class="op">(</span></span></span>
@@ -142,10 +147,6 @@ a custom path like "~/census_cache"</p></dd>
 <span class="r-in"><span>  age_groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5</span>, <span class="fl">18</span>, <span class="fl">65</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  csv_path <span class="op">=</span> <span class="fu"><a href="getCensusDataPath.html">getCensusDataPath</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Reading census data from: /home/runner/work/_temp/Library/multigroup.vaccine/extdata/cc-est2024-syasex-49.csv</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 0 to 4: sum = 72443</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 5 to 17: sum = 219984</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 18 to 64: sum = 771551</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Get age groups by sex</span></span></span>
 <span class="r-in"><span><span class="va">slc_by_sex</span> <span class="op">&lt;-</span> <span class="fu">getCensusData</span><span class="op">(</span></span></span>
@@ -156,13 +157,6 @@ a custom path like "~/census_cache"</p></dd>
 <span class="r-in"><span>  by_sex <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
 <span class="r-in"><span>  csv_path <span class="op">=</span> <span class="fu"><a href="getCensusDataPath.html">getCensusDataPath</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Reading census data from: /home/runner/work/_temp/Library/multigroup.vaccine/extdata/cc-est2024-syasex-49.csv</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 0 to 4: sum = 37449</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 5 to 17: sum = 112422</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 18 to 64: sum = 395422</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 0 to 4: sum = 34994</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 5 to 17: sum = 107562</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 18 to 64: sum = 376129</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="co"># Download from web (requires internet)</span></span></span>

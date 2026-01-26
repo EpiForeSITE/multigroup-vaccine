@@ -27,42 +27,18 @@ hildale <- getCityData(
   csv_path = hildale_path,
   age_groups = agelims
 )
-#> Aggregating ages 0 to 0: sum = 11.4
-#> Aggregating ages 1 to 4: sum = 45.6
-#> Aggregating ages 5 to 11: sum = 182.4
-#> Aggregating ages 12 to 13: sum = 72.4
-#> Aggregating ages 14 to 17: sum = 130.4
-#> Aggregating ages 18 to 24: sum = 196.8
-#> Aggregating ages 25 to 44: sum = 352
-#> Aggregating ages 45 to 69: sum = 265
 
 colorado_city <- getCityData(
   city_name = "Colorado City town, Arizona",
   csv_path = colorado_city_path,
   age_groups = agelims
 )
-#> Aggregating ages 0 to 0: sum = 25
-#> Aggregating ages 1 to 4: sum = 100
-#> Aggregating ages 5 to 11: sum = 387
-#> Aggregating ages 12 to 13: sum = 174
-#> Aggregating ages 14 to 17: sum = 373.8
-#> Aggregating ages 18 to 24: sum = 480.2
-#> Aggregating ages 25 to 44: sum = 532
-#> Aggregating ages 45 to 69: sum = 508
 
 centennial_park <- getCityData(
   city_name = "Centennial Park CDP, Arizona",
   csv_path = centennial_park_path,
   age_groups = agelims
 )
-#> Aggregating ages 0 to 0: sum = 76.2
-#> Aggregating ages 1 to 4: sum = 304.8
-#> Aggregating ages 5 to 11: sum = 318
-#> Aggregating ages 12 to 13: sum = 72
-#> Aggregating ages 14 to 17: sum = 163.2
-#> Aggregating ages 18 to 24: sum = 214.8
-#> Aggregating ages 25 to 44: sum = 395
-#> Aggregating ages 45 to 69: sum = 189
 
 agepops <- round(hildale$age_pops + colorado_city$age_pops + centennial_park$age_pops)
 ```

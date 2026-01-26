@@ -14,7 +14,8 @@ getCensusData(
   age_groups = NULL,
   by_sex = FALSE,
   csv_path = NULL,
-  cache_dir = NULL
+  cache_dir = NULL,
+  verbose = FALSE
 )
 ```
 
@@ -55,6 +56,11 @@ getCensusData(
   it, or download and save a new one. Default is NULL (no caching). Use
   "." for current directory or specify a custom path like
   "~/census_cache"
+
+- verbose:
+
+  Logical, if TRUE prints messages about data loading and age
+  aggregation. Default is FALSE.
 
 ## Value
 
@@ -102,7 +108,6 @@ slc_data <- getCensusData(
   year = 2024,
   csv_path = getCensusDataPath()
 )
-#> Reading census data from: /home/runner/work/_temp/Library/multigroup.vaccine/extdata/cc-est2024-syasex-49.csv
 
 # Get age groups without sex disaggregation
 slc_grouped <- getCensusData(
@@ -112,10 +117,6 @@ slc_grouped <- getCensusData(
   age_groups = c(0, 5, 18, 65),
   csv_path = getCensusDataPath()
 )
-#> Reading census data from: /home/runner/work/_temp/Library/multigroup.vaccine/extdata/cc-est2024-syasex-49.csv
-#> Aggregating ages 0 to 4: sum = 72443
-#> Aggregating ages 5 to 17: sum = 219984
-#> Aggregating ages 18 to 64: sum = 771551
 
 # Get age groups by sex
 slc_by_sex <- getCensusData(
@@ -126,13 +127,6 @@ slc_by_sex <- getCensusData(
   by_sex = TRUE,
   csv_path = getCensusDataPath()
 )
-#> Reading census data from: /home/runner/work/_temp/Library/multigroup.vaccine/extdata/cc-est2024-syasex-49.csv
-#> Aggregating ages 0 to 4: sum = 37449
-#> Aggregating ages 5 to 17: sum = 112422
-#> Aggregating ages 18 to 64: sum = 395422
-#> Aggregating ages 0 to 4: sum = 34994
-#> Aggregating ages 5 to 17: sum = 107562
-#> Aggregating ages 18 to 64: sum = 376129
 
 if (FALSE) { # \dontrun{
 # Download from web (requires internet)

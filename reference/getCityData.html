@@ -48,7 +48,8 @@ which can be disaggregated into single-year ages or aggregated into custom age g
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">getCityData</span><span class="op">(</span></span>
 <span>  <span class="va">city_name</span>,</span>
 <span>  <span class="va">csv_path</span>,</span>
-<span>  age_groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5</span>, <span class="fl">10</span>, <span class="fl">15</span>, <span class="fl">20</span>, <span class="fl">25</span>, <span class="fl">30</span>, <span class="fl">35</span>, <span class="fl">40</span>, <span class="fl">45</span>, <span class="fl">50</span>, <span class="fl">55</span>, <span class="fl">60</span>, <span class="fl">65</span>, <span class="fl">70</span>, <span class="fl">75</span>, <span class="fl">80</span>, <span class="fl">85</span><span class="op">)</span></span>
+<span>  age_groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5</span>, <span class="fl">10</span>, <span class="fl">15</span>, <span class="fl">20</span>, <span class="fl">25</span>, <span class="fl">30</span>, <span class="fl">35</span>, <span class="fl">40</span>, <span class="fl">45</span>, <span class="fl">50</span>, <span class="fl">55</span>, <span class="fl">60</span>, <span class="fl">65</span>, <span class="fl">70</span>, <span class="fl">75</span>, <span class="fl">80</span>, <span class="fl">85</span><span class="op">)</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -67,6 +68,10 @@ which can be disaggregated into single-year ages or aggregated into custom age g
 <dt id="arg-age-groups">age_groups<a class="anchor" aria-label="anchor" href="#arg-age-groups"></a></dt>
 <dd><p>Vector of age limits for grouping. If NULL, returns single-year ages
 (disaggregated from 5-year ACS groups). Default uses 5-year intervals: c(0,5,10,...,85)</p></dd>
+
+
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
+<dd><p>Logical, if TRUE prints messages about age aggregation. Default is FALSE.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -99,23 +104,6 @@ which can be disaggregated into single-year ages or aggregated into custom age g
 <span class="r-in"><span>  city_name <span class="op">=</span> <span class="st">"Hildale city, Utah"</span>,</span></span>
 <span class="r-in"><span>  csv_path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"hildale_ut_2023.csv"</span>, package <span class="op">=</span> <span class="st">"multigroup.vaccine"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 0 to 4: sum = 57</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 5 to 9: sum = 110</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 10 to 14: sum = 181</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 15 to 19: sum = 157</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 20 to 24: sum = 134</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 25 to 29: sum = 128</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 30 to 34: sum = 55</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 35 to 39: sum = 110</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 40 to 44: sum = 59</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 45 to 49: sum = 105</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 50 to 54: sum = 64</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 55 to 59: sum = 32</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 60 to 64: sum = 29</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 65 to 69: sum = 35</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 70 to 74: sum = 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 75 to 79: sum = 27</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 80 to 84: sum = 18</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Load with single-year ages (disaggregated)</span></span></span>
 <span class="r-in"><span><span class="va">hildale_single</span> <span class="op">&lt;-</span> <span class="fu">getCityData</span><span class="op">(</span></span></span>
@@ -130,8 +118,6 @@ which can be disaggregated into single-year ages or aggregated into custom age g
 <span class="r-in"><span>  csv_path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"hildale_ut_2023.csv"</span>, package <span class="op">=</span> <span class="st">"multigroup.vaccine"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  age_groups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">18</span>, <span class="fl">65</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 0 to 17: sum = 442.2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 18 to 64: sum = 778.8</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

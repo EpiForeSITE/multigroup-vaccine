@@ -14,7 +14,7 @@ prints aggregation summaries to the console for each group using
 ## Usage
 
 ``` r
-aggregateByAgeGroups(ages, pops, age_groups)
+aggregateByAgeGroups(ages, pops, age_groups, verbose = FALSE)
 ```
 
 ## Arguments
@@ -37,6 +37,11 @@ aggregateByAgeGroups(ages, pops, age_groups)
   in ascending order. If length is 1, the single value defines an
   "Xplus" group (ages \>= X). For length \> 1, contiguous
   non-overlapping groups are created as described above.
+
+- verbose:
+
+  Logical, if TRUE prints aggregation messages for each group. Default
+  is FALSE.
 
 ## Value
 
@@ -78,9 +83,6 @@ A named list with components:
 ages <- 0:100
 pops <- rep(100, length(ages))
 aggregateByAgeGroups(ages, pops, c(0, 5, 18, 65))
-#> Aggregating ages 0 to 4: sum = 500
-#> Aggregating ages 5 to 17: sum = 1300
-#> Aggregating ages 18 to 64: sum = 4700
 #> $pops
 #> [1]  500 1300 4700 3600
 #> 
@@ -104,7 +106,6 @@ aggregateByAgeGroups(ages, pops, c(0, 5, 18, 65))
 
 # Single open-ended group (65plus)
 aggregateByAgeGroups(ages, pops, 65)
-#> Aggregating ages 65 and above: sum = 3600
 #> $pops
 #> [1] 3600
 #> 

@@ -63,7 +63,7 @@ summaries to the console for each group using <code><a href="https://rdrr.io/r/b
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">aggregateByAgeGroups</span><span class="op">(</span><span class="va">ages</span>, <span class="va">pops</span>, <span class="va">age_groups</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">aggregateByAgeGroups</span><span class="op">(</span><span class="va">ages</span>, <span class="va">pops</span>, <span class="va">age_groups</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -87,6 +87,11 @@ beforehand if required.</p></dd>
 Must be sorted in ascending order. If length is 1, the single value defines
 an "Xplus" group (ages &gt;= X). For length &gt; 1, contiguous non-overlapping
 groups are created as described above.</p></dd>
+
+
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
+<dd><p>Logical, if TRUE prints aggregation messages for each group.
+Default is FALSE.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -121,9 +126,6 @@ aggregated group (useful for debugging / logging).</p></li>
 <span class="r-in"><span><span class="va">ages</span> <span class="op">&lt;-</span> <span class="fl">0</span><span class="op">:</span><span class="fl">100</span></span></span>
 <span class="r-in"><span><span class="va">pops</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">ages</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">aggregateByAgeGroups</span><span class="op">(</span><span class="va">ages</span>, <span class="va">pops</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5</span>, <span class="fl">18</span>, <span class="fl">65</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 0 to 4: sum = 500</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 5 to 17: sum = 1300</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 18 to 64: sum = 4700</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $pops</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1]  500 1300 4700 3600</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -147,7 +149,6 @@ aggregated group (useful for debugging / logging).</p></li>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Single open-ended group (65plus)</span></span></span>
 <span class="r-in"><span><span class="fu">aggregateByAgeGroups</span><span class="op">(</span><span class="va">ages</span>, <span class="va">pops</span>, <span class="fl">65</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Aggregating ages 65 and above: sum = 3600</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $pops</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3600</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

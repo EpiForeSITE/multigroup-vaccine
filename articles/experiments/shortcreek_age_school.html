@@ -96,42 +96,18 @@ groups:</p>
 <span>  csv_path <span class="op">=</span> <span class="va">hildale_path</span>,</span>
 <span>  age_groups <span class="op">=</span> <span class="va">agelims</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Aggregating ages 0 to 0: sum = 11.4</span></span>
-<span><span class="co">#&gt; Aggregating ages 1 to 4: sum = 45.6</span></span>
-<span><span class="co">#&gt; Aggregating ages 5 to 11: sum = 182.4</span></span>
-<span><span class="co">#&gt; Aggregating ages 12 to 13: sum = 72.4</span></span>
-<span><span class="co">#&gt; Aggregating ages 14 to 17: sum = 130.4</span></span>
-<span><span class="co">#&gt; Aggregating ages 18 to 24: sum = 196.8</span></span>
-<span><span class="co">#&gt; Aggregating ages 25 to 44: sum = 352</span></span>
-<span><span class="co">#&gt; Aggregating ages 45 to 69: sum = 265</span></span>
 <span></span>
 <span><span class="va">colorado_city</span> <span class="op">&lt;-</span> <span class="fu"><a href="../../reference/getCityData.html">getCityData</a></span><span class="op">(</span></span>
 <span>  city_name <span class="op">=</span> <span class="st">"Colorado City town, Arizona"</span>,</span>
 <span>  csv_path <span class="op">=</span> <span class="va">colorado_city_path</span>,</span>
 <span>  age_groups <span class="op">=</span> <span class="va">agelims</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Aggregating ages 0 to 0: sum = 25</span></span>
-<span><span class="co">#&gt; Aggregating ages 1 to 4: sum = 100</span></span>
-<span><span class="co">#&gt; Aggregating ages 5 to 11: sum = 387</span></span>
-<span><span class="co">#&gt; Aggregating ages 12 to 13: sum = 174</span></span>
-<span><span class="co">#&gt; Aggregating ages 14 to 17: sum = 373.8</span></span>
-<span><span class="co">#&gt; Aggregating ages 18 to 24: sum = 480.2</span></span>
-<span><span class="co">#&gt; Aggregating ages 25 to 44: sum = 532</span></span>
-<span><span class="co">#&gt; Aggregating ages 45 to 69: sum = 508</span></span>
 <span></span>
 <span><span class="va">centennial_park</span> <span class="op">&lt;-</span> <span class="fu"><a href="../../reference/getCityData.html">getCityData</a></span><span class="op">(</span></span>
 <span>  city_name <span class="op">=</span> <span class="st">"Centennial Park CDP, Arizona"</span>,</span>
 <span>  csv_path <span class="op">=</span> <span class="va">centennial_park_path</span>,</span>
 <span>  age_groups <span class="op">=</span> <span class="va">agelims</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Aggregating ages 0 to 0: sum = 76.2</span></span>
-<span><span class="co">#&gt; Aggregating ages 1 to 4: sum = 304.8</span></span>
-<span><span class="co">#&gt; Aggregating ages 5 to 11: sum = 318</span></span>
-<span><span class="co">#&gt; Aggregating ages 12 to 13: sum = 72</span></span>
-<span><span class="co">#&gt; Aggregating ages 14 to 17: sum = 163.2</span></span>
-<span><span class="co">#&gt; Aggregating ages 18 to 24: sum = 214.8</span></span>
-<span><span class="co">#&gt; Aggregating ages 25 to 44: sum = 395</span></span>
-<span><span class="co">#&gt; Aggregating ages 45 to 69: sum = 189</span></span>
 <span></span>
 <span><span class="va">agepops</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">hildale</span><span class="op">$</span><span class="va">age_pops</span> <span class="op">+</span> <span class="va">colorado_city</span><span class="op">$</span><span class="va">age_pops</span> <span class="op">+</span> <span class="va">centennial_park</span><span class="op">$</span><span class="va">age_pops</span><span class="op">)</span></span></code></pre></div>
 </div>
