@@ -4,7 +4,7 @@
 \alias{processCensusDataBySex}
 \title{Process census data with sex disaggregation}
 \usage{
-processCensusDataBySex(county_data, age_groups)
+processCensusDataBySex(county_data, age_groups, verbose = FALSE)
 }
 \description{
 Process census data with sex disaggregation

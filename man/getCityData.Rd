@@ -7,7 +7,8 @@
 getCityData(
   city_name,
   csv_path,
-  age_groups = c(0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85)
+  age_groups = c(0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85),
+  verbose = FALSE
 )
 }
 \arguments{
@@ -17,6 +18,8 @@ getCityData(
 
 \item{age_groups}{Vector of age limits for grouping. If NULL, returns single-year ages
 (disaggregated from 5-year ACS groups). Default uses 5-year intervals: c(0,5,10,...,85)}
+
+\item{verbose}{Logical, if TRUE prints messages about age aggregation. Default is FALSE.}
 }
 \value{
 A list containing:
