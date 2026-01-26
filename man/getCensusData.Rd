@@ -11,7 +11,8 @@ getCensusData(
   age_groups = NULL,
   by_sex = FALSE,
   csv_path = NULL,
-  cache_dir = NULL
+  cache_dir = NULL,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -34,6 +35,9 @@ automatic caching.}
 the function will check for an existing cached file and use it, or download and save
 a new one. Default is NULL (no caching). Use "." for current directory or specify
 a custom path like "~/census_cache"}
+
+\item{verbose}{Logical, if TRUE prints messages about data loading and age aggregation.
+Default is FALSE.}
 }
 \value{
 A list containing:
