@@ -180,9 +180,9 @@ getCensusData <- function(state_fips,
 
   # Process data based on sex disaggregation
   if (by_sex) {
-    result <- processCensusDataBySex(county_data, age_groups, verbose)
+    result <- processCensusDataBySex(county_data, age_groups, verbose = verbose)
   } else {
-    result <- processCensusDataTotal(county_data, age_groups, verbose)
+    result <- processCensusDataTotal(county_data, age_groups, verbose = verbose)
   }
 
   # Add metadata
@@ -207,7 +207,7 @@ processCensusDataTotal <- function(county_data, age_groups, verbose = FALSE) {
 
   # If age_groups specified, aggregate
   if (!is.null(age_groups)) {
-    grouped <- aggregateByAgeGroups(ages, pops, age_groups, verbose)
+    grouped <- aggregateByAgeGroups(ages, pops, age_groups, verbose = verbose)
     return(list(
       age_pops = grouped$pops,
       age_labels = grouped$labels,
@@ -239,8 +239,8 @@ processCensusDataBySex <- function(county_data, age_groups, verbose = FALSE) {
 
   # If age_groups specified, aggregate for each sex
   if (!is.null(age_groups)) {
-    male_grouped <- aggregateByAgeGroups(ages, male_pops, age_groups, verbose)
-    female_grouped <- aggregateByAgeGroups(ages, female_pops, age_groups, verbose)
+    male_grouped <- aggregateByAgeGroups(ages, male_pops, age_groups, verbose = verbose)
+    female_grouped <- aggregateByAgeGroups(ages, female_pops, age_groups, verbose = verbose)
 
     # Interleave male and female groups: M0-4, F0-4, M5-17, F5-17, etc.
     n_groups <- length(male_grouped$pops)
@@ -299,8 +299,8 @@ processCensusDataBySex <- function(county_data, age_groups, verbose = FALSE) {
 #' \code{age_groups[i]} to \code{age_groups[i+1] - 1} for i = 1:(n-1) and
 #' \code{age_groups[n]} and above for the final group. Human-readable labels are produced:
 #' "under1" for the 0–0 group, "ageX" for single-year groups, "XtoY" for ranges,
-#' and "Xplus" for the final open group. The function prints aggregation
-#' summaries to the console for each group using \code{cat()}.
+#' and "Xplus" for the final open group. When \code{verbose = TRUE}, the function prints
+#' aggregation summaries to the console for each group using \code{cat()}.
 #'
 #' @param ages Numeric vector of ages (typically integers) corresponding to the
 #'   entries in `pops`.
@@ -326,8 +326,9 @@ processCensusDataBySex <- function(county_data, age_groups, verbose = FALSE) {
 #'   infinite.
 #' - If no ages fall into a group the aggregated count for that group is 0
 #'   (because `sum(numeric(0)) == 0`).
-#' - The function writes progress messages to the console with `cat()` for each
-#'   aggregated group (useful for debugging / logging).
+#' - When \code{verbose = TRUE}, the function writes progress messages to the console
+#'   with \code{cat()} for each aggregated group (useful for debugging / logging).
+#'   By default (\code{verbose = FALSE}), the function is silent.
 #' @examples
 #' \donttest{
 #' # Multiple groups example
@@ -638,7 +639,7 @@ getCityData <- function(city_name, csv_path, age_groups = c(0,5,10,15,20,25,30,3
 
   # If age_groups is provided, first disaggregate to single years, then aggregate
   single_year <- disaggregateCityAges(acs_age_pops)
-  grouped <- aggregateByAgeGroups(single_year$ages, single_year$age_pops, age_groups, verbose)
+  grouped <- aggregateByAgeGroups(single_year$ages, single_year$age_pops, age_groups, verbose = verbose)
 
   return(list(
     city = city_name,
