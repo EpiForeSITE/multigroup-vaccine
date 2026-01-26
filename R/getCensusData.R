@@ -17,6 +17,8 @@
 #'   the function will check for an existing cached file and use it, or download and save
 #'   a new one. Default is NULL (no caching). Use "." for current directory or specify
 #'   a custom path like "~/census_cache"
+#' @param verbose Logical, if TRUE prints messages about data loading and age aggregation.
+#'   Default is FALSE.
 #' @return A list containing:
 #'   \item{county}{County name}
 #'   \item{state}{State name}
@@ -78,7 +80,8 @@ getCensusData <- function(state_fips,
                           age_groups = NULL,
                           by_sex = FALSE,
                           csv_path = NULL,
-                          cache_dir = NULL) {
+                          cache_dir = NULL,
+                          verbose = FALSE) {
   # Validate inputs
   if (!year %in% c(2020, 2020.1, 2021, 2022, 2023, 2024)) {
     stop("Year must be 2020, 2020.1 (April 1 base), 2021, 2022, 2023, or 2024")
@@ -93,28 +96,28 @@ getCensusData <- function(state_fips,
     if (!file.exists(csv_path)) {
       stop(sprintf("CSV file not found: %s", csv_path))
     }
-    message(sprintf("Reading census data from: %s", csv_path))
+    if (verbose) message(sprintf("Reading census data from: %s", csv_path))
     raw_data <- read.csv(csv_path, stringsAsFactors = FALSE)
     
   } else if (!is.null(cache_dir)) {
     # Check cache directory for existing file
     if (!dir.exists(cache_dir)) {
-      message(sprintf("Creating cache directory: %s", cache_dir))
+      if (verbose) message(sprintf("Creating cache directory: %s", cache_dir))
       dir.create(cache_dir, recursive = TRUE)
     }
     
     cached_file <- file.path(cache_dir, file_name)
     
     if (file.exists(cached_file)) {
-      message(sprintf("Reading cached census data from: %s", cached_file))
+      if (verbose) message(sprintf("Reading cached census data from: %s", cached_file))
       raw_data <- read.csv(cached_file, stringsAsFactors = FALSE)
     } else {
       # Download and cache
       base_url <- "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/counties/asrh/"
       census_url <- paste0(base_url, file_name)
       
-      message(sprintf("Downloading census data from: %s", census_url))
-      message(sprintf("Saving to cache: %s", cached_file))
+      if (verbose) message(sprintf("Downloading census data from: %s", census_url))
+      if (verbose) message(sprintf("Saving to cache: %s", cached_file))
       
       tryCatch({
         raw_data <- read.csv(census_url, stringsAsFactors = FALSE)
@@ -131,7 +134,7 @@ getCensusData <- function(state_fips,
     base_url <- "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/counties/asrh/"
     census_url <- paste0(base_url, file_name)
     
-    message(sprintf("Downloading census data from: %s", census_url))
+    if (verbose) message(sprintf("Downloading census data from: %s", census_url))
     
     tryCatch({
       raw_data <- read.csv(census_url, stringsAsFactors = FALSE)
@@ -177,9 +180,9 @@ getCensusData <- function(state_fips,
 
   # Process data based on sex disaggregation
   if (by_sex) {
-    result <- processCensusDataBySex(county_data, age_groups)
+    result <- processCensusDataBySex(county_data, age_groups, verbose = verbose)
   } else {
-    result <- processCensusDataTotal(county_data, age_groups)
+    result <- processCensusDataTotal(county_data, age_groups, verbose = verbose)
   }
 
   # Add metadata
@@ -194,7 +197,7 @@ getCensusData <- function(state_fips,
 
 #' Process census data without sex disaggregation
 #' @keywords internal
-processCensusDataTotal <- function(county_data, age_groups) {
+processCensusDataTotal <- function(county_data, age_groups, verbose = FALSE) {
 
   # Sort by age to ensure correct ordering
   county_data <- county_data[order(county_data$AGE), ]
@@ -204,7 +207,7 @@ processCensusDataTotal <- function(county_data, age_groups) {
 
   # If age_groups specified, aggregate
   if (!is.null(age_groups)) {
-    grouped <- aggregateByAgeGroups(ages, pops, age_groups)
+    grouped <- aggregateByAgeGroups(ages, pops, age_groups, verbose = verbose)
     return(list(
       age_pops = grouped$pops,
       age_labels = grouped$labels,
@@ -225,7 +228,7 @@ processCensusDataTotal <- function(county_data, age_groups) {
 
 #' Process census data with sex disaggregation
 #' @keywords internal
-processCensusDataBySex <- function(county_data, age_groups) {
+processCensusDataBySex <- function(county_data, age_groups, verbose = FALSE) {
 
   # Sort by age to ensure correct ordering
   county_data <- county_data[order(county_data$AGE), ]
@@ -236,8 +239,8 @@ processCensusDataBySex <- function(county_data, age_groups) {
 
   # If age_groups specified, aggregate for each sex
   if (!is.null(age_groups)) {
-    male_grouped <- aggregateByAgeGroups(ages, male_pops, age_groups)
-    female_grouped <- aggregateByAgeGroups(ages, female_pops, age_groups)
+    male_grouped <- aggregateByAgeGroups(ages, male_pops, age_groups, verbose = verbose)
+    female_grouped <- aggregateByAgeGroups(ages, female_pops, age_groups, verbose = verbose)
 
     # Interleave male and female groups: M0-4, F0-4, M5-17, F5-17, etc.
     n_groups <- length(male_grouped$pops)
@@ -296,8 +299,8 @@ processCensusDataBySex <- function(county_data, age_groups) {
 #' \code{age_groups[i]} to \code{age_groups[i+1] - 1} for i = 1:(n-1) and
 #' \code{age_groups[n]} and above for the final group. Human-readable labels are produced:
 #' "under1" for the 0–0 group, "ageX" for single-year groups, "XtoY" for ranges,
-#' and "Xplus" for the final open group. The function prints aggregation
-#' summaries to the console for each group using \code{cat()}.
+#' and "Xplus" for the final open group. When \code{verbose = TRUE}, the function prints
+#' aggregation summaries to the console for each group using \code{cat()}.
 #'
 #' @param ages Numeric vector of ages (typically integers) corresponding to the
 #'   entries in `pops`.
@@ -309,6 +312,8 @@ processCensusDataBySex <- function(county_data, age_groups) {
 #'   Must be sorted in ascending order. If length is 1, the single value defines
 #'   an "Xplus" group (ages >= X). For length > 1, contiguous non-overlapping
 #'   groups are created as described above.
+#' @param verbose Logical, if TRUE prints aggregation messages for each group.
+#'   Default is FALSE.
 #' @return A named list with components:
 #'   \describe{
 #'     \item{pops}{Numeric vector of aggregated population counts, one element per group.}
@@ -321,8 +326,9 @@ processCensusDataBySex <- function(county_data, age_groups) {
 #'   infinite.
 #' - If no ages fall into a group the aggregated count for that group is 0
 #'   (because `sum(numeric(0)) == 0`).
-#' - The function writes progress messages to the console with `cat()` for each
-#'   aggregated group (useful for debugging / logging).
+#' - When \code{verbose = TRUE}, the function writes progress messages to the console
+#'   with \code{cat()} for each aggregated group (useful for debugging / logging).
+#'   By default (\code{verbose = FALSE}), the function is silent.
 #' @examples
 #' \donttest{
 #' # Multiple groups example
@@ -334,7 +340,7 @@ processCensusDataBySex <- function(county_data, age_groups) {
 #' aggregateByAgeGroups(ages, pops, 65)
 #' }
 #' @export
-aggregateByAgeGroups <- function(ages, pops, age_groups) {
+aggregateByAgeGroups <- function(ages, pops, age_groups, verbose = FALSE) {
   n_groups <- length(age_groups)
   grouped_pops <- numeric(n_groups)
   labels <- character(n_groups)
@@ -348,7 +354,7 @@ aggregateByAgeGroups <- function(ages, pops, age_groups) {
     labels[1] <- sprintf("%dplus", age_groups[1])
     age_ranges[[1]] <- c(age_groups[1], Inf)
 
-    cat(sprintf("Aggregating ages %d and above: sum = %g\n", age_groups[1], grouped_pops[1]))
+    if (verbose) cat(sprintf("Aggregating ages %d and above: sum = %g\n", age_groups[1], grouped_pops[1]))
 
     return(list(pops = grouped_pops, labels = labels, age_ranges = age_ranges))
   }
@@ -360,7 +366,7 @@ aggregateByAgeGroups <- function(ages, pops, age_groups) {
     idx <- ages >= lower & ages <= upper
     grouped_pops[i] <- sum(pops[idx])
 
-    cat(sprintf("Aggregating ages %d to %d: sum = %g\n", lower, upper, grouped_pops[i]))
+    if (verbose) cat(sprintf("Aggregating ages %d to %d: sum = %g\n", lower, upper, grouped_pops[i]))
 
     if (lower == 0 && upper == 0) {
       labels[i] <- "under1"
@@ -388,6 +394,7 @@ aggregateByAgeGroups <- function(ages, pops, age_groups) {
 #' @param year Census year (2020-2024), default 2024
 #' @param csv_path Optional path to a previously downloaded census CSV file
 #' @param cache_dir Optional directory path for caching downloaded census files
+#' @param verbose Logical, if TRUE prints messages about data loading. Default is FALSE.
 #' @return Character vector of county names
 #' @examples
 #' # Use the included example data
@@ -406,7 +413,7 @@ aggregateByAgeGroups <- function(ages, pops, age_groups) {
 #' }
 #' @importFrom utils read.csv write.csv
 #' @export
-listCounties <- function(state_fips, year = 2024, csv_path = NULL, cache_dir = NULL) {
+listCounties <- function(state_fips, year = 2024, csv_path = NULL, cache_dir = NULL, verbose = FALSE) {
   file_name <- sprintf("cc-est2024-syasex-%s.csv", state_fips)
 
   # Determine where to read data from
@@ -415,28 +422,28 @@ listCounties <- function(state_fips, year = 2024, csv_path = NULL, cache_dir = N
     if (!file.exists(csv_path)) {
       stop(sprintf("CSV file not found: %s", csv_path))
     }
-    message(sprintf("Reading census data from: %s", csv_path))
+    if (verbose) message(sprintf("Reading census data from: %s", csv_path))
     raw_data <- read.csv(csv_path, stringsAsFactors = FALSE)
 
   } else if (!is.null(cache_dir)) {
     # Check cache directory for existing file
     if (!dir.exists(cache_dir)) {
-      message(sprintf("Creating cache directory: %s", cache_dir))
+      if (verbose) message(sprintf("Creating cache directory: %s", cache_dir))
       dir.create(cache_dir, recursive = TRUE)
     }
 
     cached_file <- file.path(cache_dir, file_name)
 
     if (file.exists(cached_file)) {
-      message(sprintf("Reading cached census data from: %s", cached_file))
+      if (verbose) message(sprintf("Reading cached census data from: %s", cached_file))
       raw_data <- read.csv(cached_file, stringsAsFactors = FALSE)
     } else {
       # Download and cache
       base_url <- "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/counties/asrh/"
       census_url <- paste0(base_url, file_name)
 
-      message(sprintf("Downloading census data from: %s", census_url))
-      message(sprintf("Saving to cache: %s", cached_file))
+      if (verbose) message(sprintf("Downloading census data from: %s", census_url))
+      if (verbose) message(sprintf("Saving to cache: %s", cached_file))
 
       tryCatch({
         raw_data <- read.csv(census_url, stringsAsFactors = FALSE)
@@ -453,7 +460,7 @@ listCounties <- function(state_fips, year = 2024, csv_path = NULL, cache_dir = N
     base_url <- "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/counties/asrh/"
     census_url <- paste0(base_url, file_name)
 
-    message(sprintf("Downloading census data from: %s", census_url))
+    if (verbose) message(sprintf("Downloading census data from: %s", census_url))
 
     tryCatch({
       raw_data <- read.csv(census_url, stringsAsFactors = FALSE)
@@ -545,6 +552,7 @@ getStateFIPS <- function(state_name) {
 #' @param csv_path Path to the city population CSV file
 #' @param age_groups Vector of age limits for grouping. If NULL, returns single-year ages
 #'   (disaggregated from 5-year ACS groups). Default uses 5-year intervals: c(0,5,10,...,85)
+#' @param verbose Logical, if TRUE prints messages about age aggregation. Default is FALSE.
 #' @return A list containing:
 #'   \item{city}{City name}
 #'   \item{year}{Data year}
@@ -574,7 +582,7 @@ getStateFIPS <- function(state_name) {
 #' )
 #' @importFrom utils read.csv
 #' @export
-getCityData <- function(city_name, csv_path, age_groups = c(0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85)) {
+getCityData <- function(city_name, csv_path, age_groups = c(0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85), verbose = FALSE) {
   if (!file.exists(csv_path)) {
     stop(sprintf("CSV file not found: %s", csv_path))
   }
@@ -631,7 +639,7 @@ getCityData <- function(city_name, csv_path, age_groups = c(0,5,10,15,20,25,30,3
 
   # If age_groups is provided, first disaggregate to single years, then aggregate
   single_year <- disaggregateCityAges(acs_age_pops)
-  grouped <- aggregateByAgeGroups(single_year$ages, single_year$age_pops, age_groups)
+  grouped <- aggregateByAgeGroups(single_year$ages, single_year$age_pops, age_groups, verbose = verbose)
 
   return(list(
     city = city_name,
