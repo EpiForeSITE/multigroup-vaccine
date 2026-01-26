@@ -40,13 +40,6 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
-      - name: Configure R for macOS
-        if: runner.os == 'macOS'
-        run: |
-          cat("options(repos = c(CRAN = 'https://cloud.r-project.org'))\n", file = "~/.Rprofile", append = TRUE)
-          cat("options(pkgType = 'both')\n", file = "~/.Rprofile", append = TRUE)
-        shell: Rscript {0}
-
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
