@@ -62,6 +62,8 @@ test_that("contactMatrixPolymod() works correctly with valid age limits", {
   agelims <- c(0, 5, 18, 65)
   agepops <- c(100, 200, 500, 200)
 
+  cmp <- contactMatrixPolymod(agelims, agepops)
+
   # Should not warn
   expect_silent(cmp <- contactMatrixPolymod(agelims, agepops))
 
