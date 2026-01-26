@@ -4,7 +4,7 @@
 \alias{aggregateByAgeGroups}
 \title{Aggregate population counts into age groups}
 \usage{
-aggregateByAgeGroups(ages, pops, age_groups)
+aggregateByAgeGroups(ages, pops, age_groups, verbose = FALSE)
 }
 \arguments{
 \item{ages}{Numeric vector of ages (typically integers) corresponding to the
@@ -19,6 +19,9 @@ beforehand if required.}
 Must be sorted in ascending order. If length is 1, the single value defines
 an "Xplus" group (ages >= X). For length > 1, contiguous non-overlapping
 groups are created as described above.}
+
+\item{verbose}{Logical, if TRUE prints aggregation messages for each group.
+Default is FALSE.}
 }
 \value{
 A named list with components:

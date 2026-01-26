@@ -4,7 +4,13 @@
 \alias{listCounties}
 \title{List available counties for a state}
 \usage{
-listCounties(state_fips, year = 2024, csv_path = NULL, cache_dir = NULL)
+listCounties(
+  state_fips,
+  year = 2024,
+  csv_path = NULL,
+  cache_dir = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{state_fips}{Two-digit FIPS code for the state}
@@ -14,6 +20,8 @@ listCounties(state_fips, year = 2024, csv_path = NULL, cache_dir = NULL)
 \item{csv_path}{Optional path to a previously downloaded census CSV file}
 
 \item{cache_dir}{Optional directory path for caching downloaded census files}
+
+\item{verbose}{Logical, if TRUE prints messages about data loading. Default is FALSE.}
 }
 \value{
 Character vector of county names
