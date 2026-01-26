@@ -1,6 +1,6 @@
 library(multigroup.vaccine)
 
-test_that("determinisitc final size calculations agree: 2 groups, vax at time 0", {
+test_that("deterministic final size calculations agree: 2 groups, vax at time 0", {
   vacPortion <- c(0.1, 0.1)
   popsize <- c(80000, 20000)
   R0 <- 1.5
