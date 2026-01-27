@@ -13,57 +13,69 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
+This vignette demonstrates how to set up contact matrices for age- and school-structured models using examples.
 
 ```{r setup}
 library(multigroup.vaccine)
 library(socialmixr)
 ```
-Set up age groups:
+
+First we define the age groups we want to use, and the population sizes of each group:
+
 ```{r}
 # under 1, 1-4, 5-11, 12-13, 14-17, 18-24, 25-44, 45-69, 70 plus
 agelims <- c(0, 1, 5, 12, 14, 18, 25, 45, 70)
 agepops <- c(100, 400, 700, 200, 400, 700, 2000, 2400, 1000)
 ```
-Generate contact matrix using Polymod data:
+
+Here's how to generate a contact matrix using Polymod data, which is contact survey data from the well known "Polymod" study. When including the second argument to the `contactMatrixPolymod()` function, the contact matrix will be adjusted to fit the population distribution defined above in the `agepops` variable.
+
 ```{r}
-cmp <- multigroup.vaccine:::contactMatrixPolymod(agelims, agepops)
-round(cmp, 2)
+cmp <- contactMatrixPolymod(agelims, agepops)
+knitr::kable(round(cmp, 2), format = "markdown")
 ```
 The sum of each row represents the relative overall contact rate of each group:
 ```{r}
-round(rowSums(cmp), 2)
+knitr::kable(round(rowSums(cmp), 2), format = "markdown", col.names = "total")
 ```
 Those row sums can be factored out to generate the fraction of each group's contacts that are with each group:
 The sum of each row represents the relative overall contact rate of each group:
-```{r}
-round(cmp/rowSums(cmp), 2)
-```
-
-Now we split the age groups for elementary school (5-11), middle school (12-13), and high school (18-24) into two schools each:
 
 ```{r}
-schoolagegroups <- c(3, 3, 4, 4, 5, 5)
-schoolpops <- c(350, 350, 100, 100, 200, 200)
+knitr::kable(round(cmp/rowSums(cmp), 2), format = "markdown")
 ```
 
-We can access the Polymod data to specify the number of contacts that occurred at school:
+Now we show how to split the age groups for elementary school (5-11), middle school (12-13), and high school (18-24) into two schools each:
+
 ```{r}
-cmAll <- contact_matrix(socialmixr::polymod, age.limits = agelims)$matrix
-cmSchool <- contact_matrix(socialmixr::polymod, age.limits = agelims, filter = list(cnt_school = 1))$matrix
-
-round(cmAll, 2)
-round(cmSchool, 2)
+schoolagegroups <- c(3, 3, 4, 4, 5, 5)         #The indices of the age group for each school
+schoolpops <- c(350, 350, 100, 100, 200, 200)  #The number of students in each school
 ```
-Based on this we assume that 70% of a student's within-age-group contacts occur at their own school:
+
+The `socialmixr` R package includes functions that allow us to see the number of contacts of school-aged children that occurred overall vs. just at school:
+```{r}
+cmAll <- suppressMessages(
+    suppressWarnings(socialmixr::contact_matrix(socialmixr::polymod,
+                                                age.limits = agelims)$matrix))
+cmSchool <- suppressMessages(
+    suppressWarnings(socialmixr::contact_matrix(socialmixr::polymod,
+                                                age.limits = agelims,
+                                                filter = list(cnt_school = 1))$matrix))
+
+knitr::kable(round(cmAll, 2), format = "markdown")
+knitr::kable(round(cmSchool, 2), format = "markdown")
+```
+Based on comparing the diagonal elements for the school-aged children age groups, we have some basis for an assumption that 70% of a student's within-age-group contacts occur at their own school:
 
 ```{r}
 schportion <- 0.70
 ```
 
-Now we build a new matrix using the `contactMatrixAgeSchool()` function:
-```{r}
-cmps <- multigroup.vaccine:::contactMatrixAgeSchool(agelims, agepops, schoolagegroups, schoolpops, schportion)
+Now we use the above ingredients to create a new matrix using the `contactMatrixAgeSchool()` function. We show the old age-structured model and the new age-and-school-structured model for comparison:
 
-round(cmp, 2)
-round(cmps, 2)
+```{r}
+cmps <- contactMatrixAgeSchool(agelims, agepops, schoolagegroups, schoolpops, schportion)
+
+knitr::kable(round(cmp,2), format = "markdown")
+knitr::kable(round(cmps,2), format = "markdown")
 ```
