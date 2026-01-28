@@ -11,10 +11,10 @@ Authors@R:
            person("Centers for Disease Control and Prevention's Center for Forecasting and Outbreak Analytics",
            role="fnd", comment = "Cooperative agreement CDC-RFA-FT-23-0069"))
 Maintainer: Jake Wagoner <jakew@sci.utah.edu>
-Description: Tools for modeling infectious disease dynamics in populations 
+Description: Model infectious disease dynamics in populations 
     with multiple subgroups having different vaccination rates, vaccine 
     effectiveness, and contact patterns. Provides functions for final outbreak 
-    size calculations, age-structured models using census data, and an 
+    size calculations, age-structured models, automatic census-data fetching, and an 
     interactive Shiny dashboard for scenario exploration.
 License: MIT + file LICENSE
 Encoding: UTF-8
