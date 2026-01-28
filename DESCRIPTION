@@ -31,8 +31,6 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
-    epiworldR,
-    ggplot2
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)

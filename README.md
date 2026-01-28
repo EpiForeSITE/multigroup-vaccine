@@ -27,7 +27,13 @@ modeling and outbreak forecasting.
 
 ## Installation
 
-### From R-universe (Recommended)
+### From CRAN (recommended)(when available)
+
+``` r
+install.packages("multigroup.vaccine")
+```
+
+### From R-universe
 
 ``` r
 install.packages("multigroup.vaccine", 
@@ -46,11 +52,8 @@ remotes::install_github("EpiForeSITE/multigroup-vaccine")
 The package depends on the following R packages:
 
 - **Imports**: `deSolve`, `graphics`, `shiny`, `stats`, `bslib` (\>=
-  0.8.0), `htmltools`, `socialmixr`
-- **Suggests**: `knitr`, `rmarkdown`, `testthat` (\>= 3.0.0), `ggplot2`,
-  `epiworldR`
-
-Note that some vignettes require `ggplot2` and other suggested packages.
+  0.9.0), `htmltools`, `socialmixr`
+- **Suggests**: `knitr`, `rmarkdown`, `testthat` (\>= 3.0.0)
 
 ## Quick Start
 
@@ -92,6 +95,10 @@ results <- finalsize(
 print(results)
 ```
 
+For examples of other functions or more complex scenarios, see the
+[package
+vignettes](**https://epiforesite.github.io/multigroup-vaccine/articles/index.html**).
+
 ## Features
 
 - **Multi-group SIR modeling** with vaccination and variable contact
@@ -101,8 +108,6 @@ print(results)
 - **Final outbreak size calculations** using both analytic and
   stochastic methods
 - **Interactive Shiny dashboard** for scenario exploration
-- **Real-world case studies** including measles outbreaks with census
-  data
 
 ## Documentation
 
