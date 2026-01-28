@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Two Group Final Outbreak Size Example • multigroup.vaccine</title>
+<title>Getting Started Example • multigroup.vaccine</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Two Group Final Outbreak Size Example">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Getting Started Example">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -50,7 +50,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Two Group Final Outbreak Size Example</h1>
+      <h1>Getting Started Example</h1>
             
       
 
@@ -59,93 +59,195 @@
 
     
     
+<p>This vignette walks through a first example of setting up a
+multi-group epidemic model and calculating useful quantities for
+analysis using functions in this R package. After installing the package
+(see instructions in README), load it:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://epiforesite.github.io/multigroup-vaccine/">multigroup.vaccine</a></span><span class="op">)</span></span></code></pre></div>
-<p>Consider a population with the following parameters:</p>
+<p>In our example model, we consider a population of size 10,000
+individuals and with the following parameters:</p>
 <ul>
-<li>Two sub-populations, one with size 80000 (A) and the other with size
-20000 (B)</li>
+<li>
+<strong>Group population sizes</strong>: two sub-populations, one
+with size 80,000 (A) and the other with size 20,000 (B)</li>
 </ul>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">popsize</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">80000</span>, <span class="fl">20000</span><span class="op">)</span></span></code></pre></div>
 <ul>
-<li>Set the basic reproduction number
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mn>0</mn></msub><annotation encoding="application/x-tex">R_0</annotation></semantics></math>)
-to 1.75</li>
+<li>
+<strong>Group-to-group contact rates</strong>: to model an outbreak
+spreading among this population, we require quantification of contact
+among and between members of each group. We ultimately need to create
+the square matrix <code>contactmatrix</code> that describes the relative
+amount of contact that members of one group (row) has with each other
+group (column). The contact matrix could be quantified directly, but we
+recommend using one of the package functions to create it.</li>
 </ul>
+<p>In this example we use a model for “proportionate contacts with
+preferential mixing”, making use of our
+<code><a href="../reference/contactMatrixPropPref.html">contactMatrixPropPref()</a></code> function, which requires the
+following components. This contact model can allows for different
+overall contact rates of members of each group. Here we assume the
+relative contact rates are 1 and 1.7 for groups A and B. This means that
+an individual in Group B makes 1.7 contacts for every 1 made by an
+individual in group A.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">R0</span> <span class="op">&lt;-</span> <span class="fl">1.75</span></span></code></pre></div>
-<ul>
-<li>For group-to-group contact rates, we use a model for proportionate
-contacts with preferential mixing, making use of our
-<code><a href="../reference/contactMatrixPropPref.html">contactMatrixPropPref()</a></code> function. This contact model allows
-for different overall contact rates of members of each group. Here we
-assume the relative contact rates are 1 and 1.7 for groups A and B. This
-means that an individual in Group B makes 1.7 contacts for every 1 made
-by an individual in group A.</li>
-</ul>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">relcontact</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1.7</span><span class="op">)</span></span></code></pre></div>
-<ul>
-<li>The contact model also assumes preferential mixing within one’s own
-group. We assume that the fraction of contacts that are exclusively
-within-group is 0.2 for group A, and 0.5 for group B. For group A, this
-means that 20% of their contacts are exclusively with other members of
-group A, and the remaining 80% of contacts are split between both groups
-A and B at rates proportional to the population sizes and overall
-contact rates of each group. The latter element ensures that the overall
-number of A-to-B and B-to-A contacts are equal, for contact
-symmetry.</li>
-</ul>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<p>This contact model also can also assume preferential mixing within
+one’s own group. We assume that the fraction of contacts that are
+exclusively within-group is 0.2 for group A, and 0.5 for group B. For
+group A, this means that 20% of their contacts are exclusively with
+other members of group A, and the remaining 80% of contacts are split
+between both groups A and B at rates proportional to the population
+sizes and overall contact rates of each group. The latter element
+ensures that the overall number of A-to-B and B-to-A contacts are equal,
+for contact symmetry.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">incontact</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">0.5</span><span class="op">)</span></span></code></pre></div>
-<ul>
-<li>With the above elements, we calculate the contact matrix as
-follows</li>
-</ul>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<p>With the above elements, we calculate the contact matrix as
+follows</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">contactmatrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/contactMatrixPropPref.html">contactMatrixPropPref</a></span><span class="op">(</span><span class="va">popsize</span>, <span class="va">relcontact</span>, <span class="va">incontact</span><span class="op">)</span></span></code></pre></div>
 <ul>
-<li>Not every contact between an infectious and a susceptible individual
-necessarily leads to a transmission. The two groups may differ in
-average susceptibility to infection per contact. With relative
-susceptibility 1 and 1.05, members of group B are 5% more susceptible to
-acquiring infection from an infectious contact than group A.</li>
+<li>
+<strong>Relative susceptibility to infection</strong>. Now we are
+getting into modeling transmission of particular disease within the
+population described above. Not every contact between an infectious and
+a susceptible individual necessarily leads to a transmission. The two
+groups may differ in average susceptibility to infection per contact.
+With relative susceptibility 1 and 1.05, members of group B are 5% more
+susceptible to acquiring infection from an infectious contact than group
+A.</li>
 </ul>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">relsusc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1.05</span><span class="op">)</span></span></code></pre></div>
 <ul>
-<li>The two groups may also differ in transmissibility per contact when
-infectious. With relative transmissibility 1 and 1.01, infectious
-members of group B are 1% more likely transmit infection to a
-susceptible contact compared to infectious members of group A.</li>
+<li>
+<strong>Relative transmissibility of infection</strong>: The two
+groups may also differ in transmissibility per contact when infectious.
+With relative transmissibility 1 and 1.01, infectious members of group B
+are 1% more likely transmit infection to a susceptible contact compared
+to infectious members of group A.</li>
 </ul>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">reltransm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1.01</span><span class="op">)</span></span></code></pre></div>
 <ul>
-<li>For initial conditions, we assume no one is immune due to prior
-infection (compartment R), and one individual from group A is an initial
-infectious case (compartment I). We also assume that 30% of group A and
-20% of group B are initially immune due to vaccination (compartment
-V).</li>
+<li>
+<strong>Overall transmissibility of disease</strong>. All the
+components above are enough to describe the <em>relative</em>
+transmission rates from one group to another, but we still need an
+absolute measure of how transmissible the disease is. This is often
+quantified by a basic reproduction number
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mn>0</mn></msub><annotation encoding="application/x-tex">R_0</annotation></semantics></math>),
+defined as the average number of transmissions from a typical infectious
+individual if the rest of the population is suceptible. Here we set
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mn>0</mn></msub><annotation encoding="application/x-tex">R_0</annotation></semantics></math>
+to 1.75.</li>
+</ul>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">R0</span> <span class="op">&lt;-</span> <span class="fl">1.75</span></span></code></pre></div>
+<ul>
+<li>
+<strong>Initial conditions and vaccination</strong>: we assume no
+one is immune due to prior infection (compartment R), and one individual
+from group B is an initial infectious case (compartment I). We also
+assume that 30% of group A and 20% of group B are initially immune due
+to vaccination (compartment V).</li>
 </ul>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">initR</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span></span>
-<span><span class="va">initI</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="va">initI</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">initV</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.3</span>, <span class="fl">0.2</span><span class="op">)</span> <span class="op">*</span> <span class="va">popsize</span></span></code></pre></div>
 <ul>
-<li>The <code><a href="../reference/finalsize.html">finalsize()</a></code> function computes the final number of
-infected people in each group at the end of the outbreak, by default
-using a deterministic differential equation model and numerically
+<li>
+<strong>Final outbreak size (ODE method)</strong>: The
+<code><a href="../reference/finalsize.html">finalsize()</a></code> function computes the final number of infected
+people in each group at the end of the outbreak, by default using a
+deterministic ordinary differential equation (ODE) model and numerically
 solving the equations.</li>
 </ul>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finalsize.html">finalsize</a></span><span class="op">(</span><span class="va">popsize</span>, <span class="va">R0</span>, <span class="va">contactmatrix</span>, <span class="va">relsusc</span>, <span class="va">reltransm</span>, <span class="va">initR</span>, <span class="va">initI</span>, <span class="va">initV</span><span class="op">)</span></span>
-<span><span class="va">fs</span></span>
-<span><span class="co">#&gt; [1] 14140.46  8748.82</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/finalsize.html">finalsize</a></span><span class="op">(</span><span class="va">popsize</span>, <span class="va">R0</span>, <span class="va">contactmatrix</span>, <span class="va">relsusc</span>, <span class="va">reltransm</span>, <span class="va">initR</span>, <span class="va">initI</span>, <span class="va">initV</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 14139.571  8749.608</span></span></code></pre></div>
 <p>Over one third of the infected individuals are from population B,
 despite the fact that they comprise only one fifth of the
 population.</p>
+<ul>
+<li>
+<strong>Final outbreak size (analytic method)</strong>: We also
+provide a method to solve an analytic equation for the final outbreak
+size, which avoids the need to numerically solve for the differential
+equation trajectory:</li>
+</ul>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/finalsize.html">finalsize</a></span><span class="op">(</span><span class="va">popsize</span>, <span class="va">R0</span>, <span class="va">contactmatrix</span>, <span class="va">relsusc</span>, <span class="va">reltransm</span>, <span class="va">initR</span>, <span class="va">initI</span>, <span class="va">initV</span>, method <span class="op">=</span> <span class="st">"analytic"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 14139.570  8749.609</span></span></code></pre></div>
+<p>While the analytic method might seem preferable, it is not
+necessarily faster or more stable than the ODE numerical solution
+method, as the analytic method still involves numerical estimation
+methods required to solve the transcendental equations. We recommend
+using the default ODE method, especially for models with a large number
+of groups.</p>
+<ul>
+<li>
+<strong>Final outbreak size (stochastic method)</strong>: We also
+provide a method to simulate stochastic (random) outbreaks until no
+infectious individuals remain, producing a distribution of final
+outbreak sizes. We can specify the numbers of simulations to run with
+the <code>nsims</code> argument, which defaults to 1 if
+unspecified.</li>
+</ul>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/finalsize.html">finalsize</a></span><span class="op">(</span><span class="va">popsize</span>, <span class="va">R0</span>, <span class="va">contactmatrix</span>, <span class="va">relsusc</span>, <span class="va">reltransm</span>, <span class="va">initR</span>, <span class="va">initI</span>, <span class="va">initV</span>, method <span class="op">=</span> <span class="st">"stochastic"</span>,</span>
+<span>          nsims <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
+<span><span class="co">#&gt;        [,1] [,2]</span></span>
+<span><span class="co">#&gt;  [1,]     0    1</span></span>
+<span><span class="co">#&gt;  [2,]     0    4</span></span>
+<span><span class="co">#&gt;  [3,]     5    1</span></span>
+<span><span class="co">#&gt;  [4,]     0    1</span></span>
+<span><span class="co">#&gt;  [5,]     0    1</span></span>
+<span><span class="co">#&gt;  [6,]     2    2</span></span>
+<span><span class="co">#&gt;  [7,]     0    4</span></span>
+<span><span class="co">#&gt;  [8,] 13457 8518</span></span>
+<span><span class="co">#&gt;  [9,]     0    1</span></span>
+<span><span class="co">#&gt; [10,]     0    2</span></span></code></pre></div>
+<p>Each row of the output has the results of one of the stochastic
+simulations for the final outbreak size of each group (including the
+initial one case in group B). We see that some simulations end after no
+or a small number of transmissions due to random luck, while others grow
+to a size close to the final size result from the deterministic results
+above.</p>
+<ul>
+<li>
+<strong>Final outbreak size (hybrid method)</strong>. The
+simulations for the stochastic method can be slow when the simulated
+outbreak grows to a large size. When
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>R</mi><mn>0</mn></msub><mo>&gt;</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">R_0 &gt; 1</annotation></semantics></math>,
+we typically see the “bimodal” distribution of outcomes in stochastic
+simulations in which one set of simulated outbreaks have small final
+size while another set “escape” to a size that is quite close to the
+size predicted by the deterministic ODE solution. We created a “hybrid”
+simulation method that starts by simulating the outbreak stochastically
+as in the stochastic method. If the simulation reaches a state at which
+it is extremely unlikely to end in the next transmission generation, the
+simulation is halted and it is assumed that the final size will be the
+result from the ODE method.</li>
+</ul>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/finalsize.html">finalsize</a></span><span class="op">(</span><span class="va">popsize</span>, <span class="va">R0</span>, <span class="va">contactmatrix</span>, <span class="va">relsusc</span>, <span class="va">reltransm</span>, <span class="va">initR</span>, <span class="va">initI</span>, <span class="va">initV</span>, method <span class="op">=</span> <span class="st">"hybrid"</span>,</span>
+<span>          nsims <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
+<span><span class="co">#&gt;        [,1] [,2]</span></span>
+<span><span class="co">#&gt;  [1,]     3    1</span></span>
+<span><span class="co">#&gt;  [2,]     1    1</span></span>
+<span><span class="co">#&gt;  [3,]     3    5</span></span>
+<span><span class="co">#&gt;  [4,]     0    1</span></span>
+<span><span class="co">#&gt;  [5,] 14140 8750</span></span>
+<span><span class="co">#&gt;  [6,]     1    1</span></span>
+<span><span class="co">#&gt;  [7,]     0    1</span></span>
+<span><span class="co">#&gt;  [8,]     5    4</span></span>
+<span><span class="co">#&gt;  [9,]     0    1</span></span>
+<span><span class="co">#&gt; [10,]     0    1</span></span></code></pre></div>
   </main>
 </div>
 

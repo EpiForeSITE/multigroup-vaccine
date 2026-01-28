@@ -6,16 +6,16 @@ When length(age_groups) &amp;gt; 1, groups are formed as
 age_groups[i] to age_groups[i+1] - 1 for i = 1:(n-1) and
 age_groups[n] and above for the final group. Human-readable labels are produced:
 "under1" for the 0–0 group, "ageX" for single-year groups, "XtoY" for ranges,
-and "Xplus" for the final open group. The function prints aggregation
-summaries to the console for each group using cat().'><meta property="og:description" content='Aggregate per-age population counts into coarser age groups defined by the
+and "Xplus" for the final open group. When verbose = TRUE, the function prints
+aggregation summaries to the console for each group using cat().'><meta property="og:description" content='Aggregate per-age population counts into coarser age groups defined by the
 (sorted) lower bounds in age_groups. When length(age_groups) == 1, all
 ages &amp;gt;= that value are aggregated into a single open-ended group ("Xplus").
 When length(age_groups) &amp;gt; 1, groups are formed as
 age_groups[i] to age_groups[i+1] - 1 for i = 1:(n-1) and
 age_groups[n] and above for the final group. Human-readable labels are produced:
 "under1" for the 0–0 group, "ageX" for single-year groups, "XtoY" for ranges,
-and "Xplus" for the final open group. The function prints aggregation
-summaries to the console for each group using cat().'></head><body>
+and "Xplus" for the final open group. When verbose = TRUE, the function prints
+aggregation summaries to the console for each group using cat().'></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -57,8 +57,8 @@ When <code>length(age_groups) &gt; 1</code>, groups are formed as
 <code>age_groups[i]</code> to <code>age_groups[i+1] - 1</code> for i = 1:(n-1) and
 <code>age_groups[n]</code> and above for the final group. Human-readable labels are produced:
 "under1" for the 0–0 group, "ageX" for single-year groups, "XtoY" for ranges,
-and "Xplus" for the final open group. The function prints aggregation
-summaries to the console for each group using <code><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat()</a></code>.</p>
+and "Xplus" for the final open group. When <code>verbose = TRUE</code>, the function prints
+aggregation summaries to the console for each group using <code><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat()</a></code>.</p>
     </div>
 
     <div class="section level2">
@@ -115,8 +115,9 @@ satisfying lower &lt;= age &lt;= upper). For the last group the upper bound is
 infinite.</p></li>
 <li><p>If no ages fall into a group the aggregated count for that group is 0
 (because <code>sum(numeric(0)) == 0</code>).</p></li>
-<li><p>The function writes progress messages to the console with <code><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat()</a></code> for each
-aggregated group (useful for debugging / logging).</p></li>
+<li><p>When <code>verbose = TRUE</code>, the function writes progress messages to the console
+with <code><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat()</a></code> for each aggregated group (useful for debugging / logging).
+By default (<code>verbose = FALSE</code>), the function is silent.</p></li>
 </ul></div>
 
     <div class="section level2">

@@ -7,9 +7,9 @@ single open-ended group ("Xplus"). When `length(age_groups) > 1`, groups
 are formed as `age_groups[i]` to `age_groups[i+1] - 1` for i = 1:(n-1)
 and `age_groups[n]` and above for the final group. Human-readable labels
 are produced: "under1" for the 0–0 group, "ageX" for single-year groups,
-"XtoY" for ranges, and "Xplus" for the final open group. The function
-prints aggregation summaries to the console for each group using
-[`cat()`](https://rdrr.io/r/base/cat.html).
+"XtoY" for ranges, and "Xplus" for the final open group. When
+`verbose = TRUE`, the function prints aggregation summaries to the
+console for each group using [`cat()`](https://rdrr.io/r/base/cat.html).
 
 ## Usage
 
@@ -71,9 +71,10 @@ A named list with components:
 - If no ages fall into a group the aggregated count for that group is 0
   (because `sum(numeric(0)) == 0`).
 
-- The function writes progress messages to the console with
-  [`cat()`](https://rdrr.io/r/base/cat.html) for each aggregated group
-  (useful for debugging / logging).
+- When `verbose = TRUE`, the function writes progress messages to the
+  console with [`cat()`](https://rdrr.io/r/base/cat.html) for each
+  aggregated group (useful for debugging / logging). By default
+  (`verbose = FALSE`), the function is silent.
 
 ## Examples
 

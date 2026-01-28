@@ -59,135 +59,1008 @@
 
     
     
+<p>This vignette demonstrates how to set up contact matrices for age-
+and school-structured models using examples.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://epiforesite.github.io/multigroup-vaccine/">multigroup.vaccine</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/epiforecasts/socialmixr" class="external-link">socialmixr</a></span><span class="op">)</span></span></code></pre></div>
-<p>Set up age groups:</p>
+<p>First we define the age groups we want to use, and the population
+sizes of each group:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># under 1, 1-4, 5-11, 12-13, 14-17, 18-24, 25-44, 45-69, 70 plus</span></span>
 <span><span class="va">agelims</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">5</span>, <span class="fl">12</span>, <span class="fl">14</span>, <span class="fl">18</span>, <span class="fl">25</span>, <span class="fl">45</span>, <span class="fl">70</span><span class="op">)</span></span>
 <span><span class="va">agepops</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">400</span>, <span class="fl">700</span>, <span class="fl">200</span>, <span class="fl">400</span>, <span class="fl">700</span>, <span class="fl">2000</span>, <span class="fl">2400</span>, <span class="fl">1000</span><span class="op">)</span></span></code></pre></div>
-<p>Generate contact matrix using Polymod data:</p>
+<p>Here’s how to generate a contact matrix using Polymod data, which is
+contact survey data from the well known “Polymod” study. When including
+the second argument to the <code><a href="../reference/contactMatrixPolymod.html">contactMatrixPolymod()</a></code> function,
+the contact matrix will be adjusted to fit the population distribution
+defined above in the <code>agepops</code> variable.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cmp</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu"><a href="../reference/contactMatrixPolymod.html">contactMatrixPolymod</a></span><span class="op">(</span><span class="va">agelims</span>, <span class="va">agepops</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cmp</span>, <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co">#&gt;          contact.age.group</span></span>
-<span><span class="co">#&gt; age.group under1 1to4 5to11 12to13 14to17 18to24 25to44 45to69  70+</span></span>
-<span><span class="co">#&gt;    under1   0.42 0.72  0.57   0.09   0.21   0.32   2.11   1.14 0.13</span></span>
-<span><span class="co">#&gt;    1to4     0.18 2.98  1.52   0.16   0.24   0.49   3.28   1.89 0.35</span></span>
-<span><span class="co">#&gt;    5to11    0.08 0.87  8.79   0.82   0.46   0.46   3.35   1.88 0.37</span></span>
-<span><span class="co">#&gt;    12to13   0.04 0.32  2.86   7.98   2.50   0.57   2.77   2.22 0.47</span></span>
-<span><span class="co">#&gt;    14to17   0.05 0.24  0.80   1.25   9.67   2.21   2.71   2.51 0.37</span></span>
-<span><span class="co">#&gt;    18to24   0.05 0.28  0.46   0.16   1.26   5.72   3.68   2.87 0.37</span></span>
-<span><span class="co">#&gt;    25to44   0.11 0.66  1.17   0.28   0.54   1.29   5.72   3.83 0.61</span></span>
-<span><span class="co">#&gt;    45to69   0.05 0.32  0.55   0.18   0.42   0.84   3.20   4.27 0.96</span></span>
-<span><span class="co">#&gt;    70+      0.01 0.14  0.26   0.09   0.15   0.26   1.22   2.30 1.57</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">cmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/contactMatrixPolymod.html">contactMatrixPolymod</a></span><span class="op">(</span><span class="va">agelims</span>, <span class="va">agepops</span><span class="op">)</span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cmp</span>, <span class="fl">2</span><span class="op">)</span>, format <span class="op">=</span> <span class="st">"markdown"</span><span class="op">)</span></span></code></pre></div>
+<table style="width:100%;" class="table">
+<colgroup>
+<col width="10%">
+<col width="10%">
+<col width="7%">
+<col width="9%">
+<col width="10%">
+<col width="10%">
+<col width="10%">
+<col width="10%">
+<col width="10%">
+<col width="7%">
+</colgroup>
+<thead><tr class="header">
+<th align="left"></th>
+<th align="right">under1</th>
+<th align="right">1to4</th>
+<th align="right">5to11</th>
+<th align="right">12to13</th>
+<th align="right">14to17</th>
+<th align="right">18to24</th>
+<th align="right">25to44</th>
+<th align="right">45to69</th>
+<th align="right">70+</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">under1</td>
+<td align="right">0.42</td>
+<td align="right">0.72</td>
+<td align="right">0.57</td>
+<td align="right">0.09</td>
+<td align="right">0.21</td>
+<td align="right">0.32</td>
+<td align="right">2.11</td>
+<td align="right">1.14</td>
+<td align="right">0.13</td>
+</tr>
+<tr class="even">
+<td align="left">1to4</td>
+<td align="right">0.18</td>
+<td align="right">2.98</td>
+<td align="right">1.52</td>
+<td align="right">0.16</td>
+<td align="right">0.24</td>
+<td align="right">0.49</td>
+<td align="right">3.28</td>
+<td align="right">1.89</td>
+<td align="right">0.35</td>
+</tr>
+<tr class="odd">
+<td align="left">5to11</td>
+<td align="right">0.08</td>
+<td align="right">0.87</td>
+<td align="right">8.79</td>
+<td align="right">0.82</td>
+<td align="right">0.46</td>
+<td align="right">0.46</td>
+<td align="right">3.35</td>
+<td align="right">1.88</td>
+<td align="right">0.37</td>
+</tr>
+<tr class="even">
+<td align="left">12to13</td>
+<td align="right">0.04</td>
+<td align="right">0.32</td>
+<td align="right">2.86</td>
+<td align="right">7.98</td>
+<td align="right">2.50</td>
+<td align="right">0.57</td>
+<td align="right">2.77</td>
+<td align="right">2.22</td>
+<td align="right">0.47</td>
+</tr>
+<tr class="odd">
+<td align="left">14to17</td>
+<td align="right">0.05</td>
+<td align="right">0.24</td>
+<td align="right">0.80</td>
+<td align="right">1.25</td>
+<td align="right">9.67</td>
+<td align="right">2.21</td>
+<td align="right">2.71</td>
+<td align="right">2.51</td>
+<td align="right">0.37</td>
+</tr>
+<tr class="even">
+<td align="left">18to24</td>
+<td align="right">0.05</td>
+<td align="right">0.28</td>
+<td align="right">0.46</td>
+<td align="right">0.16</td>
+<td align="right">1.26</td>
+<td align="right">5.72</td>
+<td align="right">3.68</td>
+<td align="right">2.87</td>
+<td align="right">0.37</td>
+</tr>
+<tr class="odd">
+<td align="left">25to44</td>
+<td align="right">0.11</td>
+<td align="right">0.66</td>
+<td align="right">1.17</td>
+<td align="right">0.28</td>
+<td align="right">0.54</td>
+<td align="right">1.29</td>
+<td align="right">5.72</td>
+<td align="right">3.83</td>
+<td align="right">0.61</td>
+</tr>
+<tr class="even">
+<td align="left">45to69</td>
+<td align="right">0.05</td>
+<td align="right">0.32</td>
+<td align="right">0.55</td>
+<td align="right">0.18</td>
+<td align="right">0.42</td>
+<td align="right">0.84</td>
+<td align="right">3.20</td>
+<td align="right">4.27</td>
+<td align="right">0.96</td>
+</tr>
+<tr class="odd">
+<td align="left">70+</td>
+<td align="right">0.01</td>
+<td align="right">0.14</td>
+<td align="right">0.26</td>
+<td align="right">0.09</td>
+<td align="right">0.15</td>
+<td align="right">0.26</td>
+<td align="right">1.22</td>
+<td align="right">2.30</td>
+<td align="right">1.57</td>
+</tr>
+</tbody>
+</table>
 <p>The sum of each row represents the relative overall contact rate of
 each group:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">cmp</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co">#&gt; under1   1to4  5to11 12to13 14to17 18to24 25to44 45to69    70+ </span></span>
-<span><span class="co">#&gt;   5.72  11.11  17.09  19.74  19.82  14.86  14.20  10.78   6.01</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">cmp</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, format <span class="op">=</span> <span class="st">"markdown"</span>, col.names <span class="op">=</span> <span class="st">"total"</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<thead><tr class="header">
+<th align="left"></th>
+<th align="right">total</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">under1</td>
+<td align="right">5.72</td>
+</tr>
+<tr class="even">
+<td align="left">1to4</td>
+<td align="right">11.11</td>
+</tr>
+<tr class="odd">
+<td align="left">5to11</td>
+<td align="right">17.09</td>
+</tr>
+<tr class="even">
+<td align="left">12to13</td>
+<td align="right">19.74</td>
+</tr>
+<tr class="odd">
+<td align="left">14to17</td>
+<td align="right">19.82</td>
+</tr>
+<tr class="even">
+<td align="left">18to24</td>
+<td align="right">14.86</td>
+</tr>
+<tr class="odd">
+<td align="left">25to44</td>
+<td align="right">14.20</td>
+</tr>
+<tr class="even">
+<td align="left">45to69</td>
+<td align="right">10.78</td>
+</tr>
+<tr class="odd">
+<td align="left">70+</td>
+<td align="right">6.01</td>
+</tr>
+</tbody>
+</table>
 <p>Those row sums can be factored out to generate the fraction of each
 group’s contacts that are with each group: The sum of each row
 represents the relative overall contact rate of each group:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cmp</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">cmp</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co">#&gt;          contact.age.group</span></span>
-<span><span class="co">#&gt; age.group under1 1to4 5to11 12to13 14to17 18to24 25to44 45to69  70+</span></span>
-<span><span class="co">#&gt;    under1   0.07 0.13  0.10   0.02   0.04   0.06   0.37   0.20 0.02</span></span>
-<span><span class="co">#&gt;    1to4     0.02 0.27  0.14   0.01   0.02   0.04   0.29   0.17 0.03</span></span>
-<span><span class="co">#&gt;    5to11    0.00 0.05  0.51   0.05   0.03   0.03   0.20   0.11 0.02</span></span>
-<span><span class="co">#&gt;    12to13   0.00 0.02  0.14   0.40   0.13   0.03   0.14   0.11 0.02</span></span>
-<span><span class="co">#&gt;    14to17   0.00 0.01  0.04   0.06   0.49   0.11   0.14   0.13 0.02</span></span>
-<span><span class="co">#&gt;    18to24   0.00 0.02  0.03   0.01   0.08   0.38   0.25   0.19 0.03</span></span>
-<span><span class="co">#&gt;    25to44   0.01 0.05  0.08   0.02   0.04   0.09   0.40   0.27 0.04</span></span>
-<span><span class="co">#&gt;    45to69   0.00 0.03  0.05   0.02   0.04   0.08   0.30   0.40 0.09</span></span>
-<span><span class="co">#&gt;    70+      0.00 0.02  0.04   0.02   0.02   0.04   0.20   0.38 0.26</span></span></code></pre></div>
-<p>Now we split the age groups for elementary school (5-11), middle
-school (12-13), and high school (18-24) into two schools each:</p>
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cmp</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">cmp</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>, format <span class="op">=</span> <span class="st">"markdown"</span><span class="op">)</span></span></code></pre></div>
+<table style="width:100%;" class="table">
+<colgroup>
+<col width="10%">
+<col width="10%">
+<col width="7%">
+<col width="9%">
+<col width="10%">
+<col width="10%">
+<col width="10%">
+<col width="10%">
+<col width="10%">
+<col width="7%">
+</colgroup>
+<thead><tr class="header">
+<th align="left"></th>
+<th align="right">under1</th>
+<th align="right">1to4</th>
+<th align="right">5to11</th>
+<th align="right">12to13</th>
+<th align="right">14to17</th>
+<th align="right">18to24</th>
+<th align="right">25to44</th>
+<th align="right">45to69</th>
+<th align="right">70+</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">under1</td>
+<td align="right">0.07</td>
+<td align="right">0.13</td>
+<td align="right">0.10</td>
+<td align="right">0.02</td>
+<td align="right">0.04</td>
+<td align="right">0.06</td>
+<td align="right">0.37</td>
+<td align="right">0.20</td>
+<td align="right">0.02</td>
+</tr>
+<tr class="even">
+<td align="left">1to4</td>
+<td align="right">0.02</td>
+<td align="right">0.27</td>
+<td align="right">0.14</td>
+<td align="right">0.01</td>
+<td align="right">0.02</td>
+<td align="right">0.04</td>
+<td align="right">0.29</td>
+<td align="right">0.17</td>
+<td align="right">0.03</td>
+</tr>
+<tr class="odd">
+<td align="left">5to11</td>
+<td align="right">0.00</td>
+<td align="right">0.05</td>
+<td align="right">0.51</td>
+<td align="right">0.05</td>
+<td align="right">0.03</td>
+<td align="right">0.03</td>
+<td align="right">0.20</td>
+<td align="right">0.11</td>
+<td align="right">0.02</td>
+</tr>
+<tr class="even">
+<td align="left">12to13</td>
+<td align="right">0.00</td>
+<td align="right">0.02</td>
+<td align="right">0.14</td>
+<td align="right">0.40</td>
+<td align="right">0.13</td>
+<td align="right">0.03</td>
+<td align="right">0.14</td>
+<td align="right">0.11</td>
+<td align="right">0.02</td>
+</tr>
+<tr class="odd">
+<td align="left">14to17</td>
+<td align="right">0.00</td>
+<td align="right">0.01</td>
+<td align="right">0.04</td>
+<td align="right">0.06</td>
+<td align="right">0.49</td>
+<td align="right">0.11</td>
+<td align="right">0.14</td>
+<td align="right">0.13</td>
+<td align="right">0.02</td>
+</tr>
+<tr class="even">
+<td align="left">18to24</td>
+<td align="right">0.00</td>
+<td align="right">0.02</td>
+<td align="right">0.03</td>
+<td align="right">0.01</td>
+<td align="right">0.08</td>
+<td align="right">0.38</td>
+<td align="right">0.25</td>
+<td align="right">0.19</td>
+<td align="right">0.03</td>
+</tr>
+<tr class="odd">
+<td align="left">25to44</td>
+<td align="right">0.01</td>
+<td align="right">0.05</td>
+<td align="right">0.08</td>
+<td align="right">0.02</td>
+<td align="right">0.04</td>
+<td align="right">0.09</td>
+<td align="right">0.40</td>
+<td align="right">0.27</td>
+<td align="right">0.04</td>
+</tr>
+<tr class="even">
+<td align="left">45to69</td>
+<td align="right">0.00</td>
+<td align="right">0.03</td>
+<td align="right">0.05</td>
+<td align="right">0.02</td>
+<td align="right">0.04</td>
+<td align="right">0.08</td>
+<td align="right">0.30</td>
+<td align="right">0.40</td>
+<td align="right">0.09</td>
+</tr>
+<tr class="odd">
+<td align="left">70+</td>
+<td align="right">0.00</td>
+<td align="right">0.02</td>
+<td align="right">0.04</td>
+<td align="right">0.02</td>
+<td align="right">0.02</td>
+<td align="right">0.04</td>
+<td align="right">0.20</td>
+<td align="right">0.38</td>
+<td align="right">0.26</td>
+</tr>
+</tbody>
+</table>
+<p>Now we show how to split the age groups for elementary school (5-11),
+middle school (12-13), and high school (18-24) into two schools
+each:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">schoolagegroups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span></span>
-<span><span class="va">schoolpops</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">350</span>, <span class="fl">350</span>, <span class="fl">100</span>, <span class="fl">100</span>, <span class="fl">200</span>, <span class="fl">200</span><span class="op">)</span></span></code></pre></div>
-<p>We can access the Polymod data to specify the number of contacts that
-occurred at school:</p>
+<code class="sourceCode R"><span><span class="va">schoolagegroups</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="fl">5</span><span class="op">)</span>         <span class="co">#The indices of the age group for each school</span></span>
+<span><span class="va">schoolpops</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">350</span>, <span class="fl">350</span>, <span class="fl">100</span>, <span class="fl">100</span>, <span class="fl">200</span>, <span class="fl">200</span><span class="op">)</span>  <span class="co">#The number of students in each school</span></span></code></pre></div>
+<p>The <code>socialmixr</code> R package includes functions that allow
+us to see the number of contacts of school-aged children that occurred
+overall vs. just at school:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cmAll</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://epiforecasts.io/socialmixr/reference/contact_matrix.html" class="external-link">contact_matrix</a></span><span class="op">(</span><span class="fu">socialmixr</span><span class="fu">::</span><span class="va"><a href="https://epiforecasts.io/socialmixr/reference/polymod.html" class="external-link">polymod</a></span>, age.limits <span class="op">=</span> <span class="va">agelims</span><span class="op">)</span><span class="op">$</span><span class="va">matrix</span></span>
-<span><span class="va">cmSchool</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://epiforecasts.io/socialmixr/reference/contact_matrix.html" class="external-link">contact_matrix</a></span><span class="op">(</span><span class="fu">socialmixr</span><span class="fu">::</span><span class="va"><a href="https://epiforecasts.io/socialmixr/reference/polymod.html" class="external-link">polymod</a></span>, age.limits <span class="op">=</span> <span class="va">agelims</span>, filter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cnt_school <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">matrix</span></span>
+<code class="sourceCode R"><span><span class="va">cmAll</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressMessages</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span><span class="fu">socialmixr</span><span class="fu">::</span><span class="fu"><a href="https://epiforecasts.io/socialmixr/reference/contact_matrix.html" class="external-link">contact_matrix</a></span><span class="op">(</span><span class="fu">socialmixr</span><span class="fu">::</span><span class="va"><a href="https://epiforecasts.io/socialmixr/reference/polymod.html" class="external-link">polymod</a></span>,</span>
+<span>                                                age.limits <span class="op">=</span> <span class="va">agelims</span><span class="op">)</span><span class="op">$</span><span class="va">matrix</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">cmSchool</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressMessages</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/warning.html" class="external-link">suppressWarnings</a></span><span class="op">(</span><span class="fu">socialmixr</span><span class="fu">::</span><span class="fu"><a href="https://epiforecasts.io/socialmixr/reference/contact_matrix.html" class="external-link">contact_matrix</a></span><span class="op">(</span><span class="fu">socialmixr</span><span class="fu">::</span><span class="va"><a href="https://epiforecasts.io/socialmixr/reference/polymod.html" class="external-link">polymod</a></span>,</span>
+<span>                                                age.limits <span class="op">=</span> <span class="va">agelims</span>,</span>
+<span>                                                filter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>cnt_school <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">matrix</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cmAll</span>, <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co">#&gt;          contact.age.group</span></span>
-<span><span class="co">#&gt; age.group [0,1) [1,5) [5,12) [12,14) [14,18) [18,25) [25,45) [45,70)  70+</span></span>
-<span><span class="co">#&gt;   [0,1)    0.33  0.83   0.75    0.10    0.33    0.55    3.72    1.82 0.16</span></span>
-<span><span class="co">#&gt;   [1,5)    0.07  2.34   1.38    0.19    0.25    0.51    3.62    1.81 0.32</span></span>
-<span><span class="co">#&gt;   [5,12)   0.03  0.64   7.43    0.86    0.45    0.44    3.68    1.76 0.30</span></span>
-<span><span class="co">#&gt;   [12,14)  0.03  0.17   1.99    7.14    2.47    0.63    3.35    2.03 0.35</span></span>
-<span><span class="co">#&gt;   [14,18)  0.01  0.17   0.65    1.07    9.10    2.11    2.98    2.15 0.21</span></span>
-<span><span class="co">#&gt;   [18,25)  0.01  0.21   0.41    0.13    1.22    5.64    4.14    2.63 0.29</span></span>
-<span><span class="co">#&gt;   [25,45)  0.04  0.53   1.03    0.23    0.53    1.29    6.55    3.52 0.44</span></span>
-<span><span class="co">#&gt;   [45,70)  0.02  0.26   0.50    0.18    0.46    0.91    4.01    4.34 0.74</span></span>
-<span><span class="co">#&gt;   70+      0.01  0.11   0.25    0.10    0.20    0.31    1.72    2.75 1.48</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cmSchool</span>, <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co">#&gt;          contact.age.group</span></span>
-<span><span class="co">#&gt; age.group [0,1) [1,5) [5,12) [12,14) [14,18) [18,25) [25,45) [45,70)  70+</span></span>
-<span><span class="co">#&gt;   [0,1)    0.14  0.09   0.03    0.00    0.14    0.02    0.31    0.01 0.00</span></span>
-<span><span class="co">#&gt;   [1,5)    0.01  1.45   0.43    0.02    0.02    0.02    0.47    0.18 0.01</span></span>
-<span><span class="co">#&gt;   [5,12)   0.00  0.18   5.17    0.40    0.05    0.07    0.72    0.40 0.00</span></span>
-<span><span class="co">#&gt;   [12,14)  0.00  0.01   0.62    5.57    1.38    0.07    0.86    0.48 0.01</span></span>
-<span><span class="co">#&gt;   [14,18)  0.01  0.03   0.07    0.46    6.21    0.64    0.76    0.52 0.00</span></span>
-<span><span class="co">#&gt;   [18,25)  0.00  0.03   0.04    0.01    0.42    2.02    0.36    0.20 0.00</span></span>
-<span><span class="co">#&gt;   [25,45)  0.00  0.05   0.18    0.02    0.07    0.10    0.27    0.09 0.00</span></span>
-<span><span class="co">#&gt;   [45,70)  0.00  0.06   0.15    0.04    0.12    0.05    0.11    0.10 0.01</span></span>
-<span><span class="co">#&gt;   70+      0.00  0.00   0.01    0.00    0.01    0.00    0.00    0.01 0.00</span></span></code></pre></div>
-<p>Based on this we assume that 70% of a student’s within-age-group
-contacts occur at their own school:</p>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cmAll</span>, <span class="fl">2</span><span class="op">)</span>, format <span class="op">=</span> <span class="st">"markdown"</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<colgroup>
+<col width="11%">
+<col width="8%">
+<col width="8%">
+<col width="9%">
+<col width="11%">
+<col width="11%">
+<col width="11%">
+<col width="11%">
+<col width="11%">
+<col width="6%">
+</colgroup>
+<thead><tr class="header">
+<th align="left"></th>
+<th align="right">[0,1)</th>
+<th align="right">[1,5)</th>
+<th align="right">[5,12)</th>
+<th align="right">[12,14)</th>
+<th align="right">[14,18)</th>
+<th align="right">[18,25)</th>
+<th align="right">[25,45)</th>
+<th align="right">[45,70)</th>
+<th align="right">70+</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">[0,1)</td>
+<td align="right">0.33</td>
+<td align="right">0.83</td>
+<td align="right">0.75</td>
+<td align="right">0.10</td>
+<td align="right">0.33</td>
+<td align="right">0.55</td>
+<td align="right">3.72</td>
+<td align="right">1.82</td>
+<td align="right">0.16</td>
+</tr>
+<tr class="even">
+<td align="left">[1,5)</td>
+<td align="right">0.07</td>
+<td align="right">2.34</td>
+<td align="right">1.38</td>
+<td align="right">0.19</td>
+<td align="right">0.25</td>
+<td align="right">0.51</td>
+<td align="right">3.62</td>
+<td align="right">1.81</td>
+<td align="right">0.32</td>
+</tr>
+<tr class="odd">
+<td align="left">[5,12)</td>
+<td align="right">0.03</td>
+<td align="right">0.64</td>
+<td align="right">7.43</td>
+<td align="right">0.86</td>
+<td align="right">0.45</td>
+<td align="right">0.44</td>
+<td align="right">3.68</td>
+<td align="right">1.76</td>
+<td align="right">0.30</td>
+</tr>
+<tr class="even">
+<td align="left">[12,14)</td>
+<td align="right">0.03</td>
+<td align="right">0.17</td>
+<td align="right">1.99</td>
+<td align="right">7.14</td>
+<td align="right">2.47</td>
+<td align="right">0.63</td>
+<td align="right">3.35</td>
+<td align="right">2.03</td>
+<td align="right">0.35</td>
+</tr>
+<tr class="odd">
+<td align="left">[14,18)</td>
+<td align="right">0.01</td>
+<td align="right">0.17</td>
+<td align="right">0.65</td>
+<td align="right">1.07</td>
+<td align="right">9.10</td>
+<td align="right">2.11</td>
+<td align="right">2.98</td>
+<td align="right">2.15</td>
+<td align="right">0.21</td>
+</tr>
+<tr class="even">
+<td align="left">[18,25)</td>
+<td align="right">0.01</td>
+<td align="right">0.21</td>
+<td align="right">0.41</td>
+<td align="right">0.13</td>
+<td align="right">1.22</td>
+<td align="right">5.64</td>
+<td align="right">4.14</td>
+<td align="right">2.63</td>
+<td align="right">0.29</td>
+</tr>
+<tr class="odd">
+<td align="left">[25,45)</td>
+<td align="right">0.04</td>
+<td align="right">0.53</td>
+<td align="right">1.03</td>
+<td align="right">0.23</td>
+<td align="right">0.53</td>
+<td align="right">1.29</td>
+<td align="right">6.55</td>
+<td align="right">3.52</td>
+<td align="right">0.44</td>
+</tr>
+<tr class="even">
+<td align="left">[45,70)</td>
+<td align="right">0.02</td>
+<td align="right">0.26</td>
+<td align="right">0.50</td>
+<td align="right">0.18</td>
+<td align="right">0.46</td>
+<td align="right">0.91</td>
+<td align="right">4.01</td>
+<td align="right">4.34</td>
+<td align="right">0.74</td>
+</tr>
+<tr class="odd">
+<td align="left">70+</td>
+<td align="right">0.01</td>
+<td align="right">0.11</td>
+<td align="right">0.25</td>
+<td align="right">0.10</td>
+<td align="right">0.20</td>
+<td align="right">0.31</td>
+<td align="right">1.72</td>
+<td align="right">2.75</td>
+<td align="right">1.48</td>
+</tr>
+</tbody>
+</table>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">schportion</span> <span class="op">&lt;-</span> <span class="fl">0.70</span></span></code></pre></div>
-<p>Now we build a new matrix using the
-<code><a href="../reference/contactMatrixAgeSchool.html">contactMatrixAgeSchool()</a></code> function:</p>
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cmSchool</span>, <span class="fl">2</span><span class="op">)</span>, format <span class="op">=</span> <span class="st">"markdown"</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<colgroup>
+<col width="11%">
+<col width="8%">
+<col width="8%">
+<col width="9%">
+<col width="11%">
+<col width="11%">
+<col width="11%">
+<col width="11%">
+<col width="11%">
+<col width="6%">
+</colgroup>
+<thead><tr class="header">
+<th align="left"></th>
+<th align="right">[0,1)</th>
+<th align="right">[1,5)</th>
+<th align="right">[5,12)</th>
+<th align="right">[12,14)</th>
+<th align="right">[14,18)</th>
+<th align="right">[18,25)</th>
+<th align="right">[25,45)</th>
+<th align="right">[45,70)</th>
+<th align="right">70+</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">[0,1)</td>
+<td align="right">0.14</td>
+<td align="right">0.09</td>
+<td align="right">0.03</td>
+<td align="right">0.00</td>
+<td align="right">0.14</td>
+<td align="right">0.02</td>
+<td align="right">0.31</td>
+<td align="right">0.01</td>
+<td align="right">0.00</td>
+</tr>
+<tr class="even">
+<td align="left">[1,5)</td>
+<td align="right">0.01</td>
+<td align="right">1.45</td>
+<td align="right">0.43</td>
+<td align="right">0.02</td>
+<td align="right">0.02</td>
+<td align="right">0.02</td>
+<td align="right">0.47</td>
+<td align="right">0.18</td>
+<td align="right">0.01</td>
+</tr>
+<tr class="odd">
+<td align="left">[5,12)</td>
+<td align="right">0.00</td>
+<td align="right">0.18</td>
+<td align="right">5.17</td>
+<td align="right">0.40</td>
+<td align="right">0.05</td>
+<td align="right">0.07</td>
+<td align="right">0.72</td>
+<td align="right">0.40</td>
+<td align="right">0.00</td>
+</tr>
+<tr class="even">
+<td align="left">[12,14)</td>
+<td align="right">0.00</td>
+<td align="right">0.01</td>
+<td align="right">0.62</td>
+<td align="right">5.57</td>
+<td align="right">1.38</td>
+<td align="right">0.07</td>
+<td align="right">0.86</td>
+<td align="right">0.48</td>
+<td align="right">0.01</td>
+</tr>
+<tr class="odd">
+<td align="left">[14,18)</td>
+<td align="right">0.01</td>
+<td align="right">0.03</td>
+<td align="right">0.07</td>
+<td align="right">0.46</td>
+<td align="right">6.21</td>
+<td align="right">0.64</td>
+<td align="right">0.76</td>
+<td align="right">0.52</td>
+<td align="right">0.00</td>
+</tr>
+<tr class="even">
+<td align="left">[18,25)</td>
+<td align="right">0.00</td>
+<td align="right">0.03</td>
+<td align="right">0.04</td>
+<td align="right">0.01</td>
+<td align="right">0.42</td>
+<td align="right">2.02</td>
+<td align="right">0.36</td>
+<td align="right">0.20</td>
+<td align="right">0.00</td>
+</tr>
+<tr class="odd">
+<td align="left">[25,45)</td>
+<td align="right">0.00</td>
+<td align="right">0.05</td>
+<td align="right">0.18</td>
+<td align="right">0.02</td>
+<td align="right">0.07</td>
+<td align="right">0.10</td>
+<td align="right">0.27</td>
+<td align="right">0.09</td>
+<td align="right">0.00</td>
+</tr>
+<tr class="even">
+<td align="left">[45,70)</td>
+<td align="right">0.00</td>
+<td align="right">0.06</td>
+<td align="right">0.15</td>
+<td align="right">0.04</td>
+<td align="right">0.12</td>
+<td align="right">0.05</td>
+<td align="right">0.11</td>
+<td align="right">0.10</td>
+<td align="right">0.01</td>
+</tr>
+<tr class="odd">
+<td align="left">70+</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.01</td>
+<td align="right">0.00</td>
+<td align="right">0.01</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.01</td>
+<td align="right">0.00</td>
+</tr>
+</tbody>
+</table>
+<p>Based on comparing the diagonal elements for the school-aged children
+age groups, we have some basis for an assumption that 70% of a student’s
+within-age-group contacts occur at their own school:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cmps</span> <span class="op">&lt;-</span> <span class="fu">multigroup.vaccine</span><span class="fu">:::</span><span class="fu"><a href="../reference/contactMatrixAgeSchool.html">contactMatrixAgeSchool</a></span><span class="op">(</span><span class="va">agelims</span>, <span class="va">agepops</span>, <span class="va">schoolagegroups</span>, <span class="va">schoolpops</span>, <span class="va">schportion</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">schportion</span> <span class="op">&lt;-</span> <span class="fl">0.70</span></span></code></pre></div>
+<p>Now we use the above ingredients to create a new matrix using the
+<code><a href="../reference/contactMatrixAgeSchool.html">contactMatrixAgeSchool()</a></code> function. We show the old
+age-structured model and the new age-and-school-structured model for
+comparison:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cmps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/contactMatrixAgeSchool.html">contactMatrixAgeSchool</a></span><span class="op">(</span><span class="va">agelims</span>, <span class="va">agepops</span>, <span class="va">schoolagegroups</span>, <span class="va">schoolpops</span>, <span class="va">schportion</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cmp</span>, <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co">#&gt;          contact.age.group</span></span>
-<span><span class="co">#&gt; age.group under1 1to4 5to11 12to13 14to17 18to24 25to44 45to69  70+</span></span>
-<span><span class="co">#&gt;    under1   0.42 0.72  0.57   0.09   0.21   0.32   2.11   1.14 0.13</span></span>
-<span><span class="co">#&gt;    1to4     0.18 2.98  1.52   0.16   0.24   0.49   3.28   1.89 0.35</span></span>
-<span><span class="co">#&gt;    5to11    0.08 0.87  8.79   0.82   0.46   0.46   3.35   1.88 0.37</span></span>
-<span><span class="co">#&gt;    12to13   0.04 0.32  2.86   7.98   2.50   0.57   2.77   2.22 0.47</span></span>
-<span><span class="co">#&gt;    14to17   0.05 0.24  0.80   1.25   9.67   2.21   2.71   2.51 0.37</span></span>
-<span><span class="co">#&gt;    18to24   0.05 0.28  0.46   0.16   1.26   5.72   3.68   2.87 0.37</span></span>
-<span><span class="co">#&gt;    25to44   0.11 0.66  1.17   0.28   0.54   1.29   5.72   3.83 0.61</span></span>
-<span><span class="co">#&gt;    45to69   0.05 0.32  0.55   0.18   0.42   0.84   3.20   4.27 0.96</span></span>
-<span><span class="co">#&gt;    70+      0.01 0.14  0.26   0.09   0.15   0.26   1.22   2.30 1.57</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cmps</span>, <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co">#&gt;          under1 1to4 5to11s1 5to11s2 12to13s3 12to13s4 14to17s5 14to17s6 18to24</span></span>
-<span><span class="co">#&gt; under1     0.42 0.72    0.28    0.28     0.04     0.04     0.11     0.11   0.32</span></span>
-<span><span class="co">#&gt; 1to4       0.18 2.98    0.76    0.76     0.08     0.08     0.12     0.12   0.49</span></span>
-<span><span class="co">#&gt; 5to11s1    0.08 0.87    7.47    1.32     0.41     0.41     0.23     0.23   0.46</span></span>
-<span><span class="co">#&gt; 5to11s2    0.08 0.87    1.32    7.47     0.41     0.41     0.23     0.23   0.46</span></span>
-<span><span class="co">#&gt; 12to13s3   0.04 0.32    1.43    1.43     6.79     1.20     1.25     1.25   0.57</span></span>
-<span><span class="co">#&gt; 12to13s4   0.04 0.32    1.43    1.43     1.20     6.79     1.25     1.25   0.57</span></span>
-<span><span class="co">#&gt; 14to17s5   0.05 0.24    0.40    0.40     0.63     0.63     8.22     1.45   2.21</span></span>
-<span><span class="co">#&gt; 14to17s6   0.05 0.24    0.40    0.40     0.63     0.63     1.45     8.22   2.21</span></span>
-<span><span class="co">#&gt; 18to24     0.05 0.28    0.23    0.23     0.08     0.08     0.63     0.63   5.72</span></span>
-<span><span class="co">#&gt; 25to44     0.11 0.66    0.59    0.59     0.14     0.14     0.27     0.27   1.29</span></span>
-<span><span class="co">#&gt; 45to69     0.05 0.32    0.27    0.27     0.09     0.09     0.21     0.21   0.84</span></span>
-<span><span class="co">#&gt; 70+        0.01 0.14    0.13    0.13     0.05     0.05     0.07     0.07   0.26</span></span>
-<span><span class="co">#&gt;          25to44 45to69  70+</span></span>
-<span><span class="co">#&gt; under1     2.11   1.14 0.13</span></span>
-<span><span class="co">#&gt; 1to4       3.28   1.89 0.35</span></span>
-<span><span class="co">#&gt; 5to11s1    3.35   1.88 0.37</span></span>
-<span><span class="co">#&gt; 5to11s2    3.35   1.88 0.37</span></span>
-<span><span class="co">#&gt; 12to13s3   2.77   2.22 0.47</span></span>
-<span><span class="co">#&gt; 12to13s4   2.77   2.22 0.47</span></span>
-<span><span class="co">#&gt; 14to17s5   2.71   2.51 0.37</span></span>
-<span><span class="co">#&gt; 14to17s6   2.71   2.51 0.37</span></span>
-<span><span class="co">#&gt; 18to24     3.68   2.87 0.37</span></span>
-<span><span class="co">#&gt; 25to44     5.72   3.83 0.61</span></span>
-<span><span class="co">#&gt; 45to69     3.20   4.27 0.96</span></span>
-<span><span class="co">#&gt; 70+        1.22   2.30 1.57</span></span></code></pre></div>
-  </main>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cmp</span>,<span class="fl">2</span><span class="op">)</span>, format <span class="op">=</span> <span class="st">"markdown"</span><span class="op">)</span></span></code></pre></div>
+<table style="width:100%;" class="table">
+<colgroup>
+<col width="10%">
+<col width="10%">
+<col width="7%">
+<col width="9%">
+<col width="10%">
+<col width="10%">
+<col width="10%">
+<col width="10%">
+<col width="10%">
+<col width="7%">
+</colgroup>
+<thead><tr class="header">
+<th align="left"></th>
+<th align="right">under1</th>
+<th align="right">1to4</th>
+<th align="right">5to11</th>
+<th align="right">12to13</th>
+<th align="right">14to17</th>
+<th align="right">18to24</th>
+<th align="right">25to44</th>
+<th align="right">45to69</th>
+<th align="right">70+</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">under1</td>
+<td align="right">0.42</td>
+<td align="right">0.72</td>
+<td align="right">0.57</td>
+<td align="right">0.09</td>
+<td align="right">0.21</td>
+<td align="right">0.32</td>
+<td align="right">2.11</td>
+<td align="right">1.14</td>
+<td align="right">0.13</td>
+</tr>
+<tr class="even">
+<td align="left">1to4</td>
+<td align="right">0.18</td>
+<td align="right">2.98</td>
+<td align="right">1.52</td>
+<td align="right">0.16</td>
+<td align="right">0.24</td>
+<td align="right">0.49</td>
+<td align="right">3.28</td>
+<td align="right">1.89</td>
+<td align="right">0.35</td>
+</tr>
+<tr class="odd">
+<td align="left">5to11</td>
+<td align="right">0.08</td>
+<td align="right">0.87</td>
+<td align="right">8.79</td>
+<td align="right">0.82</td>
+<td align="right">0.46</td>
+<td align="right">0.46</td>
+<td align="right">3.35</td>
+<td align="right">1.88</td>
+<td align="right">0.37</td>
+</tr>
+<tr class="even">
+<td align="left">12to13</td>
+<td align="right">0.04</td>
+<td align="right">0.32</td>
+<td align="right">2.86</td>
+<td align="right">7.98</td>
+<td align="right">2.50</td>
+<td align="right">0.57</td>
+<td align="right">2.77</td>
+<td align="right">2.22</td>
+<td align="right">0.47</td>
+</tr>
+<tr class="odd">
+<td align="left">14to17</td>
+<td align="right">0.05</td>
+<td align="right">0.24</td>
+<td align="right">0.80</td>
+<td align="right">1.25</td>
+<td align="right">9.67</td>
+<td align="right">2.21</td>
+<td align="right">2.71</td>
+<td align="right">2.51</td>
+<td align="right">0.37</td>
+</tr>
+<tr class="even">
+<td align="left">18to24</td>
+<td align="right">0.05</td>
+<td align="right">0.28</td>
+<td align="right">0.46</td>
+<td align="right">0.16</td>
+<td align="right">1.26</td>
+<td align="right">5.72</td>
+<td align="right">3.68</td>
+<td align="right">2.87</td>
+<td align="right">0.37</td>
+</tr>
+<tr class="odd">
+<td align="left">25to44</td>
+<td align="right">0.11</td>
+<td align="right">0.66</td>
+<td align="right">1.17</td>
+<td align="right">0.28</td>
+<td align="right">0.54</td>
+<td align="right">1.29</td>
+<td align="right">5.72</td>
+<td align="right">3.83</td>
+<td align="right">0.61</td>
+</tr>
+<tr class="even">
+<td align="left">45to69</td>
+<td align="right">0.05</td>
+<td align="right">0.32</td>
+<td align="right">0.55</td>
+<td align="right">0.18</td>
+<td align="right">0.42</td>
+<td align="right">0.84</td>
+<td align="right">3.20</td>
+<td align="right">4.27</td>
+<td align="right">0.96</td>
+</tr>
+<tr class="odd">
+<td align="left">70+</td>
+<td align="right">0.01</td>
+<td align="right">0.14</td>
+<td align="right">0.26</td>
+<td align="right">0.09</td>
+<td align="right">0.15</td>
+<td align="right">0.26</td>
+<td align="right">1.22</td>
+<td align="right">2.30</td>
+<td align="right">1.57</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">cmps</span>,<span class="fl">2</span><span class="op">)</span>, format <span class="op">=</span> <span class="st">"markdown"</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<colgroup>
+<col width="9%">
+<col width="7%">
+<col width="5%">
+<col width="8%">
+<col width="8%">
+<col width="9%">
+<col width="9%">
+<col width="9%">
+<col width="9%">
+<col width="7%">
+<col width="7%">
+<col width="7%">
+<col width="5%">
+</colgroup>
+<thead><tr class="header">
+<th align="left"></th>
+<th align="right">under1</th>
+<th align="right">1to4</th>
+<th align="right">5to11s1</th>
+<th align="right">5to11s2</th>
+<th align="right">12to13s3</th>
+<th align="right">12to13s4</th>
+<th align="right">14to17s5</th>
+<th align="right">14to17s6</th>
+<th align="right">18to24</th>
+<th align="right">25to44</th>
+<th align="right">45to69</th>
+<th align="right">70+</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">under1</td>
+<td align="right">0.42</td>
+<td align="right">0.72</td>
+<td align="right">0.28</td>
+<td align="right">0.28</td>
+<td align="right">0.04</td>
+<td align="right">0.04</td>
+<td align="right">0.11</td>
+<td align="right">0.11</td>
+<td align="right">0.32</td>
+<td align="right">2.11</td>
+<td align="right">1.14</td>
+<td align="right">0.13</td>
+</tr>
+<tr class="even">
+<td align="left">1to4</td>
+<td align="right">0.18</td>
+<td align="right">2.98</td>
+<td align="right">0.76</td>
+<td align="right">0.76</td>
+<td align="right">0.08</td>
+<td align="right">0.08</td>
+<td align="right">0.12</td>
+<td align="right">0.12</td>
+<td align="right">0.49</td>
+<td align="right">3.28</td>
+<td align="right">1.89</td>
+<td align="right">0.35</td>
+</tr>
+<tr class="odd">
+<td align="left">5to11s1</td>
+<td align="right">0.08</td>
+<td align="right">0.87</td>
+<td align="right">7.47</td>
+<td align="right">1.32</td>
+<td align="right">0.41</td>
+<td align="right">0.41</td>
+<td align="right">0.23</td>
+<td align="right">0.23</td>
+<td align="right">0.46</td>
+<td align="right">3.35</td>
+<td align="right">1.88</td>
+<td align="right">0.37</td>
+</tr>
+<tr class="even">
+<td align="left">5to11s2</td>
+<td align="right">0.08</td>
+<td align="right">0.87</td>
+<td align="right">1.32</td>
+<td align="right">7.47</td>
+<td align="right">0.41</td>
+<td align="right">0.41</td>
+<td align="right">0.23</td>
+<td align="right">0.23</td>
+<td align="right">0.46</td>
+<td align="right">3.35</td>
+<td align="right">1.88</td>
+<td align="right">0.37</td>
+</tr>
+<tr class="odd">
+<td align="left">12to13s3</td>
+<td align="right">0.04</td>
+<td align="right">0.32</td>
+<td align="right">1.43</td>
+<td align="right">1.43</td>
+<td align="right">6.79</td>
+<td align="right">1.20</td>
+<td align="right">1.25</td>
+<td align="right">1.25</td>
+<td align="right">0.57</td>
+<td align="right">2.77</td>
+<td align="right">2.22</td>
+<td align="right">0.47</td>
+</tr>
+<tr class="even">
+<td align="left">12to13s4</td>
+<td align="right">0.04</td>
+<td align="right">0.32</td>
+<td align="right">1.43</td>
+<td align="right">1.43</td>
+<td align="right">1.20</td>
+<td align="right">6.79</td>
+<td align="right">1.25</td>
+<td align="right">1.25</td>
+<td align="right">0.57</td>
+<td align="right">2.77</td>
+<td align="right">2.22</td>
+<td align="right">0.47</td>
+</tr>
+<tr class="odd">
+<td align="left">14to17s5</td>
+<td align="right">0.05</td>
+<td align="right">0.24</td>
+<td align="right">0.40</td>
+<td align="right">0.40</td>
+<td align="right">0.63</td>
+<td align="right">0.63</td>
+<td align="right">8.22</td>
+<td align="right">1.45</td>
+<td align="right">2.21</td>
+<td align="right">2.71</td>
+<td align="right">2.51</td>
+<td align="right">0.37</td>
+</tr>
+<tr class="even">
+<td align="left">14to17s6</td>
+<td align="right">0.05</td>
+<td align="right">0.24</td>
+<td align="right">0.40</td>
+<td align="right">0.40</td>
+<td align="right">0.63</td>
+<td align="right">0.63</td>
+<td align="right">1.45</td>
+<td align="right">8.22</td>
+<td align="right">2.21</td>
+<td align="right">2.71</td>
+<td align="right">2.51</td>
+<td align="right">0.37</td>
+</tr>
+<tr class="odd">
+<td align="left">18to24</td>
+<td align="right">0.05</td>
+<td align="right">0.28</td>
+<td align="right">0.23</td>
+<td align="right">0.23</td>
+<td align="right">0.08</td>
+<td align="right">0.08</td>
+<td align="right">0.63</td>
+<td align="right">0.63</td>
+<td align="right">5.72</td>
+<td align="right">3.68</td>
+<td align="right">2.87</td>
+<td align="right">0.37</td>
+</tr>
+<tr class="even">
+<td align="left">25to44</td>
+<td align="right">0.11</td>
+<td align="right">0.66</td>
+<td align="right">0.59</td>
+<td align="right">0.59</td>
+<td align="right">0.14</td>
+<td align="right">0.14</td>
+<td align="right">0.27</td>
+<td align="right">0.27</td>
+<td align="right">1.29</td>
+<td align="right">5.72</td>
+<td align="right">3.83</td>
+<td align="right">0.61</td>
+</tr>
+<tr class="odd">
+<td align="left">45to69</td>
+<td align="right">0.05</td>
+<td align="right">0.32</td>
+<td align="right">0.27</td>
+<td align="right">0.27</td>
+<td align="right">0.09</td>
+<td align="right">0.09</td>
+<td align="right">0.21</td>
+<td align="right">0.21</td>
+<td align="right">0.84</td>
+<td align="right">3.20</td>
+<td align="right">4.27</td>
+<td align="right">0.96</td>
+</tr>
+<tr class="even">
+<td align="left">70+</td>
+<td align="right">0.01</td>
+<td align="right">0.14</td>
+<td align="right">0.13</td>
+<td align="right">0.13</td>
+<td align="right">0.05</td>
+<td align="right">0.05</td>
+<td align="right">0.07</td>
+<td align="right">0.07</td>
+<td align="right">0.26</td>
+<td align="right">1.22</td>
+<td align="right">2.30</td>
+<td align="right">1.57</td>
+</tr>
+</tbody>
+</table></main>
 </div>
 
 

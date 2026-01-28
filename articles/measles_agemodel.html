@@ -62,188 +62,117 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://epiforesite.github.io/multigroup-vaccine/">multigroup.vaccine</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/epiforecasts/socialmixr" class="external-link">socialmixr</a></span><span class="op">)</span></span></code></pre></div>
+<p>This vignette demonstrates how to build and run an age-structured
+model of transmission within a U.S. county. The example is an outbreak
+of measles in Washington County, Utah.</p>
+<p>First we define the age groups that we want use in our model. Here we
+choose groupings for which we might have reason to assume different
+levels of immunization against measles. We define the
+<code>age_limits</code> vector using the lower limit (minimum age) of
+each group, starting with 0:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">getOutputTable</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">agelims</span>, <span class="va">agepops</span>, <span class="va">agecovr</span>, <span class="va">ageveff</span>, <span class="va">initgrp</span><span class="op">)</span> <span class="op">{</span></span>
-<span></span>
-<span>  <span class="va">grpnames</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"under"</span>, <span class="va">agelims</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">agelims</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">agelims</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span><span class="op">]</span>, <span class="st">"to"</span>, <span class="va">agelims</span><span class="op">[</span><span class="fl">3</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">agelims</span><span class="op">)</span><span class="op">]</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span>,</span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">agelims</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">agelims</span><span class="op">)</span><span class="op">]</span>, <span class="st">"+"</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span>  <span class="va">agevacimmune</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">agepops</span> <span class="op">*</span> <span class="va">agecovr</span> <span class="op">*</span> <span class="va">ageveff</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="va">mijpolymod</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/contactMatrixPolymod.html">contactMatrixPolymod</a></span><span class="op">(</span><span class="va">agelims</span><span class="op">)</span></span>
-<span>  <span class="va">mijlocal</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/contactMatrixPolymod.html">contactMatrixPolymod</a></span><span class="op">(</span><span class="va">agelims</span>, <span class="va">agepops</span><span class="op">)</span></span>
-<span>  <span class="va">R0factor</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">mijlocal</span><span class="op">)</span><span class="op">$</span><span class="va">values</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/eigen.html" class="external-link">eigen</a></span><span class="op">(</span><span class="va">mijpolymod</span><span class="op">)</span><span class="op">$</span><span class="va">values</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
-<span></span>
-<span>  <span class="va">pops</span> <span class="op">&lt;-</span> <span class="va">agepops</span></span>
-<span>  <span class="va">initV</span> <span class="op">&lt;-</span> <span class="va">agevacimmune</span></span>
-<span></span>
-<span>  <span class="va">initI</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">pops</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="va">initI</span><span class="op">[</span><span class="va">initgrp</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
-<span>  <span class="va">initR</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">pops</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="va">R0vals</span> <span class="op">&lt;-</span> <span class="fl">10</span><span class="op">:</span><span class="fl">18</span></span>
-<span>  <span class="va">meaninf</span> <span class="op">&lt;-</span> <span class="fl">7</span></span>
-<span></span>
-<span>  <span class="va">R0local</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">R0vals</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="va">Rv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">R0vals</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="va">escapesize</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">R0vals</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">pops</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">R0vals</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="va">R0local</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">R0vals</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">*</span> <span class="va">R0factor</span></span>
-<span></span>
-<span>    <span class="va">betaij</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/transmissionRates.html">transmissionRates</a></span><span class="op">(</span></span>
-<span>      R0 <span class="op">=</span> <span class="va">R0local</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>,</span>
-<span>      meaninf <span class="op">=</span> <span class="va">meaninf</span>,</span>
-<span>      reltransm <span class="op">=</span> <span class="va">mijlocal</span></span>
-<span>    <span class="op">)</span></span>
-<span></span>
-<span>    <span class="va">Rv</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/vaxrepnum.html">vaxrepnum</a></span><span class="op">(</span><span class="va">meaninf</span>, <span class="va">agepops</span>, <span class="va">betaij</span>, <span class="va">initR</span>, <span class="va">agecovr</span> <span class="op">*</span> <span class="va">agepops</span>, <span class="va">ageveff</span><span class="op">)</span></span>
-<span></span>
-<span>    <span class="kw">if</span> <span class="op">(</span><span class="va">Rv</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span>
-<span>      <span class="va">escapesize</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">pops</span><span class="op">)</span><span class="op">)</span></span>
-<span>    <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
-<span>      <span class="va">escapesize</span><span class="op">[</span><span class="va">i</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/getFinalSizeODE.html">getFinalSizeODE</a></span><span class="op">(</span></span>
-<span>        transmrates <span class="op">=</span> <span class="va">betaij</span>,</span>
-<span>        recoveryrate <span class="op">=</span> <span class="fl">1</span> <span class="op">/</span> <span class="va">meaninf</span>,</span>
-<span>        popsize <span class="op">=</span> <span class="va">pops</span>,</span>
-<span>        initR <span class="op">=</span> <span class="va">initR</span>,</span>
-<span>        initI <span class="op">=</span> <span class="va">initI</span>,</span>
-<span>        initV <span class="op">=</span> <span class="va">initV</span></span>
-<span>      <span class="op">)</span></span>
-<span>    <span class="op">}</span></span>
-<span>    <span class="va">escapesizetot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">escapesize</span><span class="op">)</span></span>
-<span>  <span class="op">}</span></span>
-<span></span>
-<span>  <span class="va">numsims</span> <span class="op">&lt;-</span> <span class="fl">1000</span></span>
-<span></span>
-<span>  <span class="va">probescape</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">R0vals</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">R0vals</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="kw">if</span> <span class="op">(</span><span class="va">Rv</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span>
-<span>      <span class="va">probescape</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">0</span></span>
-<span>    <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
-<span>      <span class="va">betaij</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/transmissionRates.html">transmissionRates</a></span><span class="op">(</span></span>
-<span>        R0 <span class="op">=</span> <span class="va">R0local</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>,</span>
-<span>        meaninf <span class="op">=</span> <span class="va">meaninf</span>,</span>
-<span>        reltransm <span class="op">=</span> <span class="va">mijlocal</span></span>
-<span>      <span class="op">)</span></span>
-<span>      <span class="va">size_dist</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/getFinalSizeDistEscape.html">getFinalSizeDistEscape</a></span><span class="op">(</span></span>
-<span>        n <span class="op">=</span> <span class="va">numsims</span>,</span>
-<span>        transmrates <span class="op">=</span> <span class="va">betaij</span>,</span>
-<span>        recoveryrate <span class="op">=</span> <span class="fl">1</span> <span class="op">/</span> <span class="va">meaninf</span>,</span>
-<span>        popsize <span class="op">=</span> <span class="va">pops</span>,</span>
-<span>        initR <span class="op">=</span> <span class="va">initR</span>,</span>
-<span>        initV <span class="op">=</span> <span class="va">initV</span>,</span>
-<span>        initI <span class="op">=</span> <span class="va">initI</span></span>
-<span>      <span class="op">)</span></span>
-<span>      <span class="va">probescape</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">size_dist</span><span class="op">)</span> <span class="op">&gt;</span> <span class="va">escapesizetot</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">*</span> <span class="fl">0.9</span><span class="op">)</span> <span class="op">/</span> <span class="va">numsims</span></span>
-<span>    <span class="op">}</span></span>
-<span>  <span class="op">}</span></span>
-<span></span>
-<span>  <span class="va">tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">R0vals</span>, <span class="va">R0local</span>, <span class="va">Rv</span>, <span class="va">probescape</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">escapesizetot</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">escapesize</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">tbl</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"R0"</span>, <span class="st">"R0local"</span>, <span class="st">"Rv"</span>, <span class="st">"pEscape"</span>, <span class="st">"escapeInfTot"</span>, <span class="va">grpnames</span><span class="op">)</span></span>
-<span>  <span class="va">tbl</span></span>
-<span><span class="op">}</span></span></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># under 1, 1-4, 5-11, 12-17, 18-24, 25-44, 45-69, 70 plus</span></span>
-<span><span class="va">agelims</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">5</span>, <span class="fl">12</span>, <span class="fl">18</span>, <span class="fl">25</span>, <span class="fl">45</span>, <span class="fl">70</span><span class="op">)</span></span>
-<span><span class="va">ageveff</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.93</span>, <span class="fl">0.93</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.97</span>, <span class="fl">5</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">agepops</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2354</span>, <span class="fl">9418</span>, <span class="fl">19835</span>, <span class="fl">17001</span>, <span class="fl">19219</span>, <span class="fl">47701</span>, <span class="fl">53956</span>, <span class="fl">32842</span><span class="op">)</span></span>
-<span><span class="va">agecovr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.83</span>, <span class="fl">0.852</span>, <span class="fl">0.879</span>, <span class="fl">0.9</span>, <span class="fl">0.925</span>, <span class="fl">0.95</span>, <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">initgrp</span> <span class="op">&lt;-</span> <span class="fl">6</span> <span class="co"># assume first case in 25-44 group</span></span>
-<span></span>
-<span><span class="va">ot1</span> <span class="op">&lt;-</span> <span class="fu">getOutputTable</span><span class="op">(</span></span>
-<span>  agelims <span class="op">=</span> <span class="va">agelims</span>,</span>
-<span>  agepops <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2354</span>, <span class="fl">9418</span>, <span class="fl">19835</span>, <span class="fl">17001</span>, <span class="fl">19219</span>, <span class="fl">47701</span>, <span class="fl">53956</span>, <span class="fl">32842</span><span class="op">)</span>,</span>
-<span>  agecovr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.83</span>, <span class="fl">0.852</span>, <span class="fl">0.879</span>, <span class="fl">0.9</span>, <span class="fl">0.925</span>, <span class="fl">0.95</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>  ageveff <span class="op">=</span> <span class="va">ageveff</span>,</span>
-<span>  initgrp <span class="op">=</span> <span class="va">initgrp</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">ot1</span><span class="op">)</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  R0  R0local       Rv pEscape escapeInfTot under1 1to4 5to11 12to17 18to24</span></span>
-<span><span class="co">#&gt;  10 10.69458 1.547278   0.205         9258    536  833  2264   1734   1010</span></span>
-<span><span class="co">#&gt;  11 11.76404 1.702006   0.261        10985    685 1021  2548   1927   1230</span></span>
-<span><span class="co">#&gt;  12 12.83349 1.856734   0.322        12444    826 1184  2757   2067   1418</span></span>
-<span><span class="co">#&gt;  13 13.90295 2.011462   0.365        13678    957 1324  2912   2169   1576</span></span>
-<span><span class="co">#&gt;  14 14.97241 2.166189   0.397        14726   1078 1442  3028   2245   1708</span></span>
-<span><span class="co">#&gt;  15 16.04187 2.320917   0.420        15620   1189 1542  3117   2303   1819</span></span>
-<span><span class="co">#&gt;  16 17.11133 2.475645   0.450        16385   1290 1628  3185   2346   1911</span></span>
-<span><span class="co">#&gt;  17 18.18078 2.630373   0.491        17042   1382 1700  3238   2380   1989</span></span>
-<span><span class="co">#&gt;  18 19.25024 2.785101   0.524        17609   1466 1761  3279   2406   2054</span></span>
-<span><span class="co">#&gt;  25to44 45to69 70+</span></span>
-<span><span class="co">#&gt;    1822   1060   0</span></span>
-<span><span class="co">#&gt;    2237   1336   0</span></span>
-<span><span class="co">#&gt;    2599   1593   0</span></span>
-<span><span class="co">#&gt;    2913   1828   0</span></span>
-<span><span class="co">#&gt;    3183   2043   0</span></span>
-<span><span class="co">#&gt;    3414   2237   0</span></span>
-<span><span class="co">#&gt;    3612   2413   0</span></span>
-<span><span class="co">#&gt;    3782   2572   0</span></span>
-<span><span class="co">#&gt;    3927   2716   0</span></span></code></pre></div>
+<span><span class="va">age_limits</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">5</span>, <span class="fl">12</span>, <span class="fl">18</span>, <span class="fl">25</span>, <span class="fl">45</span>, <span class="fl">70</span><span class="op">)</span></span></code></pre></div>
+<p>Next we collect census data from Washington County, Utah, using our
+custom age group choice:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Get data for Washington County, Utah</span></span>
+<span><span class="va">washington_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/getCensusData.html">getCensusData</a></span><span class="op">(</span></span>
+<span>  state_fips <span class="op">=</span> <span class="fu"><a href="../reference/getStateFIPS.html">getStateFIPS</a></span><span class="op">(</span><span class="st">"Utah"</span><span class="op">)</span>,</span>
+<span>  county_name <span class="op">=</span> <span class="st">"Washington County"</span>,</span>
+<span>  year <span class="op">=</span> <span class="fl">2024</span>,</span>
+<span>  age_groups <span class="op">=</span> <span class="va">age_limits</span>,</span>
+<span>  csv_path <span class="op">=</span> <span class="fu"><a href="../reference/getCensusDataPath.html">getCensusDataPath</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Now we specify immunity levels of our population age groups due to
+vaccination. The first age group (under 1 year) has no immunity because
+the first measles vaccine is not given until age one. Then we assume
+rising immunity with age:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ot2</span> <span class="op">&lt;-</span> <span class="fu">getOutputTable</span><span class="op">(</span></span>
-<span>  agelims <span class="op">=</span> <span class="va">agelims</span>,</span>
-<span>  agepops <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">11981</span>, <span class="fl">47922</span>, <span class="fl">86718</span>, <span class="fl">77302</span>, <span class="fl">120132</span>, <span class="fl">199914</span>, <span class="fl">136997</span>, <span class="fl">38206</span><span class="op">)</span>,</span>
-<span>  agecovr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.86</span>, <span class="fl">0.899</span>, <span class="fl">0.933</span>, <span class="fl">0.95</span>, <span class="fl">0.95</span>, <span class="fl">0.95</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>  ageveff <span class="op">=</span> <span class="va">ageveff</span>,</span>
-<span>  initgrp <span class="op">=</span> <span class="va">initgrp</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">ot2</span><span class="op">)</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  R0  R0local       Rv pEscape escapeInfTot under1 1to4 5to11 12to17 18to24</span></span>
-<span><span class="co">#&gt;  10 13.52980 1.394501   0.172        27675   2733 3627  6460   4230   3417</span></span>
-<span><span class="co">#&gt;  11 14.88278 1.533951   0.225        34539   3653 4608  7577   4970   4368</span></span>
-<span><span class="co">#&gt;  12 16.23576 1.673401   0.266        40271   4503 5428  8388   5509   5170</span></span>
-<span><span class="co">#&gt;  13 17.58874 1.812851   0.343        45070   5275 6106  8989   5910   5838</span></span>
-<span><span class="co">#&gt;  14 18.94172 1.952301   0.356        49104   5970 6666  9440   6212   6393</span></span>
-<span><span class="co">#&gt;  15 20.29470 2.091751   0.398        52511   6592 7128  9784   6443   6855</span></span>
-<span><span class="co">#&gt;  16 21.64768 2.231201   0.475        55404   7146 7511 10050   6623   7239</span></span>
-<span><span class="co">#&gt;  17 23.00066 2.370652   0.438        57871   7639 7828 10256   6763   7560</span></span>
-<span><span class="co">#&gt;  18 24.35364 2.510102   0.477        59987   8078 8093 10419   6873   7830</span></span>
-<span><span class="co">#&gt;  25to44 45to69 70+</span></span>
-<span><span class="co">#&gt;    5008   2200   0</span></span>
-<span><span class="co">#&gt;    6449   2914   0</span></span>
-<span><span class="co">#&gt;    7699   3574   0</span></span>
-<span><span class="co">#&gt;    8774   4178   0</span></span>
-<span><span class="co">#&gt;    9695   4727   0</span></span>
-<span><span class="co">#&gt;   10483   5225   0</span></span>
-<span><span class="co">#&gt;   11158   5677   0</span></span>
-<span><span class="co">#&gt;   11738   6087   0</span></span>
-<span><span class="co">#&gt;   12236   6460   0</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">age_immunity</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.77</span>, <span class="fl">0.83</span>, <span class="fl">0.85</span>, <span class="fl">0.87</span>, <span class="fl">0.90</span>, <span class="fl">0.92</span>, <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<p>Now we can begin defining the input arguments to our
+<code>finalsize</code> function so that we can estimate the measles
+outbreak size in this county after an introduction.</p>
+<p>Initial population size of each state:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ot3</span> <span class="op">&lt;-</span> <span class="fu">getOutputTable</span><span class="op">(</span></span>
-<span>  agelims <span class="op">=</span> <span class="va">agelims</span>,</span>
-<span>  agepops <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">14527</span>, <span class="fl">58108</span>, <span class="fl">114156</span>, <span class="fl">106006</span>, <span class="fl">118837</span>, <span class="fl">367597</span>, <span class="fl">310945</span>, <span class="fl">95637</span><span class="op">)</span>,</span>
-<span>  agecovr <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.89</span>, <span class="fl">0.949</span>, <span class="fl">0.950</span>, <span class="fl">0.95</span>, <span class="fl">0.95</span>, <span class="fl">0.95</span>, <span class="fl">1</span><span class="op">)</span>,</span>
-<span>  ageveff <span class="op">=</span> <span class="va">ageveff</span>,</span>
-<span>  initgrp <span class="op">=</span> <span class="va">initgrp</span></span>
-<span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">popsize</span> <span class="op">&lt;-</span> <span class="va">washington_data</span><span class="op">$</span><span class="va">age_pops</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">ot3</span><span class="op">)</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  R0  R0local        Rv pEscape escapeInfTot under1 1to4 5to11 12to17 18to24</span></span>
-<span><span class="co">#&gt;  10 11.49021 0.9479753   0.000            0      0    0     0      0      0</span></span>
-<span><span class="co">#&gt;  11 12.63924 1.0427728   0.063         5979    495  571   782   1006    580</span></span>
-<span><span class="co">#&gt;  12 13.78826 1.1375704   0.109        18249   1623 1803  2305   2709   1780</span></span>
-<span><span class="co">#&gt;  13 14.93728 1.2323679   0.183        28990   2726 2918  3532   3919   2832</span></span>
-<span><span class="co">#&gt;  14 16.08630 1.3271654   0.212        38233   3761 3889  4506   4809   3732</span></span>
-<span><span class="co">#&gt;  15 17.23532 1.4219629   0.258        46153   4713 4720  5281   5481   4495</span></span>
-<span><span class="co">#&gt;  16 18.38434 1.5167605   0.316        52946   5580 5427  5902   6000   5141</span></span>
-<span><span class="co">#&gt;  17 19.53336 1.6115580   0.350        58790   6366 6028  6405   6406   5689</span></span>
-<span><span class="co">#&gt;  18 20.68239 1.7063555   0.390        63836   7076 6541  6815   6730   6155</span></span>
-<span><span class="co">#&gt;  25to44 45to69 70+</span></span>
-<span><span class="co">#&gt;       0      0   0</span></span>
-<span><span class="co">#&gt;    1648    897   0</span></span>
-<span><span class="co">#&gt;    5152   2877   0</span></span>
-<span><span class="co">#&gt;    8305   4757   0</span></span>
-<span><span class="co">#&gt;   11049   6486   0</span></span>
-<span><span class="co">#&gt;   13407   8057   0</span></span>
-<span><span class="co">#&gt;   15422   9474   0</span></span>
-<span><span class="co">#&gt;   17145  10750   0</span></span>
-<span><span class="co">#&gt;   18620  11900   0</span></span></code></pre></div>
+<span><span class="va">initV</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">age_immunity</span> <span class="op">*</span> <span class="va">popsize</span><span class="op">)</span>  <span class="co"># initially immune cases </span></span>
+<span></span>
+<span><span class="va">initI</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">popsize</span><span class="op">)</span><span class="op">)</span>  <span class="co"># initial infectious cases</span></span>
+<span><span class="va">initI</span><span class="op">[</span><span class="fl">6</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">1</span>                     <span class="co"># assume 1 initial case in the 6th age group (25-44)</span></span>
+<span></span>
+<span><span class="va">initR</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">popsize</span><span class="op">)</span><span class="op">)</span>  <span class="co"># no recent prior measles outbreaks</span></span></code></pre></div>
+<p>Transmission matrix ingredients: contact matrix, relative
+susceptibility and transmissibility, and the basic reproduction number
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mn>0</mn></msub><annotation encoding="application/x-tex">R_0</annotation></semantics></math>).
+The contact matrix uses Polymod contact survey data, adjusted for local
+population distribution:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">contactmatrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/contactMatrixPolymod.html">contactMatrixPolymod</a></span><span class="op">(</span><span class="va">age_limits</span>, <span class="va">popsize</span><span class="op">)</span></span>
+<span><span class="va">relsusc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">popsize</span><span class="op">)</span><span class="op">)</span>      <span class="co"># Assume no age differences in susceptibility</span></span>
+<span><span class="va">reltransm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">popsize</span><span class="op">)</span><span class="op">)</span>    <span class="co"># or transmissibility per contact</span></span>
+<span><span class="va">R0</span> <span class="op">&lt;-</span> <span class="fl">10</span></span></code></pre></div>
+<p>Now we can estimate the final size of an outbreak using the defualt,
+deterministic solution produced by the <code><a href="../reference/finalsize.html">finalsize()</a></code>
+function:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finalsize.html">finalsize</a></span><span class="op">(</span><span class="va">popsize</span>, <span class="va">R0</span>, <span class="va">contactmatrix</span>, <span class="va">relsusc</span>, <span class="va">reltransm</span>, <span class="va">initR</span>, <span class="va">initI</span>, <span class="va">initV</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">fs</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 7573</span></span></code></pre></div>
+<p>Under the model assumptions and with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mn>0</mn></msub><annotation encoding="application/x-tex">R_0</annotation></semantics></math>
+= 10, there could be an outbreak of more than 7,500 measles cases in
+this county.</p>
+<p>Here’s how the outbreak size looks for each age group:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">fs</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">washington_data</span><span class="op">$</span><span class="va">age_labels</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fs</span><span class="op">)</span></span>
+<span><span class="co">#&gt; under1   1to4  5to11 12to17 18to24 25to44 45to69 70plus </span></span>
+<span><span class="co">#&gt;    372    648   1673   1748    876   1414    843      0</span></span></code></pre></div>
+<p>Here’s an example using the “hybrid” method option in the
+<code><a href="../reference/finalsize.html">finalsize()</a></code> function, which runs stochastic simulations
+from the initial conditions until the outbreak dies out or reaches an
+“escape” threshold, after which the stochastic simulation is suspended
+and replaced with the deterministic solution above.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fs_hybrid</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/finalsize.html">finalsize</a></span><span class="op">(</span><span class="va">popsize</span>, <span class="va">R0</span>, <span class="va">contactmatrix</span>, <span class="va">relsusc</span>, <span class="va">reltransm</span>, <span class="va">initR</span>, <span class="va">initI</span>, <span class="va">initV</span>, method <span class="op">=</span> <span class="st">"hybrid"</span>, nsims <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">fs_hybrid</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">washington_data</span><span class="op">$</span><span class="va">age_labels</span></span>
+<span><span class="va">fs_hybrid</span></span>
+<span><span class="co">#&gt;       under1 1to4 5to11 12to17 18to24 25to44 45to69 70plus</span></span>
+<span><span class="co">#&gt;  [1,]      0    0     0      0      0      1      0      0</span></span>
+<span><span class="co">#&gt;  [2,]      0    0     0      1      4      3      0      0</span></span>
+<span><span class="co">#&gt;  [3,]      0    0     0      0      0      1      0      0</span></span>
+<span><span class="co">#&gt;  [4,]      0    0     0      0      0      1      0      0</span></span>
+<span><span class="co">#&gt;  [5,]      0    0     0      0      0      1      0      0</span></span>
+<span><span class="co">#&gt;  [6,]      4    0     0      7      0      1      1      0</span></span>
+<span><span class="co">#&gt;  [7,]      0    0     0      0      0      1      0      0</span></span>
+<span><span class="co">#&gt;  [8,]    372  648  1673   1748    876   1414    843      0</span></span>
+<span><span class="co">#&gt;  [9,]      0    0     0      0      0      1      0      0</span></span>
+<span><span class="co">#&gt; [10,]      0    0     0      0      0      1      0      0</span></span>
+<span><span class="co">#&gt; [11,]      0    0     0      0      0      1      0      0</span></span>
+<span><span class="co">#&gt; [12,]      0    0     0      0      0      1      0      0</span></span>
+<span><span class="co">#&gt; [13,]      0    0     0      0      0      1      0      0</span></span>
+<span><span class="co">#&gt; [14,]      0    0     0      1      1      4      0      0</span></span>
+<span><span class="co">#&gt; [15,]      1    0     0      0      0      1      1      0</span></span>
+<span><span class="co">#&gt; [16,]    372  648  1673   1748    876   1414    843      0</span></span>
+<span><span class="co">#&gt; [17,]      0    0     0      0      0      1      0      0</span></span>
+<span><span class="co">#&gt; [18,]      1    2     2      0      0      4      0      0</span></span>
+<span><span class="co">#&gt; [19,]      0    0     0      0      0      1      0      0</span></span>
+<span><span class="co">#&gt; [20,]    372  648  1673   1748    876   1414    843      0</span></span>
+<span><span class="co">#&gt; [21,]      4    2     5      1      3      8      2      0</span></span>
+<span><span class="co">#&gt; [22,]      0    0     0      0      0      2      0      0</span></span>
+<span><span class="co">#&gt; [23,]      0    2     1      0      0      1      0      0</span></span>
+<span><span class="co">#&gt; [24,]      0    0     0      0      0      1      0      0</span></span>
+<span><span class="co">#&gt; [25,]    372  648  1673   1748    876   1414    843      0</span></span>
+<span><span class="co">#&gt; [26,]      0    0     0      0      0      2      0      0</span></span>
+<span><span class="co">#&gt; [27,]    372  648  1673   1748    876   1414    843      0</span></span>
+<span><span class="co">#&gt; [28,]      0    0     0      0      2      2      0      0</span></span>
+<span><span class="co">#&gt; [29,]      0    0     0      0      0      1      0      0</span></span>
+<span><span class="co">#&gt; [30,]      0    0     0      0      0      1      0      0</span></span></code></pre></div>
+<p>The results show that not every introduction of one infectious
+individual (in the 25 to 44 age group) will lead to a large
+outbreak.</p>
   </main>
 </div>
 
