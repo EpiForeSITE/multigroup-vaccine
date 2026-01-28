@@ -177,8 +177,3 @@ ecosystem](https://github.com/EpiForeSITE/software) developed by the
 ForeSITE Group at the University of Utah. Development was supported by
 the Centers for Disease Control and Prevention’s Center for Forecasting
 and Outbreak Analytics (Cooperative agreement CDC-RFA-FT-23-0069).
-
-------------------------------------------------------------------------
-
-**EpiForeSITE**: Epidemiological Forecasting and Scenario Modeling
-Initiative for Translational Epidemiology
