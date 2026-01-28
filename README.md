@@ -7,6 +7,7 @@
 
 [![R-CMD-check](https://github.com/EpiForeSITE/multigroup-vaccine/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/EpiForeSITE/multigroup-vaccine/actions/workflows/R-CMD-check.yaml)
 [![R-universe](https://epiforesite.r-universe.dev/badges/multigroup.vaccine)](https://epiforesite.r-universe.dev/multigroup.vaccine)
+[![Codecov test coverage](https://codecov.io/gh/EpiForeSITE/multigroup-vaccine/graph/badge.svg)](https://app.codecov.io/gh/EpiForeSITE/multigroup-vaccine?branch=main)
 [![License:
 MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![EpiForeSITE](https://img.shields.io/badge/Part%20of-EpiForeSITE-blue.svg)](https://github.com/EpiForeSITE/software)
