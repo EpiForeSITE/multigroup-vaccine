@@ -56,7 +56,7 @@
 #'   csv_path = getCensusDataPath()
 #' )
 #'
-#' \dontrun{
+#' \donttest{
 #' # Download from web (requires internet)
 #' slc_web <- getCensusData(
 #'   state_fips = "49",
@@ -404,7 +404,7 @@ aggregateByAgeGroups <- function(ages, pops, age_groups, verbose = FALSE) {
 #'   csv_path = getCensusDataPath()
 #' )
 #'
-#' \dontrun{
+#' \donttest{
 #' # Download from web (requires internet)
 #' utah_counties_web <- listCounties(state_fips = "49", year = 2024)
 #' 
@@ -485,7 +485,7 @@ listCounties <- function(state_fips, year = 2024, csv_path = NULL, cache_dir = N
 #' utah_csv <- getCensusDataPath()
 #' 
 #' # Use it with getCensusData
-#' \dontrun{
+#' \donttest{
 #' slc_data <- getCensusData(
 #'   state_fips = "49",
 #'   county_name = "Salt Lake County",
