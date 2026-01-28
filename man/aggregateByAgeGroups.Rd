@@ -39,8 +39,8 @@ When \code{length(age_groups) > 1}, groups are formed as
 \code{age_groups[i]} to \code{age_groups[i+1] - 1} for i = 1:(n-1) and
 \code{age_groups[n]} and above for the final group. Human-readable labels are produced:
 "under1" for the 0–0 group, "ageX" for single-year groups, "XtoY" for ranges,
-and "Xplus" for the final open group. The function prints aggregation
-summaries to the console for each group using \code{cat()}.
+and "Xplus" for the final open group. When \code{verbose = TRUE}, the function prints
+aggregation summaries to the console for each group using \code{cat()}.
 }
 \details{
 \itemize{
@@ -49,8 +49,9 @@ satisfying lower <= age <= upper). For the last group the upper bound is
 infinite.
 \item If no ages fall into a group the aggregated count for that group is 0
 (because \code{sum(numeric(0)) == 0}).
-\item The function writes progress messages to the console with \code{cat()} for each
-aggregated group (useful for debugging / logging).
+\item When \code{verbose = TRUE}, the function writes progress messages to the console
+with \code{cat()} for each aggregated group (useful for debugging / logging).
+By default (\code{verbose = FALSE}), the function is silent.
 }
 }
 \examples{

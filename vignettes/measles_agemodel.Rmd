@@ -19,131 +19,77 @@ library(multigroup.vaccine)
 library(socialmixr)
 ```
 
-```{r}
-getOutputTable <- function(agelims, agepops, agecovr, ageveff, initgrp) {
+This vignette demonstrates how to build and run an age-structured model of transmission within a U.S. county. The example is an outbreak of measles in Washington County, Utah.
 
-  grpnames <- c(
-    paste0("under", agelims[2]),
-    paste0(agelims[2:(length(agelims) - 1)], "to", agelims[3:length(agelims)] - 1),
-    paste0(agelims[length(agelims)], "+")
-  )
-
-  agevacimmune <- round(agepops * agecovr * ageveff)
-
-  mijpolymod <- contactMatrixPolymod(agelims)
-  mijlocal <- contactMatrixPolymod(agelims, agepops)
-  R0factor <- eigen(mijlocal)$values[1] / eigen(mijpolymod)$values[1]
-
-  pops <- agepops
-  initV <- agevacimmune
-
-  initI <- rep(0, length(pops))
-  initI[initgrp] <- 1
-  initR <- rep(0, length(pops))
-
-  R0vals <- 10:18
-  meaninf <- 7
-
-  R0local <- rep(0, length(R0vals))
-  Rv <- rep(0, length(R0vals))
-  escapesize <- matrix(0, length(R0vals), length(pops))
-
-  for (i in seq_along(R0vals)) {
-    R0local[i] <- R0vals[i] * R0factor
-
-    betaij <- transmissionRates(
-      R0 = R0local[i],
-      meaninf = meaninf,
-      reltransm = mijlocal
-    )
-
-    Rv[i] <- vaxrepnum(meaninf, agepops, betaij, initR, agecovr * agepops, ageveff)
-
-    if (Rv[i] < 1) {
-      escapesize[i, ] <- rep(0, length(pops))
-    } else {
-      escapesize[i, ] <- getFinalSizeODE(
-        transmrates = betaij,
-        recoveryrate = 1 / meaninf,
-        popsize = pops,
-        initR = initR,
-        initI = initI,
-        initV = initV
-      )
-    }
-    escapesizetot <- rowSums(escapesize)
-  }
-
-  numsims <- 1000
-
-  probescape <- rep(0, length(R0vals))
-  for (i in seq_along(R0vals)) {
-    if (Rv[i] < 1) {
-      probescape[i] <- 0
-    } else {
-      betaij <- transmissionRates(
-        R0 = R0local[i],
-        meaninf = meaninf,
-        reltransm = mijlocal
-      )
-      size_dist <- getFinalSizeDistEscape(
-        n = numsims,
-        transmrates = betaij,
-        recoveryrate = 1 / meaninf,
-        popsize = pops,
-        initR = initR,
-        initV = initV,
-        initI = initI
-      )
-      probescape[i] <- sum(rowSums(size_dist) > escapesizetot[i] * 0.9) / numsims
-    }
-  }
-
-  tbl <- cbind(R0vals, R0local, Rv, probescape, round(escapesizetot), round(escapesize))
-  colnames(tbl) <- c("R0", "R0local", "Rv", "pEscape", "escapeInfTot", grpnames)
-  tbl
-}
-```
+First we define the age groups that we want use in our model. Here we choose groupings for which we might have reason to assume different levels of immunization against measles. We define the `age_limits` vector using the lower limit (minimum age) of each group, starting with 0:
 
 ```{r}
 # under 1, 1-4, 5-11, 12-17, 18-24, 25-44, 45-69, 70 plus
-agelims <- c(0, 1, 5, 12, 18, 25, 45, 70)
-ageveff <- c(0.93, 0.93, rep(0.97, 5), 1)
-
-agepops <- c(2354, 9418, 19835, 17001, 19219, 47701, 53956, 32842)
-agecovr <- c(0, 0.83, 0.852, 0.879, 0.9, 0.925, 0.95, 1)
-initgrp <- 6 # assume first case in 25-44 group
-
-ot1 <- getOutputTable(
-  agelims = agelims,
-  agepops = c(2354, 9418, 19835, 17001, 19219, 47701, 53956, 32842),
-  agecovr = c(0, 0.83, 0.852, 0.879, 0.9, 0.925, 0.95, 1),
-  ageveff = ageveff,
-  initgrp = initgrp
-)
-
-print(as.data.frame(ot1), row.names = FALSE)
+age_limits <- c(0, 1, 5, 12, 18, 25, 45, 70)
 ```
-```{r}
-ot2 <- getOutputTable(
-  agelims = agelims,
-  agepops = c(11981, 47922, 86718, 77302, 120132, 199914, 136997, 38206),
-  agecovr = c(0, 0.86, 0.899, 0.933, 0.95, 0.95, 0.95, 1),
-  ageveff = ageveff,
-  initgrp = initgrp
-)
 
-print(as.data.frame(ot2), row.names = FALSE)
-```
+Next we collect census data from Washington County, Utah, using our custom age group choice:
 
 ```{r}
-ot3 <- getOutputTable(
-  agelims = agelims,
-  agepops = c(14527, 58108, 114156, 106006, 118837, 367597, 310945, 95637),
-  agecovr = c(0, 0.89, 0.949, 0.950, 0.95, 0.95, 0.95, 1),
-  ageveff = ageveff,
-  initgrp = initgrp
+# Get data for Washington County, Utah
+washington_data <- getCensusData(
+  state_fips = getStateFIPS("Utah"),
+  county_name = "Washington County",
+  year = 2024,
+  age_groups = age_limits,
+  csv_path = getCensusDataPath()
 )
-
-print(as.data.frame(ot3), row.names = FALSE)
 ```
+
+Now we specify immunity levels of our population age groups due to vaccination. The first age group (under 1 year) has no immunity because the first measles vaccine is not given until age one. Then we assume rising immunity with age:
+
+```{r}
+age_immunity <- c(0, 0.77, 0.83, 0.85, 0.87, 0.90, 0.92, 1)
+```
+
+Now we can begin defining the input arguments to our `finalsize` function so that we can estimate the measles outbreak size in this county after an introduction.
+
+Initial population size of each state:
+
+```{r}
+popsize <- washington_data$age_pops
+
+initV <- round(age_immunity * popsize)  # initially immune cases 
+
+initI <- rep(0, length(popsize))  # initial infectious cases
+initI[6] <- 1                     # assume 1 initial case in the 6th age group (25-44)
+
+initR <- rep(0, length(popsize))  # no recent prior measles outbreaks
+```
+
+Transmission matrix ingredients: contact matrix, relative susceptibility and transmissibility, and the basic reproduction number ($R_0$). The contact matrix uses Polymod contact survey data, adjusted for local population distribution:
+
+```{r}
+contactmatrix <- contactMatrixPolymod(age_limits, popsize)
+relsusc <- rep(1, length(popsize))      # Assume no age differences in susceptibility
+reltransm <- rep(1, length(popsize))    # or transmissibility per contact
+R0 <- 10
+```
+
+Now we can estimate the final size of an outbreak using the defualt, deterministic solution
+produced by the `finalsize()` function:
+
+```{r}
+fs <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV)
+round(sum(fs))
+```
+Under the model assumptions and with $R_0$ = 10, there could be an outbreak of more than 7,500 measles cases in this county.
+
+Here's how the outbreak size looks for each age group:
+```{r}
+names(fs) <- washington_data$age_labels
+round(fs)
+```
+Here's an example using the "hybrid" method option in the `finalsize()` function, which runs stochastic simulations from the initial conditions until the outbreak dies out or reaches an "escape" threshold, after which the stochastic simulation is suspended and replaced with the deterministic solution above.
+
+```{r}
+fs_hybrid <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV, method = "hybrid", nsims = 30)
+colnames(fs_hybrid) <- washington_data$age_labels
+fs_hybrid
+```
+The results show that not every introduction of one infectious individual (in the 25 to 44 age group) will lead to a large outbreak.
