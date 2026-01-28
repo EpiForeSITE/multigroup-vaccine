@@ -21,8 +21,10 @@ The app featured in this package is the one presented in the shiny demo:
 \url{https://shiny.posit.co/r/getstarted/shiny-basics/lesson1/index.html}.
 }
 \examples{
+\donttest{
 # To be executed interactively only
 if (interactive()) {
   run_my_app()
+}
 }
 }

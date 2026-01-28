@@ -10,9 +10,11 @@
 #' on the console.
 #' @export
 #' @examples
+#' \donttest{
 #' # To be executed interactively only
 #' if (interactive()) {
 #'   run_my_app()
+#' }
 #' }
 #' @import shiny
 #' @importFrom htmltools tags img
