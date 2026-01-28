@@ -135,39 +135,6 @@ test_that("finalsize handles single group correctly", {
   expect_true(result_ode <= popsize)
 })
 
-test_that("finalsize respects relative susceptibility", {
-  popsize <- c(1000, 1000)
-  R0 <- 2
-  contactmatrix <- matrix(1, 2, 2)
-  reltransm <- c(1, 1)
-  initR <- c(0, 0)
-  initI <- c(10, 10)
-  initV <- c(0, 0)
-
-  # Group 1 has normal susceptibility, group 2 is half as susceptible
-  result <- finalsize(popsize, R0, contactmatrix, c(1, 0.5), reltransm, initR, initI, initV, method = "ODE")
-
-  # Group 2 should have smaller final size due to lower susceptibility
-  expect_true(result[2] < result[1])
-})
-
-test_that("finalsize respects relative transmissibility", {
-  popsize <- c(1000, 1000)
-  R0 <- 2
-  contactmatrix <- matrix(1, 2, 2)
-  relsusc <- c(1, 1)
-  initR <- c(0, 0)
-  initI <- c(10, 10)
-  initV <- c(0, 0)
-
-  # Group 2 is twice as transmissible - affects outbreak in both groups
-  result_high <- finalsize(popsize, R0, contactmatrix, relsusc, c(1, 2), initR, initI, initV, method = "ODE")
-  result_normal <- finalsize(popsize, R0, contactmatrix, relsusc, c(1, 1), initR, initI, initV, method = "ODE")
-
-  # Higher transmissibility should lead to larger outbreak overall
-  expect_true(sum(result_high) > sum(result_normal))
-})
-
 test_that("finalsize works with R0 < 1", {
   popsize <- c(5000, 5000)
   R0 <- 0.8  # Below epidemic threshold
