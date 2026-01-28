@@ -3,7 +3,7 @@ Type: Package
 Title: Multigroup Vaccine Model
 Version: 0.1.1
 Authors@R:
-    c(person("Damon", "Toth", , "damon.toth@hsc.utah.edu", role = c("aut", "ctb"),
+    c(person("Damon", "Toth", , "damon.toth@hsc.utah.edu", role = c("aut", "ctb", "cph"),
            comment = c(ORCID = "0000-0001-7393-4814")),
            person("Jake", "Wagoner", , "jakew@sci.utah.edu", role = c("cre", "ctb"),
            comment = c(ORCID = "0009-0000-5053-2281")),
