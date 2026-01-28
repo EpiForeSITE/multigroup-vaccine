@@ -1,9 +1,9 @@
 Package: multigroup.vaccine
 Type: Package
-Title: Multigroup Vaccine Model
-Version: 0.1.0
+Title: Analyze Outbreak Models of Multi-Group Populations with Vaccination
+Version: 0.1.1
 Authors@R:
-    c(person("Damon", "Toth", , "damon.toth@hsc.utah.edu", role = c("aut", "ctb"),
+    c(person("Damon", "Toth", , "damon.toth@hsc.utah.edu", role = c("aut", "ctb", "cph"),
            comment = c(ORCID = "0000-0001-7393-4814")),
            person("Jake", "Wagoner", , "jakew@sci.utah.edu", role = c("cre", "ctb"),
            comment = c(ORCID = "0009-0000-5053-2281")),
@@ -11,26 +11,26 @@ Authors@R:
            person("Centers for Disease Control and Prevention's Center for Forecasting and Outbreak Analytics",
            role="fnd", comment = "Cooperative agreement CDC-RFA-FT-23-0069"))
 Maintainer: Jake Wagoner <jakew@sci.utah.edu>
-Description: This package provides a tool for examining the effects of
-    differential rates of vaccination in varied populations as well as tools for disease outbreak forecasting.
+Description: Model infectious disease dynamics in populations 
+    with multiple subgroups having different vaccination rates, vaccine 
+    effectiveness, and contact patterns. Provides functions for final outbreak 
+    size calculations, age-structured models, automatic census-data fetching, and an 
+    interactive Shiny dashboard for scenario exploration.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
 RoxygenNote: 7.3.3
 Imports:
     deSolve,
     graphics,
     shiny,
     stats,
-    bslib (>= 0.10.0),
+    bslib (>= 0.9.0),
     htmltools,
     socialmixr
 Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
-    epiworldR,
-    ggplot2
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)

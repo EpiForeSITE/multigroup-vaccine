@@ -58,7 +58,7 @@ relsusc <- c(1, 1.05)
 reltransm <- c(1, 1.01)
 ```
 
--   **Overall transmissibility of disease**. All the components above are enough to describe the *relative* transmission rates from one group to another, but we still need an absolute measure of how transmissible the disease is. This is often quantified by a basic reproduction number ($R_0$), defined as the average number of transmissions from a typical infectious individual if the rest of the population is suceptible. Here we set $R_0$ to 1.75.
+-   **Overall transmissibility of disease**. All the components above are enough to describe the *relative* transmission rates from one group to another, but we still need an absolute measure of how transmissible the disease is. This is often quantified by a basic reproduction number ($R_0$), defined as the average number of transmissions from a typical infectious individual if the rest of the population is susceptible. Here we set $R_0$ to 1.75.
 
 ```{r}
 R0 <- 1.75

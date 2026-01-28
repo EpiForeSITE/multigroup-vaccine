@@ -83,7 +83,7 @@ slc_by_sex <- getCensusData(
   csv_path = getCensusDataPath()
 )
 
-\dontrun{
+\donttest{
 # Download from web (requires internet)
 slc_web <- getCensusData(
   state_fips = "49",

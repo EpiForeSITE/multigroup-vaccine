@@ -37,7 +37,7 @@ utah_counties <- listCounties(
   csv_path = getCensusDataPath()
 )
 
-\dontrun{
+\donttest{
 # Download from web (requires internet)
 utah_counties_web <- listCounties(state_fips = "49", year = 2024)
 

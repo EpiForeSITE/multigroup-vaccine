@@ -15,3 +15,9 @@
 ^figure$
 ^README\.Rmd$
 ^vignettes/experiments$
+^docs$
+^doc$
+^Meta$
+^NEWS\\.md$
+^cran-comments\.md$
+^CRAN-SUBMISSION$
