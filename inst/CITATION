@@ -1,0 +1,9 @@
+bibentry(
+  bibtype = "Manual",
+  title = "multigroup.vaccine: Analyze Outbreak Models of Multi-Group Populations with Vaccination",
+  author = c(person("Damon", "Toth"), person("Jake", "Wagoner"), person("Willy", "Ray"),
+  person("George", "Vega Yon")),
+  year = "2026",
+  note = "R package version 0.1.1",
+  url = "https://epiforesite.github.io/multigroup-vaccine/"
+)

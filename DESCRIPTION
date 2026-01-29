@@ -5,9 +5,11 @@ Version: 0.1.1
 Authors@R:
     c(person("Damon", "Toth", , "damon.toth@hsc.utah.edu", role = c("aut", "ctb", "cph"),
            comment = c(ORCID = "0000-0001-7393-4814")),
-           person("Jake", "Wagoner", , "jakew@sci.utah.edu", role = c("cre", "ctb"),
+           person("Jake", "Wagoner", , "jakew@sci.utah.edu", role = c("cre", "aut"),
            comment = c(ORCID = "0009-0000-5053-2281")),
-           person("Willy", "Ray", , "william.ray@hsc.utah.edu", role = c("ctb")),
+           person("Willy", "Ray", , "william.ray@hsc.utah.edu", role = c("aut")),
+           person("George", "Vega Yon", , "g.vegayon@gmail.com", role = c("ctb"), 
+           comment = c(ORCID = "0000-0002-3171-0844")),
            person("Centers for Disease Control and Prevention's Center for Forecasting and Outbreak Analytics",
            role="fnd", comment = "Cooperative agreement CDC-RFA-FT-23-0069"))
 Maintainer: Jake Wagoner <jakew@sci.utah.edu>
