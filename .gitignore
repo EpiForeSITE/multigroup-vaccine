@@ -9,3 +9,7 @@ renv/*
 renv.lock
 docs
 *.DS_Store
+*.Rcheck*
+*.tar.gz*
+/doc/
+/Meta/

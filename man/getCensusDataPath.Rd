@@ -18,7 +18,7 @@ This is useful for examples, testing, and when internet access is not available.
 utah_csv <- getCensusDataPath()
 
 # Use it with getCensusData
-\dontrun{
+\donttest{
 slc_data <- getCensusData(
   state_fips = "49",
   county_name = "Salt Lake County",
