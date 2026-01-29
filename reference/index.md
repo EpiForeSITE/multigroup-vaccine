@@ -2,8 +2,6 @@
 
 ## All functions
 
-- [`UtahAgeCountyPop`](https://epiforesite.github.io/multigroup-vaccine/reference/UtahAgeCountyPop.md)
-  : Population size by age group for counties in Utah
 - [`aggregateByAgeGroups()`](https://epiforesite.github.io/multigroup-vaccine/reference/aggregateByAgeGroups.md)
   : Aggregate population counts into age groups
 - [`contactMatrixAgeSchool()`](https://epiforesite.github.io/multigroup-vaccine/reference/contactMatrixAgeSchool.md)

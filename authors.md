@@ -2,7 +2,7 @@
 
 ## Authors
 
-- **Damon Toth**. Author, contributor.
+- **Damon Toth**. Author, contributor, copyright holder.
   [](https://orcid.org/0000-0001-7393-4814)
 
 - **Jake Wagoner**. Maintainer, contributor.
@@ -16,13 +16,14 @@
 
 ## Citation
 
-Toth D (2026). *multigroup.vaccine: Multigroup Vaccine Model*. R package
-version 0.1.0, <https://epiforesite.github.io/multigroup-vaccine/>.
+Toth D (2026). *multigroup.vaccine: Analyze Outbreak Models of
+Multi-Group Populations with Vaccination*. R package version 0.1.1,
+<https://epiforesite.github.io/multigroup-vaccine/>.
 
     @Manual{,
-      title = {multigroup.vaccine: Multigroup Vaccine Model},
+      title = {multigroup.vaccine: Analyze Outbreak Models of Multi-Group Populations with Vaccination},
       author = {Damon Toth},
       year = {2026},
-      note = {R package version 0.1.0},
+      note = {R package version 0.1.1},
       url = {https://epiforesite.github.io/multigroup-vaccine/},
     }

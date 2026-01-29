@@ -88,7 +88,7 @@ reltransm <- c(1, 1.01)
   the disease is. This is often quantified by a basic reproduction
   number ($R_{0}$), defined as the average number of transmissions from
   a typical infectious individual if the rest of the population is
-  suceptible. Here we set $R_{0}$ to 1.75.
+  susceptible. Here we set $R_{0}$ to 1.75.
 
 ``` r
 R0 <- 1.75

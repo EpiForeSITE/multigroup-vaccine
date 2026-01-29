@@ -128,7 +128,7 @@ slc_by_sex <- getCensusData(
   csv_path = getCensusDataPath()
 )
 
-if (FALSE) { # \dontrun{
+# \donttest{
 # Download from web (requires internet)
 slc_web <- getCensusData(
   state_fips = "49",
@@ -143,5 +143,5 @@ slc_cached <- getCensusData(
   year = 2024,
   cache_dir = "~/census_cache"
 )
-} # }
+# }
 ```

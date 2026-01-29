@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Multigroup Vaccine Model • multigroup.vaccine</title>
+<title>Analyze Outbreak Models of Multi-Group Populations with Vaccination • multigroup.vaccine</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Multigroup Vaccine Model">
-<meta name="description" content="This package provides a tool for examining the effects of differential rates of vaccination in varied populations as well as tools for disease outbreak forecasting.">
-<meta property="og:description" content="This package provides a tool for examining the effects of differential rates of vaccination in varied populations as well as tools for disease outbreak forecasting.">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Analyze Outbreak Models of Multi-Group Populations with Vaccination">
+<meta name="description" content="Model infectious disease dynamics in populations with multiple subgroups having different vaccination rates, vaccine effectiveness, and contact patterns. Provides functions for final outbreak size calculations, age-structured models, automatic census-data fetching, and an interactive Shiny dashboard for scenario exploration.">
+<meta property="og:description" content="Model infectious disease dynamics in populations with multiple subgroups having different vaccination rates, vaccine effectiveness, and contact patterns. Provides functions for final outbreak size calculations, age-structured models, automatic census-data fetching, and an interactive Shiny dashboard for scenario exploration.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">multigroup.vaccine</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,16 +66,22 @@
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <div class="section level3">
-<h3 id="from-r-universe-recommended">From R-universe (Recommended)<a class="anchor" aria-label="anchor" href="#from-r-universe-recommended"></a>
+<h3 id="from-cran-recommendedwhen-available">From CRAN (recommended)(when available)<a class="anchor" aria-label="anchor" href="#from-cran-recommendedwhen-available"></a>
 </h3>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"multigroup.vaccine"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="from-r-universe">From R-universe<a class="anchor" aria-label="anchor" href="#from-r-universe"></a>
+</h3>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"multigroup.vaccine"</span>, </span>
 <span>                 repos <span class="op">=</span> <span class="st">"https://epiforesite.r-universe.dev"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="from-github">From GitHub<a class="anchor" aria-label="anchor" href="#from-github"></a>
 </h3>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"EpiForeSITE/multigroup-vaccine"</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -85,13 +91,11 @@
 <p>The package depends on the following R packages:</p>
 <ul>
 <li>
-<strong>Imports</strong>: <code>deSolve</code>, <code>graphics</code>, <code>shiny</code>, <code>stats</code>, <code>bslib</code> (&gt;= 0.8.0), <code>htmltools</code>, <code>socialmixr</code>
+<strong>Imports</strong>: <code>deSolve</code>, <code>graphics</code>, <code>shiny</code>, <code>stats</code>, <code>bslib</code> (&gt;= 0.9.0), <code>htmltools</code>, <code>socialmixr</code>
 </li>
 <li>
-<strong>Suggests</strong>: <code>knitr</code>, <code>rmarkdown</code>, <code>testthat</code> (&gt;= 3.0.0), <code>ggplot2</code>, <code>epiworldR</code>
-</li>
+<strong>Suggests</strong>: <code>knitr</code>, <code>rmarkdown</code>, <code>testthat</code> (&gt;= 3.0.0)</li>
 </ul>
-<p>Note that some vignettes require <code>ggplot2</code> and other suggested packages.</p>
 </div>
 </div>
 <div class="section level2">
@@ -101,7 +105,7 @@
 <h3 id="interactive-dashboard">Interactive Dashboard<a class="anchor" aria-label="anchor" href="#interactive-dashboard"></a>
 </h3>
 <p>Launch the Shiny dashboard for interactive modeling:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://epiforesite.github.io/multigroup-vaccine/">multigroup.vaccine</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/run_my_app.html">run_my_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>The dashboard models two distinct sub-populations with differential within-group and across-group contact rates and different vaccination adherence levels. See <a href="https://doi.org/10.1016/j.jval.2024.03.039" class="external-link">Nguyen et al. (2024)</a> for more details on this modeling approach.</p>
@@ -113,7 +117,7 @@
 <div class="section level4">
 <h4 id="two-group-population-comparison">Two-Group Population Comparison<a class="anchor" aria-label="anchor" href="#two-group-population-comparison"></a>
 </h4>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compare two populations with different vaccination rates</span></span>
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/finalsize.html">finalsize</a></span><span class="op">(</span></span>
 <span>  popsize <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10000</span>, <span class="fl">10000</span><span class="op">)</span>,         <span class="co"># Equal population sizes</span></span>
@@ -127,6 +131,7 @@
 <span>  method <span class="op">=</span> <span class="st">"analytic"</span>                <span class="co"># Solve for final size analytically</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
+<p>For examples of other functions or more complex scenarios, see the <a href="**https://epiforesite.github.io/multigroup-vaccine/articles/index.html**">package vignettes</a>.</p>
 </div>
 </div>
 </div>
@@ -144,8 +149,6 @@
 <strong>Final outbreak size calculations</strong> using both analytic and stochastic methods</li>
 <li>
 <strong>Interactive Shiny dashboard</strong> for scenario exploration</li>
-<li>
-<strong>Real-world case studies</strong> including measles outbreaks with census data</li>
 </ul>
 </div>
 <div class="section level2">
@@ -153,7 +156,7 @@
 </h2>
 <p>Comprehensive documentation and vignettes are available at: <strong><a href="https://epiforesite.github.io/multigroup-vaccine/" class="uri">https://epiforesite.github.io/multigroup-vaccine/</a></strong></p>
 <p>View all available vignettes:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/browseVignettes.html" class="external-link">browseVignettes</a></span><span class="op">(</span><span class="st">"multigroup.vaccine"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -188,13 +191,13 @@
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
 <p>If you use this package in your research, please obtain citation information in R:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"multigroup.vaccine"</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="development-setup">Development Setup<a class="anchor" aria-label="anchor" href="#development-setup"></a>
 </h3>
 <p>For local development:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Clone the repository</span></span>
 <span><span class="co"># git clone https://github.com/EpiForeSITE/multigroup-vaccine.git</span></span>
 <span></span>
@@ -220,8 +223,6 @@
 <h2 id="acknowledgments">Acknowledgments<a class="anchor" aria-label="anchor" href="#acknowledgments"></a>
 </h2>
 <p>This package is part of the <a href="https://github.com/EpiForeSITE/software" class="external-link">EpiForeSITE software ecosystem</a> developed by the ForeSITE Group at the University of Utah. Development was supported by the Centers for Disease Control and Prevention’s Center for Forecasting and Outbreak Analytics (Cooperative agreement CDC-RFA-FT-23-0069).</p>
-<hr>
-<p><strong>EpiForeSITE</strong>: Epidemiological Forecasting and Scenario Modeling Initiative for Translational Epidemiology</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="license">
@@ -243,7 +244,7 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Damon Toth <br><small class="roles"> Author, contributor </small> <a href="https://orcid.org/0000-0001-7393-4814" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
+<li>Damon Toth <br><small class="roles"> Author, contributor, copyright holder </small> <a href="https://orcid.org/0000-0001-7393-4814" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 <li>Jake Wagoner <br><small class="roles"> Maintainer, contributor </small> <a href="https://orcid.org/0009-0000-5053-2281" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 <li>Centers for Disease Control and Prevention's Center for Forecasting and Outbreak Analytics <br><small class="roles"> Funder </small>   </li>
 <li><a href="authors.html">More about authors...</a></li>

@@ -22,12 +22,12 @@ Character string with the path to the example census CSV file for Utah
 utah_csv <- getCensusDataPath()
 
 # Use it with getCensusData
-if (FALSE) { # \dontrun{
+# \donttest{
 slc_data <- getCensusData(
   state_fips = "49",
   county_name = "Salt Lake County",
   year = 2024,
   csv_path = getCensusDataPath()
 )
-} # }
+# }
 ```

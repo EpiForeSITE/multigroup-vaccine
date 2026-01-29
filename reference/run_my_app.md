@@ -27,8 +27,10 @@ The app featured in this package is the one presented in the shiny demo:
 ## Examples
 
 ``` r
+# \donttest{
 # To be executed interactively only
 if (interactive()) {
   run_my_app()
 }
+# }
 ```

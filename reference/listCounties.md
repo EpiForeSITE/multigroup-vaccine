@@ -50,11 +50,11 @@ utah_counties <- listCounties(
   csv_path = getCensusDataPath()
 )
 
-if (FALSE) { # \dontrun{
+# \donttest{
 # Download from web (requires internet)
 utah_counties_web <- listCounties(state_fips = "49", year = 2024)
 
 # With caching
 utah_counties_cached <- listCounties(state_fips = "49", cache_dir = "~/census_cache")
-} # }
+# }
 ```

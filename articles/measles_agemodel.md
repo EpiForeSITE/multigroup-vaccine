@@ -72,7 +72,7 @@ reltransm <- rep(1, length(popsize))    # or transmissibility per contact
 R0 <- 10
 ```
 
-Now we can estimate the final size of an outbreak using the defualt,
+Now we can estimate the final size of an outbreak using the default,
 deterministic solution produced by the
 [`finalsize()`](https://epiforesite.github.io/multigroup-vaccine/reference/finalsize.md)
 function:

@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">multigroup.vaccine</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -113,7 +113,7 @@ population distribution:</p>
 <span><span class="va">relsusc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">popsize</span><span class="op">)</span><span class="op">)</span>      <span class="co"># Assume no age differences in susceptibility</span></span>
 <span><span class="va">reltransm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">popsize</span><span class="op">)</span><span class="op">)</span>    <span class="co"># or transmissibility per contact</span></span>
 <span><span class="va">R0</span> <span class="op">&lt;-</span> <span class="fl">10</span></span></code></pre></div>
-<p>Now we can estimate the final size of an outbreak using the defualt,
+<p>Now we can estimate the final size of an outbreak using the default,
 deterministic solution produced by the <code><a href="../reference/finalsize.html">finalsize()</a></code>
 function:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
