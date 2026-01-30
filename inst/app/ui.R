@@ -97,18 +97,21 @@ ui <- page_fluid(
             double_input_row(
               "vacPortion_a",
               "vacPortion_b",
-              "Fraction Vaccinated",
+              "Fraction vaccinated",
               0.3,
               0.2,
-              tip = "Fraction of each population that is vaccinated at time zero."
+              tip = "Fraction of each population that is vaccinated, all at once, at the
+              vaccination time."
             ),
             double_input_row(
               "contactWithinGroup_a",
               "contactWithinGroup_b",
-              "Fraction of contacts within-group",
+              "Fraction of contacts exclusively within-group",
               0.4,
               0.4,
-              tip = "This is the propotion of contacts made by individuals in each population that are within their own group."
+              tip = "Propotion of contacts made by individuals in each population that are
+              exclusively within their own group. The remaining contacts will be
+              distributed proportionally between both groups."
             ),
             double_input_row(
               "hospProb_a",
@@ -139,21 +142,19 @@ ui <- page_fluid(
         card(
           card_title("Parameters"),
           tags$table(
-            single_input_row("vacTime", "Vaccination start time (days)", 0, tip = "Time when vaccine will be started"),
-            single_input_row("recoveryRate", "Recovery Rate", 0.1, tip = "Probability per day of a infected individual recovering"),
-            single_input_row("R0", "R0", 2, tip = "Basic Reproduction Number"),
-            single_input_row("contactRatio", "Contact Ratio", 1.1, tip = "The ratio of the contact rate of the second group to the first group"),
-            single_input_row("suscRatio", "Susceptibility Ratio", 1.2,
-              tip =
-                "The ratio of the susceptibility of the second group to the first group"
+            single_input_row("vacTime", "Vaccination start time (days)", 0,
+                             tip = "Time when vaccine will be started"),
+            single_input_row("recoveryRate", "Recovery rate (per day)", 0.1,
+                             tip = "Rate per day of an infected individual recovering"),
+            single_input_row("R0", "R0", 2, tip = "Basic reproduction number"),
+            single_input_row("contactRatio", "Contact ratio", 1.1,
+                             tip = "The ratio of the contact rate of the second group to the first group"),
+            single_input_row("suscRatio", "Susceptibility ratio", 1.2,
+                             tip = "The ratio of the susceptibility of the second group to the first group"
             ),
-            single_input_row("transmRatio", "Transmissibility Ratio", 1.05,
-                             tip =
-                               "The ratio of the transmissibility of the second group to the first group"
+            single_input_row("transmRatio", "Transmissibility ratio", 1.05,
+                             tip = "The ratio of the transmissibility of the second group to the first group"
             )
-            # ,single_input_row("vaccineCostRatio", "Vaccine cost ratio", 1.3, tip =
-            #  "The ratio of the cost of the vaccine for the second group to the first group")
-            # ,single_input_row("amountToSpend", "Amount to spend", 1e5, tip = "Funds available for vacination ($)")
           )
         ),
         card(
@@ -161,7 +162,6 @@ ui <- page_fluid(
           tableOutput("table"),
         )
       ),
-      # plotOutput("plot", click = "plot_click", ),
     ),
     nav_panel(
       "About",
