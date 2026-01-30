@@ -2,11 +2,10 @@
 
 ## Authors
 
-- **Damon Toth**. Author, contributor, copyright holder.
+- **Damon Toth**. Author, maintainer, copyright holder.
   [](https://orcid.org/0000-0001-7393-4814)
 
-- **Jake Wagoner**. Maintainer, author.
-  [](https://orcid.org/0009-0000-5053-2281)
+- **Jake Wagoner**. Author. [](https://orcid.org/0009-0000-5053-2281)
 
 - **Willy Ray**. Author.
 
