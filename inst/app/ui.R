@@ -165,12 +165,19 @@ ui <- page_fluid(
     ),
     nav_panel(
       "About",
-      h3("Abstract:"),
+      br(),
       p(
-        "Addressing disparities in vaccine uptake through targeted outreach programs requires additional funding, but the cost and outcome trade-offs are not well-understood. This study compared the overall and distributional health and cost outcomes of different vaccination programs."
+        "This application allows exploration of the health effects of disparities in transmission
+        epidemiology and vaccine uptake in a two group population outbreak model. The model has
+        been used to assess the cost effectiveness of targeted outreach programs aiming to
+        compare the overall and distributional health and cost outcomes of different vaccination
+        programs, as described in the following publications:"
       ),
-      tags$i("D. Nguyen1 ∙ K. Duong2 ∙ E. Coates3 ∙ R.E. Nelson4 ∙ J. Love4 ∙ M.M. Jones4 ∙ M. Samore5 ∙ N. Chaiyakunapruk6 ∙ D. Toth"),
+      tags$i("Nguyen et al. (2024)"),
       a("https://doi.org/10.1016/j.jval.2024.03.039", href = "https://doi.org/10.1016/j.jval.2024.03.039", class = "link-class", id = "paper_link"),
+      br(),
+      tags$i("Duong et al. (2026)"),
+      a("https://doi.org/10.1093/ofid/ofaf695.217", href = "https://doi.org/10.1093/ofid/ofaf695.217", class = "link-class", id = "paper_link"),
       br(), br(),
       p("This project was made possible by cooperative agreement CDC-RFA-FT-23-0069 from the CDC’s Center for Forecasting and Outbreak Analytics. Its contents are solely the responsibility of
         the authors and do not necessarily represent the official views of the Centers for Disease Control and Prevention.")
