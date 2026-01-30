@@ -14,10 +14,13 @@ Authors@R:
            role="fnd", comment = "Cooperative agreement CDC-RFA-FT-23-0069"))
 Maintainer: Jake Wagoner <jakew@sci.utah.edu>
 Description: Model infectious disease dynamics in populations 
-    with multiple subgroups having different vaccination rates, vaccine 
-    effectiveness, and contact patterns. Provides functions for final outbreak 
-    size calculations, age-structured models, automatic census-data fetching, and an 
-    interactive Shiny dashboard for scenario exploration.
+    with multiple subgroups having different vaccination rates, transmission
+    characteristics, and contact patterns. Calculate final and intermediate
+    outbreak sizes, form age-structured contact models with automatic fetching
+    of U.S. census data, and explore vaccination scenarios with an interactive
+    Shiny dashboard for a model with two subgroups, as described in Nguyen et
+    al. (2024) <doi:10.1016/j.jval.2024.03.039> and Duong et al. (2026)
+    <doi:10.1093/ofid/ofaf695.217>.
 License: MIT + file LICENSE
 Encoding: UTF-8
 RoxygenNote: 7.3.3
