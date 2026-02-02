@@ -97,7 +97,7 @@ results <- finalsize(
 print(results)
 ```
 
-For examples of other functions or more complex scenarios, see the [package vignettes](**https://epiforesite.github.io/multigroup-vaccine/articles/index.html**).
+For examples of other functions or more complex scenarios, see the [package vignettes](https://epiforesite.github.io/multigroup-vaccine/articles/index.html).
 
 ## Features
 
