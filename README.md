@@ -5,13 +5,12 @@
 
 <!-- badges: start -->
 
+[![ForeSITE Group](https://github.com/EpiForeSITE/software/raw/e82ed88f75e0fe5c0a1a3b38c2b94509f122019c/docs/assets/foresite-software-badge.svg)](https://github.com/EpiForeSITE)
 [![R-CMD-check](https://github.com/EpiForeSITE/multigroup-vaccine/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/EpiForeSITE/multigroup-vaccine/actions/workflows/R-CMD-check.yaml)
 [![R-universe](https://epiforesite.r-universe.dev/badges/multigroup.vaccine)](https://epiforesite.r-universe.dev/multigroup.vaccine)
-[![Codecov test
-coverage](https://codecov.io/gh/EpiForeSITE/multigroup-vaccine/graph/badge.svg)](https://app.codecov.io/gh/EpiForeSITE/multigroup-vaccine?branch=main)
-[![License:
-MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![EpiForeSITE](https://img.shields.io/badge/Part%20of-EpiForeSITE-blue.svg)](https://github.com/EpiForeSITE/software)
+[![Codecov test coverage](https://codecov.io/gh/EpiForeSITE/multigroup-vaccine/graph/badge.svg)](https://app.codecov.io/gh/EpiForeSITE/multigroup-vaccine?branch=main)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 <!-- badges: end -->
 
 ## Overview
@@ -115,7 +114,7 @@ vignettes](https://epiforesite.github.io/multigroup-vaccine/articles/index.html)
 ## Documentation
 
 Comprehensive documentation and vignettes are available at:
-**<https://epiforesite.github.io/multigroup-vaccine/>**
+<https://epiforesite.github.io/multigroup-vaccine/>
 
 View all available vignettes:
 
