@@ -3,11 +3,11 @@
 ## Overview
 
 `multigroup.vaccine` models infectious disease dynamics in populations
-with multiple distinct subgroups that have:
+with multiple distinct subgroups that can have:
 
 - Different vaccination rates
-- Different vaccine effectiveness
-- Differential contact patterns between and within groups
+- Different susceptibility and/or transmissibility characteristics
+- Different contact rates and patterns between and within groups
 
 The package provides both an interactive Shiny dashboard for a simple
 two-group example and programmatic R functions for epidemiological
@@ -57,7 +57,8 @@ run_my_app()
 The dashboard models two distinct sub-populations with differential
 within-group and across-group contact rates and different vaccination
 adherence levels. See [Nguyen et
-al. (2024)](https://doi.org/10.1016/j.jval.2024.03.039) for more details
+al. (2024)](https://doi.org/10.1016/j.jval.2024.03.039) and [Duong et
+al. (2026)](https://doi.org/10.1093/ofid/ofaf695.217) for more details
 on this modeling approach.
 
 ### Programmatic Usage
@@ -84,14 +85,15 @@ print(results)
 ```
 
 For examples of other functions or more complex scenarios, see the
-[package vignettes](NA).
+[package
+vignettes](https://epiforesite.github.io/multigroup-vaccine/articles/index.html).
 
 ## Features
 
 - **Multi-group SIR modeling** with vaccination and variable contact
   rates
 - **Age-structured population models** using census data
-- **Contact matrix integration** via POLYMOD and custom matrices
+- **Contact matrix integration** via POLYMOD-derived and custom matrices
 - **Final outbreak size calculations** using both analytic and
   stochastic methods
 - **Interactive Shiny dashboard** for scenario exploration

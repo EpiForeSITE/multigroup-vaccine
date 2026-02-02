@@ -54,11 +54,11 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p><code>multigroup.vaccine</code> models infectious disease dynamics in populations with multiple distinct subgroups that have:</p>
+<p><code>multigroup.vaccine</code> models infectious disease dynamics in populations with multiple distinct subgroups that can have:</p>
 <ul>
 <li>Different vaccination rates</li>
-<li>Different vaccine effectiveness</li>
-<li>Differential contact patterns between and within groups</li>
+<li>Different susceptibility and/or transmissibility characteristics</li>
+<li>Different contact rates and patterns between and within groups</li>
 </ul>
 <p>The package provides both an interactive Shiny dashboard for a simple two-group example and programmatic R functions for epidemiological modeling and outbreak forecasting.</p>
 </div>
@@ -108,7 +108,7 @@
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://epiforesite.github.io/multigroup-vaccine/">multigroup.vaccine</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/run_my_app.html">run_my_app</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>The dashboard models two distinct sub-populations with differential within-group and across-group contact rates and different vaccination adherence levels. See <a href="https://doi.org/10.1016/j.jval.2024.03.039" class="external-link">Nguyen et al. (2024)</a> for more details on this modeling approach.</p>
+<p>The dashboard models two distinct sub-populations with differential within-group and across-group contact rates and different vaccination adherence levels. See <a href="https://doi.org/10.1016/j.jval.2024.03.039" class="external-link">Nguyen et al. (2024)</a> and <a href="https://doi.org/10.1093/ofid/ofaf695.217" class="external-link">Duong et al. (2026)</a> for more details on this modeling approach.</p>
 </div>
 <div class="section level3">
 <h3 id="programmatic-usage">Programmatic Usage<a class="anchor" aria-label="anchor" href="#programmatic-usage"></a>
@@ -131,7 +131,7 @@
 <span>  method <span class="op">=</span> <span class="st">"analytic"</span>                <span class="co"># Solve for final size analytically</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
-<p>For examples of other functions or more complex scenarios, see the <a href="**https://epiforesite.github.io/multigroup-vaccine/articles/index.html**">package vignettes</a>.</p>
+<p>For examples of other functions or more complex scenarios, see the <a href="https://epiforesite.github.io/multigroup-vaccine/articles/index.html">package vignettes</a>.</p>
 </div>
 </div>
 </div>
@@ -144,7 +144,7 @@
 <li>
 <strong>Age-structured population models</strong> using census data</li>
 <li>
-<strong>Contact matrix integration</strong> via POLYMOD and custom matrices</li>
+<strong>Contact matrix integration</strong> via POLYMOD-derived and custom matrices</li>
 <li>
 <strong>Final outbreak size calculations</strong> using both analytic and stochastic methods</li>
 <li>
