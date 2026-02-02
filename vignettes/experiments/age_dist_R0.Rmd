@@ -30,6 +30,8 @@ table {
 This vignette shows the effects of the age distribution of the Short Creek community on
 the basic reproduction number $R_0$, compared to other populations with different age distributions.
 
+Warning: The data and calculations in this vignette are for demonstration purposes only and do not reflect real-world conditions accurately. The assumptions may not be accurate and may not reflect true risk of measles outbreaks in these communities.
+
 ```{r setup}
 library(multigroup.vaccine)
 library(socialmixr)
@@ -70,6 +72,7 @@ centennial_park <- getCityData(
 agepops <- round(hildale$age_pops + colorado_city$age_pops + centennial_park$age_pops)
 ```
 ## Getting data from Washington County, Utah (where Hildale is located)
+
 ```{r get-county-data}
 utah_fips <- getStateFIPS("Utah")
 census_csv <- getCensusDataPath()
