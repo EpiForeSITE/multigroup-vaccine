@@ -4,6 +4,11 @@ This vignette shows the effects of the age distribution of the Short
 Creek community on the basic reproduction number $R_{0}$, compared to
 other populations with different age distributions.
 
+Warning: The data and calculations in this vignette are for
+demonstration purposes only and do not reflect real-world conditions
+accurately. The assumptions may not be accurate and may not reflect true
+risk of measles outbreaks in these communities.
+
 ``` r
 library(multigroup.vaccine)
 library(socialmixr)

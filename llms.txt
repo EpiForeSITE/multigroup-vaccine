@@ -101,7 +101,7 @@ vignettes](https://epiforesite.github.io/multigroup-vaccine/articles/index.html)
 ## Documentation
 
 Comprehensive documentation and vignettes are available at:
-**<https://epiforesite.github.io/multigroup-vaccine/>**
+<https://epiforesite.github.io/multigroup-vaccine/>
 
 View all available vignettes:
 

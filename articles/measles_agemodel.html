@@ -65,6 +65,10 @@
 <p>This vignette demonstrates how to build and run an age-structured
 model of transmission within a U.S. county. The example is an outbreak
 of measles in Washington County, Utah.</p>
+<p>WARNING: The data and model used in this vignette are for
+demonstration purposes only and do not reflect real-world conditions
+accurately. The results are not intended to forecast or predict a
+measles outbreak size in this location.</p>
 <p>First we define the age groups that we want use in our model. Here we
 choose groupings for which we might have reason to assume different
 levels of immunization against measles. We define the
@@ -87,7 +91,10 @@ custom age group choice:</p>
 <p>Now we specify immunity levels of our population age groups due to
 vaccination. The first age group (under 1 year) has no immunity because
 the first measles vaccine is not given until age one. Then we assume
-rising immunity with age:</p>
+rising immunity with age.</p>
+<p>NOTE: These vaccination and immunization assumptions are not
+validated by data and should not be taken as the actual levels of
+immunization against measles in Washington County.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">age_immunity</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.77</span>, <span class="fl">0.83</span>, <span class="fl">0.85</span>, <span class="fl">0.87</span>, <span class="fl">0.90</span>, <span class="fl">0.92</span>, <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <p>Now we can begin defining the input arguments to our
@@ -173,6 +180,14 @@ and replaced with the deterministic solution above.</p>
 <p>The results show that not every introduction of one infectious
 individual (in the 25 to 44 age group) will lead to a large
 outbreak.</p>
+<p>NOTE: All above results should be taken with caution, as this
+simulation is a simplification of reality that does not consider, for
+example, individuals’ changing behavior, e.g. dramatically reducing
+contact rates or taking other precautionary actions upon observing a
+measles outbreak occurring in the community. The model also makes the
+highly unrealistic assumption of spatially uniform mixing across a large
+county with geographically dispersed communities, which could make the
+results unreliable.</p>
   </main>
 </div>
 

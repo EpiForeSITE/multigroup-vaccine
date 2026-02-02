@@ -9,6 +9,11 @@ This vignette demonstrates how to build and run an age-structured model
 of transmission within a U.S. county. The example is an outbreak of
 measles in Washington County, Utah.
 
+WARNING: The data and model used in this vignette are for demonstration
+purposes only and do not reflect real-world conditions accurately. The
+results are not intended to forecast or predict a measles outbreak size
+in this location.
+
 First we define the age groups that we want use in our model. Here we
 choose groupings for which we might have reason to assume different
 levels of immunization against measles. We define the `age_limits`
@@ -37,7 +42,11 @@ washington_data <- getCensusData(
 Now we specify immunity levels of our population age groups due to
 vaccination. The first age group (under 1 year) has no immunity because
 the first measles vaccine is not given until age one. Then we assume
-rising immunity with age:
+rising immunity with age.
+
+NOTE: These vaccination and immunization assumptions are not validated
+by data and should not be taken as the actual levels of immunization
+against measles in Washington County.
 
 ``` r
 age_immunity <- c(0, 0.77, 0.83, 0.85, 0.87, 0.90, 0.92, 1)
@@ -141,3 +150,12 @@ fs_hybrid
 
 The results show that not every introduction of one infectious
 individual (in the 25 to 44 age group) will lead to a large outbreak.
+
+NOTE: All above results should be taken with caution, as this simulation
+is a simplification of reality that does not consider, for example,
+individuals’ changing behavior, e.g. dramatically reducing contact rates
+or taking other precautionary actions upon observing a measles outbreak
+occurring in the community. The model also makes the highly unrealistic
+assumption of spatially uniform mixing across a large county with
+geographically dispersed communities, which could make the results
+unreliable.
