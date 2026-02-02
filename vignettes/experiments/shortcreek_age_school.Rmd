@@ -27,12 +27,18 @@ table {
   width: 100%;
 }
 ```
-
+This is an experimental model to estimate the size of a measles outbreak in the community informally known as Short Creek that spans the Utah / Arizona border. We incorporate some real vaccination data from publicly available sources, and population age structure and composition from US census data. Vaccination rates for some schools and for the non-school-aged population were imputed based on assumptions and are not based on actual vaccination information for those age groups.
+ 
 ```{r setup}
 library(multigroup.vaccine)
 library(socialmixr)
+```
 
-# Load city data files
+## Load city data files
+
+The following census-designated cities / places are assumed to comprise the Short Creek community:
+
+```{r city-data}
 hildale_path <- system.file("extdata", "hildale_ut_2023.csv", package = "multigroup.vaccine")
 colorado_city_path <- system.file("extdata", "colorado_city_az_2023.csv", package = "multigroup.vaccine")
 centennial_park_path <- system.file("extdata", "centennial_park_az_2023.csv", package = "multigroup.vaccine")
@@ -199,7 +205,6 @@ colnames(os) <- c("outbreakSize", "freq")
 knitr::kable(os, row.names = FALSE, format = "markdown")
 ```
 
+## Final comments
 
-
-
-
+These results show a high likelihood of more than 3,000 measles infections in this community after an introduction, which comprises all unvaccinated individuals and a small number of vaccinated individuals also getting infected. This is consistent with the high transmissibility of measles and the large number of children and low vaccination rates in the area. Nonetheless, these results should be taken with caution, as this simulation is a simplification of reality that does not consider, for example, individuals’ changing behavior, e.g. dramatically reducing contact rates or taking other precautionary actions upon observing a measles outbreak occurring in the community.
