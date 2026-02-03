@@ -52,6 +52,8 @@ centerville_data <- centerville_census_data$data
 centerville_age_pops <- centerville_census_data$age_pops
 centerville_age_labels <- centerville_census_data$age_labels
 
+saveRDS(centerville_census_data, file = "data/centerville_census_data.rds", compress = "xz")
+
 print(centerville_data)
 print(centerville_age_pops)
 print(centerville_age_labels)
@@ -72,4 +74,19 @@ ggplot(age_grouped_df, aes(x = AgeGroup, y = Population)) +
         x = "Aggregated Age Group",
         y = "Population") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## Pull in relevant school data
+
+The student with H5 flu infection is from school ID S0172, and the elementary school of interest in school ID S0173.
+
+```{r schools}
+davis_school_path <- system.file("extdata/DavisSchools.csv", package = "multigroup.vaccine")
+davis_school_data <- read.csv(davis_school_path)
+
+print(davis_school_data)
+
+# filter out the two relevant schools in Centerville
+s0172 <- davis_school_data[davis_school_data$id == "S0172", ]
+s0173 <- davis_school_data[davis_school_data$id == "S0173", ]
 ```
