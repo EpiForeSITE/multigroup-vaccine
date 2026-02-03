@@ -1,0 +1,75 @@
+---
+title: "Centerville census data fetching"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Centerville census data fetching}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 11,
+  fig.height = 7
+)
+```
+
+```{css, echo=FALSE}
+body {
+  max-width: 1100px;
+  margin: auto;
+  padding: 1em;
+}
+
+table {
+  width: 100%;
+}
+```
+
+# Centerville Census Data Fetching
+
+CSV is at /extdata/centerville_city_ut_2024.csv
+
+```{r setup}
+library(multigroup.vaccine)
+library(socialmixr)
+
+# Get the path to the included census data file
+centerville_csv_path <- system.file("extdata", "centerville_city_ut_2024.csv", package = "multigroup.vaccine")
+```
+
+```{r city-data}
+# Get Centerville city data
+centerville_census_data <- getCityData(
+  city_name = "Centerville city, Utah",
+  csv_path = centerville_csv_path,
+  age_groups = c(0, 1, 5, 12, 14, 18, 25, 45, 70)
+)
+
+centerville_data <- centerville_census_data$data
+centerville_age_pops <- centerville_census_data$age_pops
+centerville_age_labels <- centerville_census_data$age_labels
+
+print(centerville_data)
+print(centerville_age_pops)
+print(centerville_age_labels)
+```
+
+```{r plot-data}
+library(ggplot2)
+
+age_grouped_df <- data.frame(
+  AgeGroup = factor(centerville_age_labels, levels = centerville_age_labels),
+  Population = centerville_age_pops
+)
+
+ggplot(age_grouped_df, aes(x = AgeGroup, y = Population)) +
+  geom_bar(stat = "identity", fill = "coral") +
+  theme_minimal() +
+  labs(title = "Centerville City Population by Aggregated Age Groups (2024)",
+        x = "Aggregated Age Group",
+        y = "Population") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
