@@ -19,7 +19,7 @@ library(multigroup.vaccine)
 library(socialmixr)
 ```
 
-This vignette demonstrates an age-structured model of transmission within a Davis County, Utah. 
+This vignette demonstrates an age-structured model of transmission within Davis County, Utah. 
 
 First we define the age groups that we want use in our model. We define the `age_limits` vector using the lower limit (minimum age) of each group, starting with 0:
 
@@ -43,11 +43,10 @@ davis_data <- getCensusData(
 Now we specify immunity levels of our population age groups due to vaccination and prior infection. Let's assume no prior immunity to H5N1.
 
 ```{r}
-#age_immunity <- c(0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1)
 age_immunity <- rep(0, length(age_limits))
 ```
 
-Now we can begin defining the input arguments to our `finalsize` function so that we can estimate the outbreak size in this county after an introduction.
+Now we can begin defining the input arguments to our `finalsize` function so that we can estimate the outbreak size in this county after an introduction from a 13-year-old.
 
 Initial population size of each disease state:
 
