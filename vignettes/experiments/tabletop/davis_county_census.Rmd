@@ -75,6 +75,39 @@ ggplot(davis_population$data, aes(x = davis_population$ages, y = davis_populatio
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
+## Aggregate by Age Groups
+
+```{r aggregate-age-groups}
+agelims <- c(0, 1, 5, 12, 14, 18, 25, 45, 70)
+
+ageGrouped <- aggregateByAgeGroups(
+  ages = davis_population$ages,
+  pops = davis_population$age_pops,
+  age_groups = agelims,
+  verbose = TRUE
+)
+
+print(ageGrouped)
+```
+
+```{r plot-aggregated-population, message=FALSE}
+# Create a data frame from the aggregated results
+age_grouped_df <- data.frame(
+  AgeGroup = factor(ageGrouped$labels, levels = ageGrouped$labels),
+  Population = ageGrouped$pops
+)
+
+ggplot(age_grouped_df, aes(x = AgeGroup, y = Population)) +
+  geom_bar(stat = "identity", fill = "coral") +
+  theme_minimal() +
+  labs(title = "Davis County Population by Aggregated Age Groups (2024)",
+        x = "Aggregated Age Group",
+        y = "Population") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## School Data
+
 Population data from schools in Davis County. The levels are: 1 = elementary school, 2 = middle school / jr. high, and 3 = high school. 
 
 The student with H5 flu infection is from school ID S0172, and the elementary school of interest in school ID S0173.
