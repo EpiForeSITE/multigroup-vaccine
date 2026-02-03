@@ -1,0 +1,76 @@
+---
+title: "Davis County census data fetching"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Davis County census data fetching}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 11,
+  fig.height = 7
+)
+```
+
+```{css, echo=FALSE}
+body {
+  max-width: 1100px;
+  margin: auto;
+  padding: 1em;
+}
+
+table {
+  width: 100%;
+}
+```
+
+# Davis County Census Data Fetching
+
+First, establish that we can reliably get Davis County census information about population by age groups.
+
+```{r setup}
+library(multigroup.vaccine)
+library(socialmixr)
+
+# Get the path to the included census data file
+census_csv <- getCensusDataPath()
+```
+
+```{r state-fips}
+# Get FIPS code for Utah
+utah_fips <- getStateFIPS("Utah")
+cat("Utah FIPS code:", utah_fips, "\n")
+```
+
+```{r county-list}
+# List counties in Utah
+utah_counties <- listCounties(utah_fips)
+print(utah_counties)
+```
+
+```{r davis-population}
+# Get population by age groups for Davis County (2024)
+davis_population <- getCensusData(state_fips = utah_fips, county_name = "Davis")
+
+print(davis_population$data)
+```
+
+## Visualize the population distribution by age groups
+
+Using ggplot2 for formatting the plot.
+
+```{r plot-population, message=FALSE}
+library(ggplot2)
+
+ggplot(davis_population$data, aes(x = davis_population$ages, y = davis_population$age_pops)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  theme_minimal() +
+  labs(title = "Davis County Population by Age Groups (2024)",
+       x = "Age Group",
+       y = "Population") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
