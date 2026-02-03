@@ -13,4 +13,7 @@ articles:
   contents:
   - experiments/age_dist_R0
   - experiments/shortcreek_age_school
+- title: Tabletop Exercises
+  contents:
+  - experiments/tabletop/davis_county_census.Rmd
   
