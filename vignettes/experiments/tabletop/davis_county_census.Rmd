@@ -74,3 +74,14 @@ ggplot(davis_population$data, aes(x = davis_population$ages, y = davis_populatio
        y = "Population") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+
+Population data from schools in Davis County. The levels are: 1 = elementary school, 2 = middle school / jr. high, and 3 = high school. 
+
+The student with H5 flu infection is from school ID S0172, and the elementary school of interest in school ID S0173.
+
+
+```{r schools}
+davis_school_path <- system.file("extdata/DavisSchools.csv", package = "multigroup.vaccine")
+davis_school_data <- read.csv(davis_school_path)
+davis_school_data
+```
