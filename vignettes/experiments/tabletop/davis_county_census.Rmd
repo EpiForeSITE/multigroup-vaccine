@@ -56,6 +56,8 @@ print(utah_counties)
 # Get population by age groups for Davis County (2024)
 davis_population <- getCensusData(state_fips = utah_fips, county_name = "Davis")
 
+saveRDS(davis_population, file = "data/davis_county_census_data.rds", compress = "xz")
+
 print(davis_population$data)
 ```
 
@@ -86,6 +88,8 @@ ageGrouped <- aggregateByAgeGroups(
   age_groups = agelims,
   verbose = TRUE
 )
+
+saveRDS(ageGrouped, file = "data/davis_county_age_grouped.rds", compress = "xz")
 
 print(ageGrouped)
 ```
