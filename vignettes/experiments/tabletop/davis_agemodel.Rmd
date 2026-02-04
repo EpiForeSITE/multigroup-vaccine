@@ -1,6 +1,6 @@
 ---
 title: "Davis County Age-Structured Model"
-output: rmarkdown::html_vignette
+output: rmarkdown::md_document
 vignette: >
   %\VignetteIndexEntry{Davis County Age-Structured Model}
   %\VignetteEngine{knitr::rmarkdown}
@@ -71,7 +71,7 @@ reltransm <- rep(1, length(popsize))    # or transmissibility per contact
 
 ## Basic reproduction number.
 
-H5 flu could have a low level of transmissibility with $R0<1$ - let's see how outbreak sizes might look:
+H5 flu could have a low level of transmissibility with $R_0<1$ - let's see how outbreak sizes might look for a range of 0.1 to 0.9. The results are from 1,000 simulations and show how many of those simulations resulted in each number of total infections (including the first one).
 
 ```{r}
 outbreak_dist <- function(R0){
