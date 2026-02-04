@@ -10,13 +10,17 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.width = 11,
+  fig.height = 7
 )
 ```
 
 ```{r setup}
 library(multigroup.vaccine)
 library(socialmixr)
+
+library(ggplot2)
 ```
 
 This vignette demonstrates an age-structured model of transmission within Davis County, Utah. 
@@ -74,38 +78,81 @@ reltransm <- rep(1, length(popsize))    # or transmissibility per contact
 H5 flu could have a low level of transmissibility with $R_0<1$ - let's see how outbreak sizes might look for a range of 0.1 to 0.9. The results are from 1,000 simulations and show how many of those simulations resulted in each number of total infections (including the first one).
 
 ```{r}
-outbreak_dist <- function(R0){
-  fs <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
-            method ="stochastic", nsims = 1000)
-  table(rowSums(fs))
-}
+# Define R0 values to inspect
+r0_low_vals <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
 
-outbreak_dist(R0 = 0.1)
-outbreak_dist(R0 = 0.2)
-outbreak_dist(R0 = 0.3)
-outbreak_dist(R0 = 0.4)
-outbreak_dist(R0 = 0.5)
-outbreak_dist(R0 = 0.6)
-outbreak_dist(R0 = 0.7)
-outbreak_dist(R0 = 0.8)
-outbreak_dist(R0 = 0.9)
+# Run simulations
+results_low <- do.call(rbind, lapply(r0_low_vals, function(r) {
+  fs <- finalsize(popsize, r, contactmatrix, relsusc, reltransm, initR, initI, initV,
+                  method = "stochastic", nsims = 1000)
+  data.frame(R0 = as.factor(r), Cases = rowSums(fs))
+}))
+
+# Visualization: Fixed axis breaks to stop overlapping
+ggplot(results_low, aes(x = Cases)) +
+  geom_bar(fill = "steelblue", width = 1) + # width=1 removes gaps between discrete integers
+  facet_wrap(~R0, labeller = label_both) +
+  scale_x_continuous(breaks = c(1, 10, 20, 30), limits = c(0, 35)) + 
+  labs(title = "Distribution of Outbreak Sizes (Sub-critical)",
+       subtitle = "Simulation results for R0 < 1",
+       y = "Frequency",
+       x = "Total Cases") +
+  theme_minimal()
 ```
 If $R_0 > 1$, there could be a very large outbreak. We can provide a quick estimate of outbreak sizes using our hybrid model:
 
 ```{r}
-outbreak_dist_hybrid <- function(R0){
-  fs <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
-            method ="hybrid", nsims = 1000)
-  table(rowSums(fs))
-}
+# Define R0 values to inspect
+r0_high_vals <- c(1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9)
 
-outbreak_dist_hybrid(R0 = 1.1)
-outbreak_dist_hybrid(R0 = 1.2)
-outbreak_dist_hybrid(R0 = 1.3)
-outbreak_dist_hybrid(R0 = 1.4)
-outbreak_dist_hybrid(R0 = 1.5)
-outbreak_dist_hybrid(R0 = 1.6)
-outbreak_dist_hybrid(R0 = 1.7)
-outbreak_dist_hybrid(R0 = 1.8)
-outbreak_dist_hybrid(R0 = 1.9)
+# Run simulations
+results_high <- do.call(rbind, lapply(r0_high_vals, function(r) {
+  fs <- finalsize(popsize, r, contactmatrix, relsusc, reltransm, initR, initI, initV,
+                  method = "hybrid", nsims = 1000)
+  data.frame(R0 = as.factor(r), Cases = rowSums(fs))
+}))
+
+# Visualization: 3x3 Grid + Log Scale Bins
+ggplot(results_high, aes(x = Cases)) +
+  # Manually define log-spaced breaks to ensure the histogram renders cleanly
+  geom_histogram(breaks = 10^seq(0, 6, by = 0.25), fill = "firebrick") +
+  facet_wrap(~R0, labeller = label_both, ncol = 3) + # Grid layout instead of vertical
+  scale_x_log10(labels = scales::trans_format("log10", scales::math_format(10^.x))) + 
+  labs(title = "Bimodal Outcome: Extinction vs. Epidemic",
+       subtitle = "R0 > 1 outcomes split into tiny outbreaks or major epidemics",
+       y = "Frequency",
+       x = "Total Cases (Log Scale)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## Other Diagrams
+
+```{r other-diagrams, warning=FALSE}
+# Calculate the probability of over 100 cases across a range of R0 values
+r0_range <- seq(0.1, 2.5, by = 0.1)
+risk_data <- do.call(rbind, lapply(r0_range, function(r) {
+  # Run 500 simulations per R0
+  fs <- finalsize(popsize, r, contactmatrix, relsusc, reltransm, initR, initI, initV,
+                  method = "hybrid", nsims = 500)
+
+  # Calculate proportion of runs that have over 100 cases
+  prob_epidemic <- mean(rowSums(fs) > 100)
+
+  data.frame(R0 = r, Probability = prob_epidemic)
+}))
+
+# Plot the Sigmoid Risk Curve
+ggplot(risk_data, aes(x = R0, y = Probability)) +
+  geom_line(color = "firebrick", size = 1.2) +
+  geom_point(size = 3, alpha = 0.6) +
+  # Add a reference line where risk begins to skyrocket
+  geom_vline(xintercept = 1.0, linetype = "dashed", color = "gray50") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "Epidemic Risk Curve",
+       subtitle = "Probability of over 100 cases as R0 increases",
+       y = "Probability of Epidemic",
+       x = "Basic Reproduction Number (R0)") +
+  theme_minimal()
+
 ```

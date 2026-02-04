@@ -1,6 +1,8 @@
     library(multigroup.vaccine)
     library(socialmixr)
 
+    library(ggplot2)
+
 This vignette demonstrates an age-structured model of transmission
 within Davis County, Utah.
 
@@ -58,143 +60,86 @@ range of 0.1 to 0.9. The results are from 1,000 simulations and show how
 many of those simulations resulted in each number of total infections
 (including the first one).
 
-    outbreak_dist <- function(R0){
-      fs <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
-                method ="stochastic", nsims = 1000)
-      table(rowSums(fs))
-    }
+    # Define R0 values to inspect
+    r0_low_vals <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
 
-    outbreak_dist(R0 = 0.1)
-    #> 
-    #>   1   2   3   4   5   6 
-    #> 894  83  16   2   4   1
-    outbreak_dist(R0 = 0.2)
-    #> 
-    #>   1   2   3   4   5   6   8  10 
-    #> 803 122  47  18   4   4   1   1
-    outbreak_dist(R0 = 0.3)
-    #> 
-    #>   1   2   3   4   5   6   7   8   9  10  11  12 
-    #> 725 154  72  25   6   8   4   2   1   1   1   1
-    outbreak_dist(R0 = 0.4)
-    #> 
-    #>   1   2   3   4   5   6   7   8   9  10  11  12  13  15  16  18 
-    #> 646 151  78  33  25  25  13   7   5   7   1   3   1   1   2   2
-    outbreak_dist(R0 = 0.5)
-    #> 
-    #>   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  27  29 
-    #> 589 174  63  43  33  19  14  12  15   9   4   5   8   2   1   1   1   1   1   2   1   1   1
-    outbreak_dist(R0 = 0.6)
-    #> 
-    #>   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  25  26 
-    #> 582 124  79  41  30  24  19   9  13   5   7   8   5   6   3   6   2   3   2   2   5   2   1   3   2 
-    #>  27  28  31  32  34  41  45  46  50  53  55 
-    #>   4   3   1   1   1   1   2   1   1   1   1
-    outbreak_dist(R0 = 0.7)
-    #> 
-    #>   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25 
-    #> 512 118  78  52  35  25  25  15  15  14   7   9   9   7   3   8   8   8   3   2   2   3   1   4   1 
-    #>  26  27  28  29  30  31  32  34  35  36  37  41  42  44  45  46  47  50  52  53  60  64  65  67  76 
-    #>   1   3   1   2   1   2   2   1   1   1   1   1   1   1   1   3   2   1   1   1   1   1   1   1   1 
-    #>  80 100 122 
-    #>   1   1   1
-    outbreak_dist(R0 = 0.8)
-    #> 
-    #>   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  24  25  26 
-    #> 471 133  72  59  42  21  18  16  13  16  12   9   1  11  11   2   4   8   1   3   6   2   1   5   3 
-    #>  27  28  29  31  32  33  34  36  37  40  41  48  49  51  52  53  54  60  63  64  68  70  71  72  73 
-    #>   3   1   3   1   2   1   2   4   3   1   1   2   1   2   2   2   1   1   1   1   1   1   1   1   1 
-    #>  74  76  78  84  88  89  95 103 107 111 123 127 134 152 157 176 190 191 278 
-    #>   1   1   1   2   1   1   1   1   1   1   1   1   1   1   1   1   1   1   1
-    outbreak_dist(R0 = 0.9)
-    #> 
-    #>    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   20   21   22 
-    #>  460  120   81   53   24   23   23   17   21    7   11    8   10    6    3    6    3    6    4    2 
-    #>   23   24   25   26   27   28   29   30   31   32   34   35   36   37   38   39   40   41   43   44 
-    #>    3    3    4    2    2    3    2    2    1    2    1    4    2    1    2    1    1    2    2    1 
-    #>   45   46   48   49   50   53   55   56   57   58   60   61   62   64   67   68   69   71   72   73 
-    #>    1    1    1    1    1    2    1    1    1    2    1    1    1    2    1    2    1    1    1    1 
-    #>   75   78   81   86   94   97   99  102  103  105  108  111  115  116  131  137  142  143  161  167 
-    #>    1    1    2    1    1    2    2    1    1    1    1    1    1    2    1    1    1    1    1    1 
-    #>  171  178  183  190  204  208  212  221  271  281  282  291  325  369  401  448  460  477  554  614 
-    #>    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1    1 
-    #>  643  675 1520 
-    #>    1    1    1
+    # Run simulations
+    results_low <- do.call(rbind, lapply(r0_low_vals, function(r) {
+      fs <- finalsize(popsize, r, contactmatrix, relsusc, reltransm, initR, initI, initV,
+                      method = "stochastic", nsims = 1000)
+      data.frame(R0 = as.factor(r), Cases = rowSums(fs))
+    }))
 
+    # Visualization: Fixed axis breaks to stop overlapping
+    ggplot(results_low, aes(x = Cases)) +
+      geom_bar(fill = "steelblue", width = 1) + # width=1 removes gaps between discrete integers
+      facet_wrap(~R0, labeller = label_both) +
+      scale_x_continuous(breaks = c(1, 10, 20, 30), limits = c(0, 35)) + 
+      labs(title = "Distribution of Outbreak Sizes (Sub-critical)",
+           subtitle = "Simulation results for R0 < 1",
+           y = "Frequency",
+           x = "Total Cases") +
+      theme_minimal()
+    #> Warning: Removed 167 rows containing non-finite outside the scale range
+    #> (`stat_count()`).
+    #> Warning: Removed 1 row containing missing values or values outside the scale
+    #> range (`geom_bar()`).
+
+![](davis_agemodel_files/figure-markdown_strict/unnamed-chunk-7-1.png)
 If *R*<sub>0</sub> &gt; 1, there could be a very large outbreak. We can
 provide a quick estimate of outbreak sizes using our hybrid model:
 
-    outbreak_dist_hybrid <- function(R0){
-      fs <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
-                method ="hybrid", nsims = 1000)
-      table(rowSums(fs))
-    }
+    # Define R0 values to inspect
+    r0_high_vals <- c(1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9)
 
-    outbreak_dist_hybrid(R0 = 1.1)
-    #> 
-    #>     1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16 
-    #>   436    74    56    39    16    30    21    10     9     9     9     5    10     8     9     6 
-    #>    17    18    19    20    21    23    24    25    26    28    29    30    31    33    34    35 
-    #>     5     4     3     5     6     3     5     4     3     4     2     1     2     4     1     3 
-    #>    39    40    41    42    43    44    46    47    51    53    56    57    59    60    61    62 
-    #>     1     3     4     1     1     1     2     1     1     2     1     1     2     1     1     2 
-    #>    66    70    87   103   108   134 33400 
-    #>     1     1     1     1     1     1   167
-    outbreak_dist_hybrid(R0 = 1.2)
-    #> 
-    #>     1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16 
-    #>   387    89    47    28    22    13    17    12     7     9     5    12     8     5     5     4 
-    #>    17    18    19    20    21    22    23    24    25    26    27    28    29    30    31    33 
-    #>     2     4     6     2     4     6     1     2     3     2     2     2     2     3     1     2 
-    #>    35    37    38    40    41    42    45    47    50    51    55    58    59    61    82    91 
-    #>     1     2     2     2     1     1     2     1     5     1     1     1     2     1     1     1 
-    #> 65705 
-    #>   261
-    outbreak_dist_hybrid(R0 = 1.3)
-    #> 
-    #>     1     2     3     4     5     6     7     8     9    10    11    12    13    14    15    16 
-    #>   359   117    48    29    19    14    10    13     8     7     7     6     4     4     1     2 
-    #>    17    18    19    20    21    22    23    24    25    27    28    32    34    39    40    42 
-    #>     2     1     4     1     3     3     1     2     6     2     1     1     4     1     1     3 
-    #>    44    46    48    58    59    61    64    67    69    93   104   134 95844 
-    #>     1     1     2     1     1     1     1     1     1     1     1     1   303
-    outbreak_dist_hybrid(R0 = 1.4)
-    #> 
-    #>      1      2      3      4      5      6      7      8      9     10     11     12     13     14 
-    #>    386     77     49     23     16     13     12     13      4      8      3      8      3      3 
-    #>     15     16     17     19     20     21     22     23     24     25     26     27     28     29 
-    #>      1      2      4      3      3      1      3      2      2      1      2      1      5      1 
-    #>     31     32     34     35     36     37     40     41     42     44     45     46     48     49 
-    #>      1      4      3      1      3      1      1      1      1      1      2      1      1      1 
-    #>     56     65     97 123308 
-    #>      1      1      1    326
-    outbreak_dist_hybrid(R0 = 1.5)
-    #> 
-    #>      1      2      3      4      5      6      7      8      9     10     11     13     14     15 
-    #>    335     80     35     28     16     15     10      5      5      3      3      6      4      5 
-    #>     16     18     19     20     22     24     25     26     28     30     31     35     79 148004 
-    #>      5      5      4      1      1      2      2      1      1      2      1      1      1    423
-    outbreak_dist_hybrid(R0 = 1.6)
-    #> 
-    #>      1      2      3      4      5      6      7      8      9     10     11     12     13     14 
-    #>    304     75     43     19     16     14     10     10      6      4      7      1      3      7 
-    #>     15     16     17     18     19     22     26     27     33     35     38     42 170037 
-    #>      2      3      2      2      2      4      1      2      1      1      1      1    459
-    outbreak_dist_hybrid(R0 = 1.7)
-    #> 
-    #>      1      2      3      4      5      6      7      8      9     10     11     12     13     14 
-    #>    316     79     29     19     13     11      9      8      5      3      7      1      3      1 
-    #>     15     16     17     18     20     21     23     24     28     34 189630 
-    #>      5      1      2      1      1      2      1      1      1      2    479
-    outbreak_dist_hybrid(R0 = 1.8)
-    #> 
-    #>      1      2      3      4      5      6      7      8      9     10     11     12     13     16 
-    #>    293     83     26     18     16     14      2      3      7      4      1      3      2      1 
-    #>     17     19     20     21     33     40 207035 
-    #>      1      2      2      3      1      1    517
-    outbreak_dist_hybrid(R0 = 1.9)
-    #> 
-    #>      1      2      3      4      5      6      7      8      9     11     12     14     17     18 
-    #>    292     69     28     20     11      8      3      3      2      5      2      1      1      1 
-    #>     22     24     26     31     32 222498 
-    #>      1      2      1      1      1    548
+    # Run simulations
+    results_high <- do.call(rbind, lapply(r0_high_vals, function(r) {
+      fs <- finalsize(popsize, r, contactmatrix, relsusc, reltransm, initR, initI, initV,
+                      method = "hybrid", nsims = 1000)
+      data.frame(R0 = as.factor(r), Cases = rowSums(fs))
+    }))
+
+    # Visualization: 3x3 Grid + Log Scale Bins
+    ggplot(results_high, aes(x = Cases)) +
+      # Manually define log-spaced breaks to ensure the histogram renders cleanly
+      geom_histogram(breaks = 10^seq(0, 6, by = 0.25), fill = "firebrick") +
+      facet_wrap(~R0, labeller = label_both, ncol = 3) + # Grid layout instead of vertical
+      scale_x_log10(labels = scales::trans_format("log10", scales::math_format(10^.x))) + 
+      labs(title = "Bimodal Outcome: Extinction vs. Epidemic",
+           subtitle = "R0 > 1 outcomes split into tiny outbreaks or major epidemics",
+           y = "Frequency",
+           x = "Total Cases (Log Scale)") +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+![](davis_agemodel_files/figure-markdown_strict/unnamed-chunk-8-1.png)
+
+## Other Diagrams
+
+    # Calculate the probability of over 100 cases across a range of R0 values
+    r0_range <- seq(0.1, 2.5, by = 0.1)
+    risk_data <- do.call(rbind, lapply(r0_range, function(r) {
+      # Run 500 simulations per R0
+      fs <- finalsize(popsize, r, contactmatrix, relsusc, reltransm, initR, initI, initV,
+                      method = "hybrid", nsims = 500)
+
+      # Calculate proportion of runs that have over 100 cases
+      prob_epidemic <- mean(rowSums(fs) > 100)
+
+      data.frame(R0 = r, Probability = prob_epidemic)
+    }))
+
+    # Plot the Sigmoid Risk Curve
+    ggplot(risk_data, aes(x = R0, y = Probability)) +
+      geom_line(color = "firebrick", size = 1.2) +
+      geom_point(size = 3, alpha = 0.6) +
+      # Add a reference line where risk begins to skyrocket
+      geom_vline(xintercept = 1.0, linetype = "dashed", color = "gray50") +
+      scale_y_continuous(labels = scales::percent) +
+      labs(title = "Epidemic Risk Curve",
+           subtitle = "Probability of over 100 cases as R0 increases",
+           y = "Probability of Epidemic",
+           x = "Basic Reproduction Number (R0)") +
+      theme_minimal()
+
+![](davis_agemodel_files/figure-markdown_strict/other-diagrams-1.png)
