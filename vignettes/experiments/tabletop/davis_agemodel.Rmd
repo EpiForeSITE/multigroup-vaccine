@@ -1,6 +1,6 @@
 ---
 title: "Davis County Age-Structured Model"
-output: rmarkdown::md_document
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Davis County Age-Structured Model}
   %\VignetteEngine{knitr::rmarkdown}
@@ -62,7 +62,7 @@ initV <- round(age_immunity * popsize)  # initially immune cases
 
 initI <- rep(0, length(popsize))  # initial infectious cases
 initI[4] <- 1                     # assume 1 initial case in the 4th age group (12-13)
-
+initI[3] <- 2                     # ... and 2 initial cases in the 3rd age group (5-11)
 initR <- rep(0, length(popsize))  # no recent prior H5 flu survivors
 ```
 

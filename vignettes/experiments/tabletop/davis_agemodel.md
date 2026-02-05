@@ -2,7 +2,9 @@
     library(socialmixr)
 
     library(data.table)
+    #> data.table 1.17.0 using 4 threads (see ?getDTthreads).  Latest news: r-datatable.com
     library(ggplot2)
+    #> Learn more about the underlying theory at https://ggplot2-book.org/
 
 This vignette demonstrates an age-structured model of transmission
 within Davis County, Utah.
@@ -42,7 +44,7 @@ Initial population size of each disease state:
 
     initI <- rep(0, length(popsize))  # initial infectious cases
     initI[4] <- 1                     # assume 1 initial case in the 4th age group (12-13)
-
+    initI[3] <- 2                     # ... and 2 initial cases in the 3rd age group (5-11)
     initR <- rep(0, length(popsize))  # no recent prior H5 flu survivors
 
 Transmission matrix ingredients: contact matrix, relative susceptibility
@@ -81,10 +83,8 @@ many of those simulations resulted in each number of total infections
            y = "Frequency",
            x = "Total Cases") +
       theme_minimal()
-    #> Warning: Removed 151 rows containing non-finite outside the scale range
-    #> (`stat_count()`).
-    #> Warning: Removed 2 rows containing missing values or values outside the scale
-    #> range (`geom_bar()`).
+    #> Warning: Removed 390 rows containing non-finite outside the scale range (`stat_count()`).
+    #> Warning: Removed 4 rows containing missing values or values outside the scale range (`geom_bar()`).
 
 ![](davis_agemodel_files/figure-markdown_strict/unnamed-chunk-7-1.png)
 
@@ -117,27 +117,27 @@ outbreak sizes:
 <tr>
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">1.00</td>
-<td style="text-align: right;">0.59</td>
+<td style="text-align: right;">0.00</td>
 </tr>
 <tr>
 <td style="text-align: right;">5</td>
-<td style="text-align: right;">0.12</td>
-<td style="text-align: right;">0.90</td>
+<td style="text-align: right;">0.57</td>
+<td style="text-align: right;">0.56</td>
 </tr>
 <tr>
 <td style="text-align: right;">10</td>
-<td style="text-align: right;">0.04</td>
-<td style="text-align: right;">0.97</td>
+<td style="text-align: right;">0.19</td>
+<td style="text-align: right;">0.84</td>
 </tr>
 <tr>
 <td style="text-align: right;">15</td>
-<td style="text-align: right;">0.02</td>
-<td style="text-align: right;">0.99</td>
+<td style="text-align: right;">0.07</td>
+<td style="text-align: right;">0.94</td>
 </tr>
 <tr>
 <td style="text-align: right;">20</td>
-<td style="text-align: right;">0.01</td>
-<td style="text-align: right;">0.99</td>
+<td style="text-align: right;">0.03</td>
+<td style="text-align: right;">0.97</td>
 </tr>
 <tr>
 <td style="text-align: right;">30</td>
@@ -213,43 +213,43 @@ sizes:
 <tbody>
 <tr>
 <td style="text-align: right;">10</td>
-<td style="text-align: right;">0.48</td>
-<td style="text-align: right;">0.52</td>
+<td style="text-align: right;">0.81</td>
+<td style="text-align: right;">0.20</td>
 </tr>
 <tr>
 <td style="text-align: right;">20</td>
-<td style="text-align: right;">0.46</td>
-<td style="text-align: right;">0.55</td>
+<td style="text-align: right;">0.77</td>
+<td style="text-align: right;">0.23</td>
 </tr>
 <tr>
 <td style="text-align: right;">50</td>
-<td style="text-align: right;">0.43</td>
-<td style="text-align: right;">0.57</td>
+<td style="text-align: right;">0.74</td>
+<td style="text-align: right;">0.26</td>
 </tr>
 <tr>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">0.43</td>
-<td style="text-align: right;">0.57</td>
+<td style="text-align: right;">0.73</td>
+<td style="text-align: right;">0.27</td>
 </tr>
 <tr>
 <td style="text-align: right;">200</td>
-<td style="text-align: right;">0.43</td>
-<td style="text-align: right;">0.57</td>
+<td style="text-align: right;">0.73</td>
+<td style="text-align: right;">0.27</td>
 </tr>
 <tr>
 <td style="text-align: right;">500</td>
-<td style="text-align: right;">0.43</td>
-<td style="text-align: right;">0.57</td>
+<td style="text-align: right;">0.73</td>
+<td style="text-align: right;">0.27</td>
 </tr>
 <tr>
 <td style="text-align: right;">1000</td>
-<td style="text-align: right;">0.43</td>
-<td style="text-align: right;">0.57</td>
+<td style="text-align: right;">0.73</td>
+<td style="text-align: right;">0.27</td>
 </tr>
 <tr>
 <td style="text-align: right;">2000</td>
-<td style="text-align: right;">0.43</td>
-<td style="text-align: right;">0.57</td>
+<td style="text-align: right;">0.73</td>
+<td style="text-align: right;">0.27</td>
 </tr>
 </tbody>
 </table>
