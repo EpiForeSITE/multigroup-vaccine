@@ -1,6 +1,7 @@
     library(multigroup.vaccine)
     library(socialmixr)
 
+    library(data.table)
     library(ggplot2)
 
 This vignette demonstrates an age-structured model of transmission
@@ -80,12 +81,82 @@ many of those simulations resulted in each number of total infections
            y = "Frequency",
            x = "Total Cases") +
       theme_minimal()
-    #> Warning: Removed 167 rows containing non-finite outside the scale range
+    #> Warning: Removed 151 rows containing non-finite outside the scale range
     #> (`stat_count()`).
-    #> Warning: Removed 1 row containing missing values or values outside the scale
+    #> Warning: Removed 2 rows containing missing values or values outside the scale
     #> range (`geom_bar()`).
 
 ![](davis_agemodel_files/figure-markdown_strict/unnamed-chunk-7-1.png)
+
+For a closer look at R0 = 0.5, here are the probabilities of different
+outbreak sizes:
+
+    # Show detailed probabilities for R0 = 0.5
+    outbreak_tot <- results_low[results_low$R0 == "0.5", ]
+    sizes <- c(1, 5, 10, 15, 20, 30, 50, 100)
+    knitr::kable(
+      data.table(
+        "Size" = sizes,
+        "P(Greater or equal)" = sapply(sizes, function(sz) mean(outbreak_tot$Cases >= sz)),
+        "P(Less or equal)" = sapply(sizes, function(sz) mean(outbreak_tot$Cases <= sz))
+      ),
+      caption = "Probability of outbreak sizes for R0 = 0.5",
+      digits = 2
+    )
+
+<table>
+<caption>Probability of outbreak sizes for R0 = 0.5</caption>
+<thead>
+<tr>
+<th style="text-align: right;">Size</th>
+<th style="text-align: right;">P(Greater or equal)</th>
+<th style="text-align: right;">P(Less or equal)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.59</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0.12</td>
+<td style="text-align: right;">0.90</td>
+</tr>
+<tr>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0.04</td>
+<td style="text-align: right;">0.97</td>
+</tr>
+<tr>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">0.99</td>
+</tr>
+<tr>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">0.01</td>
+<td style="text-align: right;">0.99</td>
+</tr>
+<tr>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.00</td>
+</tr>
+<tr>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.00</td>
+</tr>
+<tr>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">1.00</td>
+</tr>
+</tbody>
+</table>
+
 If *R*<sub>0</sub> &gt; 1, there could be a very large outbreak. We can
 provide a quick estimate of outbreak sizes using our hybrid model:
 
@@ -112,16 +183,85 @@ provide a quick estimate of outbreak sizes using our hybrid model:
       theme_minimal() +
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-![](davis_agemodel_files/figure-markdown_strict/unnamed-chunk-8-1.png)
+![](davis_agemodel_files/figure-markdown_strict/unnamed-chunk-9-1.png)
+
+For R0 = 1.5, here are the probabilities across different outbreak
+sizes:
+
+    # Show detailed probabilities for R0 = 1.5
+    outbreak_tot <- results_high[results_high$R0 == "1.5", ]
+    sizes <- c(10, 20, 50, 100, 200, 500, 1000, 2000)
+    knitr::kable(
+      data.table(
+        "Size" = sizes,
+        "P(Greater or equal)" = sapply(sizes, function(sz) mean(outbreak_tot$Cases >= sz)),
+        "P(Less or equal)" = sapply(sizes, function(sz) mean(outbreak_tot$Cases <= sz))
+      ),
+      caption = "Probability of outbreak sizes for R0 = 1.5",
+      digits = 2
+    )
+
+<table>
+<caption>Probability of outbreak sizes for R0 = 1.5</caption>
+<thead>
+<tr>
+<th style="text-align: right;">Size</th>
+<th style="text-align: right;">P(Greater or equal)</th>
+<th style="text-align: right;">P(Less or equal)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0.48</td>
+<td style="text-align: right;">0.52</td>
+</tr>
+<tr>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">0.46</td>
+<td style="text-align: right;">0.55</td>
+</tr>
+<tr>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">0.43</td>
+<td style="text-align: right;">0.57</td>
+</tr>
+<tr>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">0.43</td>
+<td style="text-align: right;">0.57</td>
+</tr>
+<tr>
+<td style="text-align: right;">200</td>
+<td style="text-align: right;">0.43</td>
+<td style="text-align: right;">0.57</td>
+</tr>
+<tr>
+<td style="text-align: right;">500</td>
+<td style="text-align: right;">0.43</td>
+<td style="text-align: right;">0.57</td>
+</tr>
+<tr>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">0.43</td>
+<td style="text-align: right;">0.57</td>
+</tr>
+<tr>
+<td style="text-align: right;">2000</td>
+<td style="text-align: right;">0.43</td>
+<td style="text-align: right;">0.57</td>
+</tr>
+</tbody>
+</table>
 
 ## Other Diagrams
 
     # Calculate the probability of over 100 cases across a range of R0 values
     r0_range <- seq(0.1, 2.5, by = 0.1)
     risk_data <- do.call(rbind, lapply(r0_range, function(r) {
-      # Run 500 simulations per R0
+      # Run 1000 simulations per R0
       fs <- finalsize(popsize, r, contactmatrix, relsusc, reltransm, initR, initI, initV,
-                      method = "hybrid", nsims = 500)
+                      method = "hybrid", nsims = 1000)
 
       # Calculate proportion of runs that have over 100 cases
       prob_epidemic <- mean(rowSums(fs) > 100)

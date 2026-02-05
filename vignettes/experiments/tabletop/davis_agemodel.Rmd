@@ -20,6 +20,7 @@ knitr::opts_chunk$set(
 library(multigroup.vaccine)
 library(socialmixr)
 
+library(data.table)
 library(ggplot2)
 ```
 
@@ -99,6 +100,24 @@ ggplot(results_low, aes(x = Cases)) +
        x = "Total Cases") +
   theme_minimal()
 ```
+
+For a closer look at R0 = 0.5, here are the probabilities of different outbreak sizes:
+
+```{r}
+# Show detailed probabilities for R0 = 0.5
+outbreak_tot <- results_low[results_low$R0 == "0.5", ]
+sizes <- c(1, 5, 10, 15, 20, 30, 50, 100)
+knitr::kable(
+  data.table(
+    "Size" = sizes,
+    "P(Greater or equal)" = sapply(sizes, function(sz) mean(outbreak_tot$Cases >= sz)),
+    "P(Less or equal)" = sapply(sizes, function(sz) mean(outbreak_tot$Cases <= sz))
+  ),
+  caption = "Probability of outbreak sizes for R0 = 0.5",
+  digits = 2
+)
+```
+
 If $R_0 > 1$, there could be a very large outbreak. We can provide a quick estimate of outbreak sizes using our hybrid model:
 
 ```{r}
@@ -126,15 +145,32 @@ ggplot(results_high, aes(x = Cases)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
+For R0 = 1.5, here are the probabilities across different outbreak sizes:
+
+```{r}
+# Show detailed probabilities for R0 = 1.5
+outbreak_tot <- results_high[results_high$R0 == "1.5", ]
+sizes <- c(10, 20, 50, 100, 200, 500, 1000, 2000)
+knitr::kable(
+  data.table(
+    "Size" = sizes,
+    "P(Greater or equal)" = sapply(sizes, function(sz) mean(outbreak_tot$Cases >= sz)),
+    "P(Less or equal)" = sapply(sizes, function(sz) mean(outbreak_tot$Cases <= sz))
+  ),
+  caption = "Probability of outbreak sizes for R0 = 1.5",
+  digits = 2
+)
+```
+
 ## Other Diagrams
 
 ```{r other-diagrams, warning=FALSE}
 # Calculate the probability of over 100 cases across a range of R0 values
 r0_range <- seq(0.1, 2.5, by = 0.1)
 risk_data <- do.call(rbind, lapply(r0_range, function(r) {
-  # Run 500 simulations per R0
+  # Run 1000 simulations per R0
   fs <- finalsize(popsize, r, contactmatrix, relsusc, reltransm, initR, initI, initV,
-                  method = "hybrid", nsims = 500)
+                  method = "hybrid", nsims = 1000)
 
   # Calculate proportion of runs that have over 100 cases
   prob_epidemic <- mean(rowSums(fs) > 100)
