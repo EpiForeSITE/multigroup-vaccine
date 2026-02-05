@@ -1,6 +1,6 @@
 ---
 title: "Davis County Age-Structured Model"
-output: rmarkdown::html_vignette
+output: rmarkdown::md_document
 vignette: >
   %\VignetteIndexEntry{Davis County Age-Structured Model}
   %\VignetteEngine{knitr::rmarkdown}
@@ -80,8 +80,7 @@ H5 flu could have a low level of transmissibility with $R_0<1$ - let's see how o
 
 ```{r}
 # Define R0 values to inspect
-r0_low_vals <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
-
+r0_low_vals <- c(0.5, 0.7, 0.9, 0.99)
 # Run simulations
 results_low <- do.call(rbind, lapply(r0_low_vals, function(r) {
   fs <- finalsize(popsize, r, contactmatrix, relsusc, reltransm, initR, initI, initV,
@@ -191,4 +190,35 @@ ggplot(risk_data, aes(x = R0, y = Probability)) +
        x = "Basic Reproduction Number (R0)") +
   theme_minimal()
 
+```
+
+### Zoomed-in R0 Curve
+
+Let's look at the 0.7 to 1.3 range in more detail:
+
+```{r zoomed-curve}
+# Zoomed-in R0 range
+r0_zoom <- seq(0.9, 1.0, by = 0.025)
+risk_data_zoom <- do.call(rbind, lapply(r0_zoom, function(r) {
+  # Run 500 simulations per R0
+  fs <- finalsize(popsize, r, contactmatrix, relsusc, reltransm, initR, initI, initV,
+                  method = "hybrid", nsims = 500)
+
+  # Calculate proportion of runs that have over 100 cases
+  prob_epidemic <- mean(rowSums(fs) > 100)
+
+  data.frame(R0 = r, Probability = prob_epidemic)
+}))
+
+# Plot the Zoomed-in Risk Curve
+ggplot(risk_data_zoom, aes(x = R0, y = Probability)) +
+  geom_line(color = "darkgreen", size = 1.2) +
+  geom_point(size = 3, alpha = 0.6) +
+  geom_vline(xintercept = 1.0, linetype = "dashed", color = "gray50") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "Zoomed-In Epidemic Risk Curve",
+       subtitle = "Probability of over 100 cases for R0 between 0.9 and 1.0",
+       y = "Probability of Epidemic",
+       x = "Basic Reproduction Number (R0)") +
+  theme_minimal()
 ```

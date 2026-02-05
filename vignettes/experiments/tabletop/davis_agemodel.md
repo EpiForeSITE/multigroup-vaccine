@@ -2,9 +2,7 @@
     library(socialmixr)
 
     library(data.table)
-    #> data.table 1.17.0 using 4 threads (see ?getDTthreads).  Latest news: r-datatable.com
     library(ggplot2)
-    #> Learn more about the underlying theory at https://ggplot2-book.org/
 
 This vignette demonstrates an age-structured model of transmission
 within Davis County, Utah.
@@ -64,8 +62,7 @@ many of those simulations resulted in each number of total infections
 (including the first one).
 
     # Define R0 values to inspect
-    r0_low_vals <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
-
+    r0_low_vals <- c(0.5, 0.7, 0.9, 0.99)
     # Run simulations
     results_low <- do.call(rbind, lapply(r0_low_vals, function(r) {
       fs <- finalsize(popsize, r, contactmatrix, relsusc, reltransm, initR, initI, initV,
@@ -83,8 +80,10 @@ many of those simulations resulted in each number of total infections
            y = "Frequency",
            x = "Total Cases") +
       theme_minimal()
-    #> Warning: Removed 390 rows containing non-finite outside the scale range (`stat_count()`).
-    #> Warning: Removed 4 rows containing missing values or values outside the scale range (`geom_bar()`).
+    #> Warning: Removed 566 rows containing non-finite outside the scale range
+    #> (`stat_count()`).
+    #> Warning: Removed 3 rows containing missing values or values outside the scale
+    #> range (`geom_bar()`).
 
 ![](davis_agemodel_files/figure-markdown_strict/unnamed-chunk-7-1.png)
 
@@ -122,17 +121,17 @@ outbreak sizes:
 <tr>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">0.57</td>
-<td style="text-align: right;">0.56</td>
+<td style="text-align: right;">0.55</td>
 </tr>
 <tr>
 <td style="text-align: right;">10</td>
-<td style="text-align: right;">0.19</td>
-<td style="text-align: right;">0.84</td>
+<td style="text-align: right;">0.17</td>
+<td style="text-align: right;">0.86</td>
 </tr>
 <tr>
 <td style="text-align: right;">15</td>
-<td style="text-align: right;">0.07</td>
-<td style="text-align: right;">0.94</td>
+<td style="text-align: right;">0.08</td>
+<td style="text-align: right;">0.93</td>
 </tr>
 <tr>
 <td style="text-align: right;">20</td>
@@ -141,8 +140,8 @@ outbreak sizes:
 </tr>
 <tr>
 <td style="text-align: right;">30</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0.01</td>
+<td style="text-align: right;">0.99</td>
 </tr>
 <tr>
 <td style="text-align: right;">50</td>
@@ -213,8 +212,8 @@ sizes:
 <tbody>
 <tr>
 <td style="text-align: right;">10</td>
-<td style="text-align: right;">0.81</td>
-<td style="text-align: right;">0.20</td>
+<td style="text-align: right;">0.82</td>
+<td style="text-align: right;">0.19</td>
 </tr>
 <tr>
 <td style="text-align: right;">20</td>
@@ -228,28 +227,28 @@ sizes:
 </tr>
 <tr>
 <td style="text-align: right;">100</td>
-<td style="text-align: right;">0.73</td>
-<td style="text-align: right;">0.27</td>
+<td style="text-align: right;">0.74</td>
+<td style="text-align: right;">0.26</td>
 </tr>
 <tr>
 <td style="text-align: right;">200</td>
-<td style="text-align: right;">0.73</td>
-<td style="text-align: right;">0.27</td>
+<td style="text-align: right;">0.74</td>
+<td style="text-align: right;">0.26</td>
 </tr>
 <tr>
 <td style="text-align: right;">500</td>
-<td style="text-align: right;">0.73</td>
-<td style="text-align: right;">0.27</td>
+<td style="text-align: right;">0.74</td>
+<td style="text-align: right;">0.26</td>
 </tr>
 <tr>
 <td style="text-align: right;">1000</td>
-<td style="text-align: right;">0.73</td>
-<td style="text-align: right;">0.27</td>
+<td style="text-align: right;">0.74</td>
+<td style="text-align: right;">0.26</td>
 </tr>
 <tr>
 <td style="text-align: right;">2000</td>
-<td style="text-align: right;">0.73</td>
-<td style="text-align: right;">0.27</td>
+<td style="text-align: right;">0.74</td>
+<td style="text-align: right;">0.26</td>
 </tr>
 </tbody>
 </table>
@@ -283,3 +282,34 @@ sizes:
       theme_minimal()
 
 ![](davis_agemodel_files/figure-markdown_strict/other-diagrams-1.png)
+
+### Zoomed-in R0 Curve
+
+Let’s look at the 0.7 to 1.3 range in more detail:
+
+    # Zoomed-in R0 range
+    r0_zoom <- seq(0.9, 1.0, by = 0.025)
+    risk_data_zoom <- do.call(rbind, lapply(r0_zoom, function(r) {
+      # Run 500 simulations per R0
+      fs <- finalsize(popsize, r, contactmatrix, relsusc, reltransm, initR, initI, initV,
+                      method = "hybrid", nsims = 500)
+
+      # Calculate proportion of runs that have over 100 cases
+      prob_epidemic <- mean(rowSums(fs) > 100)
+
+      data.frame(R0 = r, Probability = prob_epidemic)
+    }))
+
+    # Plot the Zoomed-in Risk Curve
+    ggplot(risk_data_zoom, aes(x = R0, y = Probability)) +
+      geom_line(color = "darkgreen", size = 1.2) +
+      geom_point(size = 3, alpha = 0.6) +
+      geom_vline(xintercept = 1.0, linetype = "dashed", color = "gray50") +
+      scale_y_continuous(labels = scales::percent) +
+      labs(title = "Zoomed-In Epidemic Risk Curve",
+           subtitle = "Probability of over 100 cases for R0 between 0.9 and 1.0",
+           y = "Probability of Epidemic",
+           x = "Basic Reproduction Number (R0)") +
+      theme_minimal()
+
+![](davis_agemodel_files/figure-markdown_strict/zoomed-curve-1.png)
