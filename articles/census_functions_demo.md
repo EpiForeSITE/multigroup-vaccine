@@ -305,7 +305,7 @@ for (i in seq_along(hildale_school$age_labels)) {
 
 ``` r
 # Create a comparison visualization
-par(mfrow = c(1, 2), mar = c(5, 4, 4, 2))
+oldpar <- par(mfrow = c(1, 2), mar = c(5, 4, 4, 2))
 
 # Plot 5-year groups
 age_pct_5yr <- 100 * hildale_5yr$age_pops / hildale_5yr$total_pop
@@ -340,7 +340,7 @@ y-axis.](census_functions_demo_files/figure-html/compare-aggregations-1.png)
 
 ``` r
 
-par(mfrow = c(1, 1))
+par(oldpar)
 ```
 
 This demonstrates how

@@ -357,7 +357,7 @@ pre-school (0-4), elementary (5-11), middle school (12-13), high school
 </h3>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a comparison visualization</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">4</span>, <span class="fl">4</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">oldpar</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">4</span>, <span class="fl">4</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Plot 5-year groups</span></span>
 <span><span class="va">age_pct_5yr</span> <span class="op">&lt;-</span> <span class="fl">100</span> <span class="op">*</span> <span class="va">hildale_5yr</span><span class="op">$</span><span class="va">age_pops</span> <span class="op">/</span> <span class="va">hildale_5yr</span><span class="op">$</span><span class="va">total_pop</span></span>
@@ -385,7 +385,7 @@ pre-school (0-4), elementary (5-11), middle school (12-13), high school
 <p><img src="census_functions_demo_files/figure-html/compare-aggregations-1.png" class="r-plt" alt="Two side-by-side bar charts comparing age grouping methods for Hildale, UT. Left panel shows 5-year age groups in steel blue. Right panel shows school-aligned age groups in coral. Both display percentage of population on y-axis." width="960"></p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span><span class="va">oldpar</span><span class="op">)</span></span></code></pre></div>
 <p>This demonstrates how <code><a href="../reference/getCityData.html">getCityData()</a></code> provides flexibility
 in age grouping. The 5-year groups follow standard ACS categories, while
 custom groups can be defined to match specific analysis needs (e.g.,
