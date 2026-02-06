@@ -22,7 +22,7 @@ with multiple distinct subgroups that can have:
 - Different susceptibility and/or transmissibility characteristics
 - Different contact rates and patterns between and within groups
 
-The package provides both an interactive Shiny dashboard for a simple
+The package provides both an interactive `shiny` dashboard for a simple
 two-group example and programmatic R functions for epidemiological
 modeling and outbreak forecasting.
 
@@ -60,7 +60,7 @@ The package depends on the following R packages:
 
 ### Interactive Dashboard
 
-Launch the Shiny dashboard for interactive modeling:
+Launch the `shiny` dashboard for interactive modeling:
 
 ``` r
 library(multigroup.vaccine)
@@ -109,7 +109,7 @@ vignettes](https://epiforesite.github.io/multigroup-vaccine/articles/index.html)
 - **Contact matrix integration** via POLYMOD-derived and custom matrices
 - **Final outbreak size calculations** using both analytic and
   stochastic methods
-- **Interactive Shiny dashboard** for scenario exploration
+- **Interactive `shiny` dashboard** for scenario exploration
 
 ## Documentation
 
@@ -132,8 +132,8 @@ browseVignettes("multigroup.vaccine")
   from POLYMOD data
 - `getCensusData()`: Download and process US Census Bureau population
   data for age group-structured models
-- `run_my_app()`: Launch the interactive Shiny dashboard for a two-group
-  model
+- `run_my_app()`: Launch the interactive `shiny` dashboard for a
+  two-group model
 
 ## Getting Help
 

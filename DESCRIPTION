@@ -17,7 +17,7 @@ Description: Model infectious disease dynamics in populations
     characteristics, and contact patterns. Calculate final and intermediate
     outbreak sizes, form age-structured contact models with automatic fetching
     of U.S. census data, and explore vaccination scenarios with an interactive
-    Shiny dashboard for a model with two subgroups, as described in Nguyen et
+    `shiny` dashboard for a model with two subgroups, as described in Nguyen et
     al. (2024) <doi:10.1016/j.jval.2024.03.039> and Duong et al. (2026)
     <doi:10.1093/ofid/ofaf695.217>.
 License: MIT + file LICENSE

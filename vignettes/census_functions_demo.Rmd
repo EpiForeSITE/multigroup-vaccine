@@ -245,7 +245,7 @@ for (i in seq_along(hildale_school$age_labels)) {
 
 ```{r compare-aggregations, fig.alt="Two side-by-side bar charts comparing age grouping methods for Hildale, UT. Left panel shows 5-year age groups in steel blue. Right panel shows school-aligned age groups in coral. Both display percentage of population on y-axis."}
 # Create a comparison visualization
-par(mfrow = c(1, 2), mar = c(5, 4, 4, 2))
+oldpar <- par(mfrow = c(1, 2), mar = c(5, 4, 4, 2))
 
 # Plot 5-year groups
 age_pct_5yr <- 100 * hildale_5yr$age_pops / hildale_5yr$total_pop
@@ -271,7 +271,7 @@ barplot(age_pct_school,
         cex.names = 0.7,
         ylim = c(0, max(age_pct_school) * 1.2))
 
-par(mfrow = c(1, 1))
+par(oldpar)
 ```
 
 This demonstrates how `getCityData()` provides flexibility in age grouping. The 5-year groups follow standard ACS categories, while custom groups can be defined to match specific analysis needs (e.g., school grades, epidemiological contact patterns).
