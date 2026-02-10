@@ -8,7 +8,7 @@ articles:
   measles_agemodel: measles_agemodel.html
   run_model_on_command_line: run_model_on_command_line.html
   experiments/shortcreek_age_school: experiments/shortcreek_age_school.html
-last_built: 2026-02-06T20:02Z
+last_built: 2026-02-10T22:22Z
 urls:
   reference: https://epiforesite.github.io/multigroup-vaccine/reference
   article: https://epiforesite.github.io/multigroup-vaccine/articles
