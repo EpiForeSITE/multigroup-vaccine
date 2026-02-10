@@ -1,0 +1,124 @@
+---
+title: "Davis County census data fetching"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Davis County census data fetching}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 11,
+  fig.height = 7
+)
+```
+
+```{css, echo=FALSE}
+body {
+  max-width: 1100px;
+  margin: auto;
+  padding: 1em;
+}
+
+table {
+  width: 100%;
+}
+```
+
+# Davis County Census Data Fetching
+
+First, establish that we can reliably get Davis County census information about population by age groups.
+
+```{r setup}
+library(multigroup.vaccine)
+library(socialmixr)
+
+# Get the path to the included census data file
+census_csv <- getCensusDataPath()
+```
+
+```{r state-fips}
+# Get FIPS code for Utah
+utah_fips <- getStateFIPS("Utah")
+cat("Utah FIPS code:", utah_fips, "\n")
+```
+
+```{r county-list}
+# List counties in Utah
+utah_counties <- listCounties(utah_fips)
+print(utah_counties)
+```
+
+```{r davis-population}
+# Get population by age groups for Davis County (2024)
+davis_population <- getCensusData(state_fips = utah_fips, county_name = "Davis")
+
+saveRDS(davis_population, file = "data/davis_county_census_data.rds", compress = "xz")
+
+print(davis_population$data)
+```
+
+## Visualize the population distribution by age groups
+
+Using ggplot2 for formatting the plot.
+
+```{r plot-population, message=FALSE}
+library(ggplot2)
+
+ggplot(davis_population$data, aes(x = davis_population$ages, y = davis_population$age_pops)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  theme_minimal() +
+  labs(title = "Davis County Population by Age Groups (2024)",
+       x = "Age Group",
+       y = "Population") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## Aggregate by Age Groups
+
+```{r aggregate-age-groups}
+agelims <- c(0, 1, 5, 12, 14, 18, 25, 45, 70)
+
+ageGrouped <- aggregateByAgeGroups(
+  ages = davis_population$ages,
+  pops = davis_population$age_pops,
+  age_groups = agelims,
+  verbose = TRUE
+)
+
+saveRDS(ageGrouped, file = "data/davis_county_age_grouped.rds", compress = "xz")
+
+print(ageGrouped)
+```
+
+```{r plot-aggregated-population, message=FALSE}
+# Create a data frame from the aggregated results
+age_grouped_df <- data.frame(
+  AgeGroup = factor(ageGrouped$labels, levels = ageGrouped$labels),
+  Population = ageGrouped$pops
+)
+
+ggplot(age_grouped_df, aes(x = AgeGroup, y = Population)) +
+  geom_bar(stat = "identity", fill = "coral") +
+  theme_minimal() +
+  labs(title = "Davis County Population by Aggregated Age Groups (2024)",
+        x = "Aggregated Age Group",
+        y = "Population") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## School Data
+
+Population data from schools in Davis County. The levels are: 1 = elementary school, 2 = middle school / jr. high, and 3 = high school. 
+
+The student with H5 flu infection is from school ID S0172, and the elementary school of interest in school ID S0173.
+
+
+```{r schools}
+davis_school_path <- system.file("extdata/DavisSchools.csv", package = "multigroup.vaccine")
+davis_school_data <- read.csv(davis_school_path)
+davis_school_data
+```
