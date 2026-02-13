@@ -1,4 +1,4 @@
-simStochasticOutbreak <- function(n, transmrates, recoveryrate, popsize, initR, initI, initV) {
+simOutbreakDist <- function(n, transmrates, recoveryrate, popsize, initR, initI, initV) {
   g <- length(popsize) # number of groups
   e <- g * 2           # number of distinct events
   betaoverNj <- t(t(transmrates) / popsize)
