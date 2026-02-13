@@ -14,7 +14,7 @@ simStochasticOutbreak <- function(n, transmrates, recoveryrate, popsize, initR, 
     R <- initR
 
     tm <- 0
-    if(ind + nI - 1 > length(tsim)){
+    while(ind + nI - 1 > length(tsim)){
       length(tsim) <- length(gsim) <- length(tsim) * 2
     }
     tsim[ind:(ind + nI - 1)] <- 0
@@ -52,12 +52,4 @@ simStochasticOutbreak <- function(n, transmrates, recoveryrate, popsize, initR, 
   z <- gsim[!is.na(tsim)]
 
   list(total = Rtally, inftime = cbind(sim = x, inftime = y, group = z))
-  #xc <- cumsum(c(1, x))
-  #max_len <- max(x)
-  #last_vals <- y[cumsum(x)]
-  #mp <- matrix(last_vals, nrow = n, ncol = max_len, byrow = FALSE)
-  #row_idx <- rep(1:n, times = x)
-  #col_idx <- sequence(x)
-  #mp[cbind(row_idx, col_idx)] <- y
-  #mp
 }
