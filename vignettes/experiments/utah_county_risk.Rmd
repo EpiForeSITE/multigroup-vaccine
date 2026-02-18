@@ -1,6 +1,6 @@
 ---
 title: "Measles Age-Structured Model"
-output: rmarkdown::md_document
+output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Measles Age-Structured Model}
   %\VignetteEngine{knitr::rmarkdown}
@@ -352,6 +352,7 @@ for (county_name in names(utah_counties)) {
 ```
 
 ```{r visualize-age-differences}
+library(scales)  # For comma formatter
 print(county_difference)
 
 county_difference$total_population <- county_difference$census_population
@@ -395,4 +396,507 @@ p2 <- ggplot(county_difference, aes(x = total_population, y = percent_difference
   theme_minimal()
 
 grid.arrange(p1, p2, ncol = 1)
+```
+
+### Vaccination Levels by Age Group
+
+Now we assign vaccination/immunity levels to each age group for each county based on the school vaccination data. We follow the approach from the measles age model vignette, accounting for:
+
+- Under 1 year: No vaccination (0%)
+- Ages 1-4: Slightly lower than elementary (90% of elementary rate, with 93% vaccine effectiveness for single dose)
+- School-age groups: Use the actual vaccination rates from the data (with 97% vaccine effectiveness)
+- Adults 18-69: linearly extrapolate from high school rates
+- Ages 70+: Very high immunity (99%)
+
+```{r vaccination-levels}
+# Create a data frame to store immunity levels for each county
+county_immunity <- list()
+
+for (county_name in names(utah_counties)) {
+  # Get the age groups for this county
+  county_data <- utah_counties[[county_name]]
+  county_name_short <- gsub(" County", "", county_name)
+  
+  # Get vaccination data for this county
+  vax_data <- county_vax_data[county_vax_data$county == county_name_short, ]
+  
+  # Calculate vaccination rates directly from the data for each school level
+  # These are the actual vaccination rates: vax / pop
+  el_vax_rate <- vax_data$vax[vax_data$level == 1] / vax_data$pop[vax_data$level == 1]
+  middle_vax_rate <- vax_data$vax[vax_data$level == 2] / vax_data$pop[vax_data$level == 2]
+  high_vax_rate <- vax_data$vax[vax_data$level == 3] / vax_data$pop[vax_data$level == 3]
+  pre_k_vax_rate <- el_vax_rate * 0.9  # Assuming pre-K has about 90% of the elementary vaccination rate
+
+  # Calculate immunity by applying vaccine effectiveness
+  # School age: 97% effectiveness (two-dose schedule)
+  # Ages 1-4: 93% effectiveness (single-dose)
+  pre_k_immunity <- pre_k_vax_rate * 0.93
+  el_immunity <- el_vax_rate * 0.97
+  middle_immunity <- middle_vax_rate * 0.97
+  high_immunity <- high_vax_rate * 0.97
+
+  # Get the age groups for this county to determine midpoints for interpolation
+  ages <- age_groups_by_county[[county_name]]
+
+  # Linear interpolation from high school immunity at age 18 to 100% at age 70
+  # Starting point: high school immunity at age 18
+  start_immunity <- high_immunity
+  end_immunity <- 1.0  # Target 100% at age 70
+  start_age <- 18
+  end_age <- 70
+
+  # Calculate midpoint ages for adult groups
+  age_18_25_mid <- (18 + 25) / 2  # 21.5
+  age_25_45_mid <- (25 + 45) / 2  # 35
+  age_45_70_mid <- (45 + 70) / 2  # 57.5
+
+  # Linear interpolation function
+  interpolate_immunity <- function(age, start_age, end_age, start_imm, end_imm) {
+    slope <- (end_imm - start_imm) / (end_age - start_age)
+    return(start_imm + slope * (age - start_age))
+  }
+
+  # Calculate immunity for adult groups
+  immunity_18_25 <- interpolate_immunity(age_18_25_mid, start_age, end_age, start_immunity, end_immunity)
+  immunity_25_45 <- interpolate_immunity(age_25_45_mid, start_age, end_age, start_immunity, end_immunity)
+  immunity_45_70 <- interpolate_immunity(age_45_70_mid, start_age, end_age, start_immunity, end_immunity)
+
+  # Build the age_immunity vector based on the county's age groups
+  # The structure is: [0-1, 1-4/5, elementary, middle, high, 18-25, 25-45, 45-70, 70+]
+  age_immunity <- c(
+    0,                                    # Under 1: no vaccination
+    pre_k_immunity,                       # 1-4: 90% of elementary vax rate, with 93% effectiveness
+    el_immunity,                          # Elementary: from vax data (level 1)
+    middle_immunity,                      # Middle: from vax data (level 2)
+    high_immunity,                        # High: from vax data (level 3)
+    immunity_18_25,                       # 18-24: linearly interpolated from high school
+    immunity_25_45,                       # 25-44: linearly interpolated
+    immunity_45_70,                       # 45-69: linearly interpolated
+    end_immunity                          # 70+: 100% immunity
+  )
+
+  county_immunity[[county_name]] <- age_immunity
+
+  if (verbose) {
+    print(paste("County:", county_name_short))
+    print(paste("  Elementary vax rate:", round(el_vax_rate, 3), "-> immunity:", round(el_immunity, 3)))
+    print(paste("  Middle vax rate:", round(middle_vax_rate, 3), "-> immunity:", round(middle_immunity, 3)))
+    print(paste("  High vax rate:", round(high_vax_rate, 3), "-> immunity:", round(high_immunity, 3)))
+    print("  Age immunity vector:")
+    print(round(age_immunity, 3))
+    print("")
+  }
+}
+```
+
+## R0 Calibration Based on Age Distribution
+
+Before estimating outbreak sizes, we calibrate R0 values for each county based on their specific age distributions and contact patterns. Following the approach from the age distribution R0 analysis, we calculate adjustment factors based on contact matrix eigenvalues.
+
+**Methodology:**
+
+- Create a reference contact matrix using default Polymod survey data
+- Calculate the dominant eigenvalue of each county's contact matrix
+- Compute R0 adjustment factors relative to the reference
+- Apply these factors to obtain county-specific effective R0 values
+
+**Assumptions:**
+
+- Baseline R0 for measles is set at 10
+- Contact patterns are assumed to be similar to those captured in the Polymod survey
+
+```{r R0-calibration}
+# Baseline R0 for measles
+R0_baseline <- 10
+
+# Create reference contact matrix using default Polymod data
+# Using a common age structure for reference
+reference_age_limits <- c(0, 1, 5, 11, 14, 18, 25, 45, 70)
+reference_matrix <- contactMatrixPolymod(reference_age_limits)
+reference_eigenvalue <- eigen(reference_matrix)$values[1]
+
+if (verbose) {
+  print(paste("Reference eigenvalue:", round(Re(reference_eigenvalue), 3)))
+}
+
+# Calculate R0 adjustment factors for each county
+county_R0_factors <- data.frame(
+  county = character(),
+  eigenvalue = numeric(),
+  R0_factor = numeric(),
+  R0_effective = numeric(),
+  stringsAsFactors = FALSE
+)
+
+for (county_name in names(utah_counties)) {
+  county_name_short <- gsub(" County", "", county_name)
+  county_data <- utah_counties[[county_name]]
+  age_limits <- age_groups_by_county[[county_name_short]]
+  popsize <- county_data$age_pops
+
+  # Create county-specific contact matrix
+  county_matrix <- contactMatrixPolymod(age_limits, popsize)
+
+  # Calculate dominant eigenvalue
+  county_eigenvalue <- eigen(county_matrix)$values[1]
+
+  # Calculate R0 adjustment factor
+  R0_factor <- Re(county_eigenvalue) / Re(reference_eigenvalue)
+
+  # Calculate effective R0 for this county
+  R0_effective <- R0_baseline * R0_factor
+
+  county_R0_factors <- rbind(county_R0_factors, data.frame(
+    county = county_name_short,
+    eigenvalue = Re(county_eigenvalue),
+    R0_factor = R0_factor,
+    R0_effective = R0_effective
+  ))
+
+  if (verbose) {
+    print(paste("County:", county_name_short))
+    print(paste("  Eigenvalue:", round(Re(county_eigenvalue), 3)))
+    print(paste("  R0 factor:", round(R0_factor, 3)))
+    print(paste("  Effective R0:", round(R0_effective, 2)))
+  }
+}
+
+# Summary of R0 calibration
+print("R0 Calibration Summary:")
+print(paste("Baseline R0:", R0_baseline))
+print(paste("Mean R0 factor:", round(mean(county_R0_factors$R0_factor), 3)))
+print(paste("Range of R0 factors:", round(min(county_R0_factors$R0_factor), 3), 
+            "to", round(max(county_R0_factors$R0_factor), 3)))
+print(paste("Range of effective R0:", round(min(county_R0_factors$R0_effective), 2),
+            "to", round(max(county_R0_factors$R0_effective), 2)))
+```
+
+```{r visualize-R0-calibration}
+# Histogram of R0 factors
+ggplot(county_R0_factors, aes(x = R0_factor)) +
+  geom_histogram(bins = 20, fill = "steelblue", alpha = 0.7) +
+  geom_vline(xintercept = 1, linetype = "dashed", color = "red") +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  labs(
+    title = "Distribution of R0 Adjustment Factors by County",
+    subtitle = "Factors > 1 indicate age distributions more favorable to transmission",
+    x = "R0 Adjustment Factor",
+    y = "Number of Counties"
+  ) +
+  theme_minimal()
+
+# Effective R0 by county
+ggplot(county_R0_factors, aes(x = reorder(county, R0_effective), y = R0_effective)) +
+  geom_point(size = 3, alpha = 0.7, color = "darkblue") +
+  geom_hline(yintercept = R0_baseline, linetype = "dashed", color = "red", 
+             alpha = 0.5) +
+  coord_flip() +
+  labs(
+    title = "Effective R0 by County (Age-Adjusted)",
+    subtitle = paste0("Based on baseline R0 = ", R0_baseline, " (red line)"),
+    x = "County",
+    y = "Effective R0"
+  ) +
+  theme_minimal() +
+  theme(axis.text.y = element_text(size = 7))
+```
+
+### Sensitivity to Baseline R0
+
+Changing the baseline R0 assumption will affect the effective R0 values for each county.
+
+To understand this sensitivity, we can test a range of baseline R0 values from 6 to 16.
+```{r R0-sensitivity-analysis}
+# Test range of baseline R0 values
+R0_baseline_range <- seq(6, 16, by = 1)
+
+# Create data frame to store results across all baselines and counties
+R0_sensitivity_data <- data.frame()
+
+for (R0_test in R0_baseline_range) {
+  for (i in 1:nrow(county_R0_factors)) {
+    county_name <- county_R0_factors$county[i]
+    R0_factor <- county_R0_factors$R0_factor[i]
+    R0_eff <- R0_test * R0_factor
+
+    # Calculate herd immunity threshold for this effective R0
+    # TODO: update to use vaxrepnum rather than naive calculation
+    HIT <- 1 - (1 / R0_eff)
+
+    R0_sensitivity_data <- rbind(R0_sensitivity_data, data.frame(
+      baseline_R0 = R0_test,
+      county = county_name,
+      R0_factor = R0_factor,
+      effective_R0 = R0_eff,
+      herd_immunity_threshold = HIT
+    ))
+  }
+}
+
+# Summary statistics by baseline R0
+sensitivity_summary <- R0_sensitivity_data %>%
+  group_by(baseline_R0) %>%
+  summarise(
+    min_effective_R0 = min(effective_R0),
+    mean_effective_R0 = mean(effective_R0),
+    max_effective_R0 = max(effective_R0),
+    mean_HIT = mean(herd_immunity_threshold)
+  )
+
+print("Sensitivity Analysis Summary:")
+print(sensitivity_summary)
+```
+
+```{r visualize-R0-sensitivity}
+# Heatmap: Effective R0 by county and baseline
+ggplot(R0_sensitivity_data, aes(x = baseline_R0, y = reorder(county, effective_R0), fill = effective_R0)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", mid = "yellow", high = "red", 
+                       midpoint = 10, name = "Effective R0") +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_discrete(expand = c(0, 0)) +
+  labs(
+    title = "Effective R0 Heatmap: County vs Baseline R0",
+    subtitle = "Shows how age-adjusted R0 varies with baseline assumptions",
+    x = "Baseline R0",
+    y = "County"
+  ) +
+  theme_minimal() +
+  theme(axis.text.y = element_text(size = 6))
+
+# Line plot: Effective R0 trajectories for each county
+ggplot(R0_sensitivity_data, aes(x = baseline_R0, y = effective_R0, group = county)) +
+  geom_line(alpha = 0.3, color = "steelblue") +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red", linewidth = 1) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0.02, 0)) +
+  labs(
+    title = "Effective R0 Across Baseline Values",
+    subtitle = "Individual counties (blue) vs 1:1 ratio (red dashed line)",
+    x = "Baseline R0",
+    y = "Effective R0"
+  ) +
+  theme_minimal()
+
+# Heatmap: Herd immunity threshold by county and baseline
+ggplot(R0_sensitivity_data, aes(x = baseline_R0, y = reorder(county, herd_immunity_threshold), 
+                                 fill = herd_immunity_threshold * 100)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "green", mid = "yellow", high = "red", 
+                       midpoint = 90, name = "HIT (%)") +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_discrete(expand = c(0, 0)) +
+  labs(
+    title = "Herd Immunity Threshold Heatmap: County vs Baseline R0",
+    subtitle = "Critical vaccination coverage needed varies by age structure",
+    x = "Baseline R0",
+    y = "County"
+  ) +
+  theme_minimal() +
+  theme(axis.text.y = element_text(size = 6))
+
+# Violin plot: Distribution of effective R0 at each baseline (raincloud style)
+# One-sided KDE with jittered points inside and boxplot, all aligned on same axis
+library(ggdist)
+
+R0_sensitivity_data$baseline_R0_factor <- factor(R0_sensitivity_data$baseline_R0)
+
+ggplot(R0_sensitivity_data, aes(y = baseline_R0_factor, x = effective_R0)) +
+  # right side KDE
+  stat_halfeye(aes(group = baseline_R0_factor),
+               side = "right",
+               fill = "steelblue", alpha = 0.5,
+               .width = 0, point_interval = NULL,
+               scale = 0.8) +
+  # Boxplot - left side
+  geom_boxplot(aes(group = baseline_R0_factor),
+               width = 0.2, outlier.shape = NA, alpha = 0.7, fill = "gray80") +
+  # Jittered points - centered on the axis with slight vertical jitter for visibility
+  geom_jitter(aes(group = baseline_R0_factor),
+              width = 0, height = 0.1, alpha = 0.4, size = 1.5, color = "darkblue") +
+  labs(
+    title = "Distribution of Effective R0 Across Counties",
+    subtitle = "Boxplot (left), individual counties (center), and KDE (right) aligned on discrete baseline R0",
+    y = "Baseline R0",
+    x = "Effective R0"
+  ) +
+  theme_minimal()
+```
+
+## Outbreak size estimation for every county
+
+Now we use the `finalsize()` function to estimate outbreak size for each county, using:
+- Age-specific population sizes and immunity levels
+- County-specific calibrated R0 values adjusted for age distribution (assumes baseline R0 of 10)
+
+**Note:** Hybrid model would provide a better method for risk determination
+TODO: convert to hybrid model
+
+```{r outbreak-estimation}
+# Store results for all counties
+outbreak_results <- data.frame(
+  county = character(),
+  total_outbreak_size = numeric(),
+  population = numeric(),
+  susceptible_population = numeric(),
+  R0_effective = numeric(),
+  herd_immunity_threshold = numeric(),
+  stringsAsFactors = FALSE
+)
+
+# Store age-specific results
+outbreak_by_age <- list()
+
+# Transmission parameters
+relsusc <- NULL  # Will be set based on number of age groups per county
+reltransm <- NULL  # Will be set based on number of age groups per county
+
+for (county_name in names(utah_counties)) {
+  county_data <- utah_counties[[county_name]]
+  county_name_short <- gsub(" County", "", county_name)
+
+  if (verbose) {
+    print(paste("Processing outbreak estimation for:", county_name_short))
+  }
+
+  # Get population and immunity data
+  popsize <- county_data$age_pops
+  age_immunity <- county_immunity[[county_name]]
+  age_limits <- age_groups_by_county[[county_name_short]]
+
+  # Get county-specific calibrated R0
+  R0_effective <- county_R0_factors$R0_effective[county_R0_factors$county == county_name_short]
+
+  if (verbose) {
+    print(paste("  Age limits length:", length(age_limits)))
+    print(paste("  Population size length:", length(popsize)))
+    print(paste("  Age immunity length:", length(age_immunity)))
+    print(paste("  Effective R0:", round(R0_effective, 2)))
+  }
+
+  # Initial conditions
+  initV <- round(age_immunity * popsize)  # initially immune individuals
+  initI <- rep(0, length(popsize))        # initial infectious cases
+  initI[6] <- 1                           # assume 1 initial case in 6th age group (young adults)
+  initR <- rep(0, length(popsize))        # no recent prior outbreaks
+
+  # Set up transmission parameters
+  relsusc <- rep(1, length(popsize))      # no age differences in susceptibility
+  reltransm <- rep(1, length(popsize))    # or transmissibility per contact
+
+  # Create contact matrix using Polymod data
+  contactmatrix <- contactMatrixPolymod(age_limits, popsize)
+
+  # Run finalsize model with calibrated R0
+  fs <- finalsize(popsize, R0_effective, contactmatrix, relsusc, reltransm, initR, initI, initV)
+
+  # Store results
+  total_cases <- sum(fs)
+  total_pop <- sum(popsize)
+  susceptible_pop <- total_pop - sum(initV)
+
+  # Calculate herd immunity threshold: proportion that needs to be immune = 1 - 1/R0
+  # TODO: update to use vaxrepnum rather than naive calculation
+  herd_immunity_threshold <- 1 - (1 / R0_effective)
+
+  outbreak_results <- rbind(outbreak_results, data.frame(
+    county = county_name_short,
+    total_outbreak_size = total_cases,
+    population = total_pop,
+    susceptible_population = susceptible_pop,
+    R0_effective = R0_effective,
+    herd_immunity_threshold = herd_immunity_threshold
+  ))
+
+  # Store age-specific results
+  age_specific_df <- data.frame(
+    age_group = county_data$age_labels,
+    cases = fs,
+    population = popsize,
+    susceptible = popsize - initV[1:length(popsize)]
+  )
+  outbreak_by_age[[county_name_short]] <- age_specific_df
+
+  if (verbose) {
+    print(paste("  Total outbreak size:", round(total_cases)))
+    print(paste("  Susceptible population:", round(susceptible_pop)))
+    print(paste("  Herd immunity threshold:", round(herd_immunity_threshold * 100, 1), "%"))
+  }
+}
+
+# Sort by outbreak size
+outbreak_results <- outbreak_results[order(-outbreak_results$total_outbreak_size), ]
+
+if (verbose) {
+  print("Outbreak estimation complete for all counties")
+  print(head(outbreak_results))
+}
+```
+
+```{r visualize-outbreak-results}
+# Calculate actual immunity coverage and compare to threshold
+outbreak_results$actual_immunity <- 1 - (outbreak_results$susceptible_population / outbreak_results$population)
+outbreak_results$immunity_gap <- outbreak_results$herd_immunity_threshold - outbreak_results$actual_immunity
+outbreak_results$final_size_percent <- (outbreak_results$total_outbreak_size / outbreak_results$population) * 100
+
+# Bar chart: Total outbreak size by county (absolute cases)
+ggplot(outbreak_results, aes(x = reorder(county, total_outbreak_size), y = total_outbreak_size)) +
+  geom_bar(stat = "identity", fill = "coral") +
+  coord_flip() +
+  scale_y_continuous(labels = scales::comma) +
+  labs(
+    title = "Estimated Final Epidemic Size by Utah County",
+    subtitle = "Using age-distribution calibrated R0 and one initial case in young adults",
+    x = "County",
+    y = "Final Epidemic Size (total cases)"
+  ) +
+  theme_minimal() +
+  theme(axis.text.y = element_text(size = 8))
+
+# Bar chart: Final epidemic size as percentage of population
+ggplot(outbreak_results, aes(x = reorder(county, final_size_percent), y = final_size_percent)) +
+  geom_bar(stat = "identity", fill = "darkred", alpha = 0.7) +
+  coord_flip() +
+  labs(
+    title = "Final Epidemic Size by Utah County (Percentage)",
+    subtitle = "Cumulative proportion infected by end of epidemic",
+    x = "County",
+    y = "Final Epidemic Size (% of population)"
+  ) +
+  theme_minimal() +
+  theme(axis.text.y = element_text(size = 8))
+
+# Create summary statistics
+summary_stats <- data.frame(
+  Statistic = c(
+    "Baseline R0",
+    "Mean Effective R0",
+    "Mean Herd Immunity Threshold (%)",
+    "Mean Actual Immunity (%)", 
+    "Median Actual Immunity (%)",
+    "Counties Below Threshold",
+    "Mean Final Epidemic Size (%)",
+    "Median Final Epidemic Size (%)",
+    "Total Cases (all counties)", 
+    "Total Population (all counties)",
+    "Total Susceptible (all counties)"
+  ),
+  Value = c(
+    R0_baseline,
+    round(mean(outbreak_results$R0_effective), 2),
+    round(mean(outbreak_results$herd_immunity_threshold) * 100, 2),
+    round(mean(outbreak_results$actual_immunity) * 100, 2),
+    round(median(outbreak_results$actual_immunity) * 100, 2),
+    sum(outbreak_results$immunity_gap > 0),
+    round(mean(outbreak_results$final_size_percent), 2),
+    round(median(outbreak_results$final_size_percent), 2),
+    round(sum(outbreak_results$total_outbreak_size)),
+    sum(outbreak_results$population),
+    round(sum(outbreak_results$susceptible_population))
+  )
+)
+
+print("Summary Statistics:")
+print(summary_stats)
 ```
