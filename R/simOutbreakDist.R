@@ -5,8 +5,9 @@ simOutbreakDist <- function(n, transmrates, recoveryrate, popsize, initR, initI,
   initS <- popsize - initR - initV
   nI <- sum(initI)
   Rtally <- matrix(0, n, g)
-  ind <- 1
+  ind <- stateind <- 1
   tsim <- gsim <- rep(NA, n * nI * 10)
+  statesim <- matrix(NA, n * nI * 10, g * 3 + 2)
   gsimInit <- rep(which(initI > 0), initI[initI > 0])
   for (r in 1:n) {
     I <- initI
@@ -20,6 +21,12 @@ simOutbreakDist <- function(n, transmrates, recoveryrate, popsize, initR, initI,
     tsim[ind:(ind + nI - 1)] <- 0
     gsim[ind:(ind + nI - 1)] <- gsimInit
     ind <- ind + nI
+
+    if(stateind > nrow(statesim)){
+      statesim <- rbind(statesim, matrix(NA, nrow(statesim), g * 3 + 2))
+    }
+    statesim[stateind, ] <- c(r, tm, S, I, R)
+    stateind <- stateind + 1
 
     while (sum(I) > 0) {
       tr <- rowSums(outer(S, I) * betaoverNj)
@@ -43,6 +50,11 @@ simOutbreakDist <- function(n, transmrates, recoveryrate, popsize, initR, initI,
           length(tsim) <- length(gsim) <- length(tsim) * 2
         }
       }
+      if(stateind > nrow(statesim)){
+        statesim <- rbind(statesim, matrix(NA, nrow(statesim), g * 3 + 2))
+      }
+      statesim[stateind, ] <- c(r, tm, S, I, R)
+      stateind <- stateind + 1
     }
     Rtally[r, ] <- R
   }
@@ -51,5 +63,8 @@ simOutbreakDist <- function(n, transmrates, recoveryrate, popsize, initR, initI,
   y <- tsim[!is.na(tsim)]
   z <- gsim[!is.na(tsim)]
 
-  list(total = Rtally, inftime = cbind(sim = x, inftime = y, group = z))
+  statesim <- statesim[complete.cases(statesim), ]
+  colnames(statesim) <- c("sim", "time", paste0("S", 1:g), paste0("I", 1:g), paste0("R", 1:g))
+
+  list(total = Rtally, inftime = cbind(sim = x, inftime = y, group = z), statesim = statesim)
 }
