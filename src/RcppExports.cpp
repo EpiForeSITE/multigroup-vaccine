@@ -10,23 +10,22 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// sir_ssa_cpp
-List sir_ssa_cpp(NumericVector state, NumericVector beta, double gamma, double tmax);
-RcppExport SEXP _multigroup_vaccine_sir_ssa_cpp(SEXP stateSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP tmaxSEXP) {
+// sir_finalsize_cpp
+NumericVector sir_finalsize_cpp(NumericVector init, NumericVector beta, double gamma);
+RcppExport SEXP _multigroup_vaccine_sir_finalsize_cpp(SEXP initSEXP, SEXP betaSEXP, SEXP gammaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type state(stateSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type init(initSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type beta(betaSEXP);
     Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP);
-    Rcpp::traits::input_parameter< double >::type tmax(tmaxSEXP);
-    rcpp_result_gen = Rcpp::wrap(sir_ssa_cpp(state, beta, gamma, tmax));
+    rcpp_result_gen = Rcpp::wrap(sir_finalsize_cpp(init, beta, gamma));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_multigroup_vaccine_sir_ssa_cpp", (DL_FUNC) &_multigroup_vaccine_sir_ssa_cpp, 4},
+    {"_multigroup_vaccine_sir_finalsize_cpp", (DL_FUNC) &_multigroup_vaccine_sir_finalsize_cpp, 3},
     {NULL, NULL, 0}
 };
 
