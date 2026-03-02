@@ -5,7 +5,15 @@
 \title{Calculate time trajectory of solution to a Susceptible-Infectious-Removed (SIR) system by
 numerically solving the multi-group ordinary differential equations}
 \usage{
-simodeSIR(transmrates, recoveryrate, popsize, initR, initI, initV, times = NA)
+simodeSIR(
+  transmrates,
+  recoveryrate,
+  popsize,
+  initR,
+  initI,
+  initV,
+  times = NULL
+)
 }
 \arguments{
 \item{transmrates}{matrix of group-to-group (column-to-row) transmission rates}
@@ -20,9 +28,9 @@ simodeSIR(transmrates, recoveryrate, popsize, initR, initI, initV, times = NA)
 
 \item{initV}{initial number of each group vaccinated}
 
-\item{times}{optional argument for times at which the solution is to be calculated; if NA (the
-default) the solution will be computed up to the time at which the total number of infectious
-individuals is sufficiently close to zero (outbreak extinction)}
+\item{times}{optional argument for times at which the solution is to be calculated; if NULL
+(the default) the solution will be computed up to the time at which the total number of
+infectious individuals is sufficiently close to zero (outbreak extinction)}
 }
 \value{
 vector of final sizes (number of infected over whole outbreak) for each group
@@ -34,4 +42,6 @@ numerically solving the multi-group ordinary differential equations
 \examples{
 simodeSIR(transmrates = matrix(0.2, 2 ,2), recoveryrate = 0.3,
 popsize = c(100, 150), initR = c(0, 0), initI = c(0, 1), initV = c(10, 10))
+simodeSIR(transmrates = matrix(0.2, 2 ,2), recoveryrate = 0.3,
+popsize = c(100, 150), initR = c(0, 0), initI = c(0, 1), initV = c(10, 10), times = 0:10)
 }
