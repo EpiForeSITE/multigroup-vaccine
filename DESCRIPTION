@@ -23,6 +23,7 @@ Description: Model infectious disease dynamics in populations
 License: MIT + file LICENSE
 Encoding: UTF-8
 RoxygenNote: 7.3.3
+LinkingTo: Rcpp
 Imports:
     deSolve,
     graphics,
@@ -30,7 +31,8 @@ Imports:
     stats,
     bslib (>= 0.9.0),
     htmltools,
-    socialmixr
+    socialmixr,
+    Rcpp
 Suggests:
     knitr,
     rmarkdown,

@@ -13,3 +13,6 @@ docs
 *.tar.gz*
 /doc/
 /Meta/
+src/*.o
+src/*.so
+src/*.dll
