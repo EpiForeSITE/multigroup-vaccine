@@ -14,29 +14,18 @@
 getFinalSizeDist <- function(n, transmrates, recoveryrate, popsize, initR, initI, initV) {
   g <- length(popsize) # number of groups
   e <- g * 2           # number of distinct events
-  betaoverNj <- t(t(transmrates) / popsize)
+  betaoverNj <- c(t(t(transmrates) / popsize))
   initS <- popsize - initR - initV
+  init <- c(initS, initI, initR)
+  names(init) <- c(paste0("S", seq_len(g)), paste0("I", seq_len(g)), paste0("R", seq_len(g)))
   Rtally <- matrix(0, n, g)
   for (r in 1:n) {
-    I <- initI
-    S <- initS
-    R <- initR
-
-    while (sum(I) > 0) {
-      tr <- rowSums(outer(S, I) * betaoverNj)
-      rr <- I * recoveryrate
-
-      event <- sample(e, 1, prob = c(tr, rr))
-
-      if (event > g) {
-        I[event - g] <- I[event - g] - 1
-        R[event - g] <- R[event - g] + 1
-      } else {
-        S[event] <- S[event] - 1
-        I[event] <- I[event] + 1
-      }
-    }
-    Rtally[r, ] <- R
+    fs <- sir_finalsize_cpp(init, betaoverNj, recoveryrate)
+    Rtally[r, ] <- fs[(2*g+1):(3*g)]
   }
   Rtally
 }
+
+#' @useDynLib multigroup.vaccine, .registration = TRUE
+#' @importFrom Rcpp evalCpp
+NULL
