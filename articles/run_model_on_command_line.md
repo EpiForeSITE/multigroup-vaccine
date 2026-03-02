@@ -147,16 +147,16 @@ method, especially for models with a large number of groups.
 finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV, method = "stochastic",
           nsims = 10)
 #>        [,1] [,2]
-#>  [1,]     0    1
-#>  [2,]     0    4
-#>  [3,]     5    1
-#>  [4,]     0    1
+#>  [1,] 14440 9015
+#>  [2,]     0    1
+#>  [3,] 14509 8900
+#>  [4,] 14005 8509
 #>  [5,]     0    1
-#>  [6,]     2    2
-#>  [7,]     0    4
-#>  [8,] 13457 8518
-#>  [9,]     0    1
-#> [10,]     0    2
+#>  [6,] 13805 8591
+#>  [7,]     0    1
+#>  [8,] 13846 8710
+#>  [9,]     8    5
+#> [10,]     0    1
 ```
 
 Each row of the output has the results of one of the stochastic
@@ -183,14 +183,14 @@ above.
 finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV, method = "hybrid",
           nsims = 10)
 #>        [,1] [,2]
-#>  [1,]     3    1
+#>  [1,]     0    1
 #>  [2,]     1    1
-#>  [3,]     3    5
+#>  [3,] 14140 8750
 #>  [4,]     0    1
-#>  [5,] 14140 8750
-#>  [6,]     1    1
+#>  [5,]     3    2
+#>  [6,] 14140 8750
 #>  [7,]     0    1
-#>  [8,]     5    4
-#>  [9,]     0    1
+#>  [8,]     2    3
+#>  [9,] 14140 8750
 #> [10,]     0    1
 ```

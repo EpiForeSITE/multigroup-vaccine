@@ -91,28 +91,28 @@ method = "analytic")
 finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
 method = "stochastic", nsims = 10)
 #>       [,1] [,2]
-#>  [1,]  424  114
-#>  [2,]  402   98
-#>  [3,]    1    0
-#>  [4,]    1    0
-#>  [5,]    1    0
-#>  [6,]    1    0
-#>  [7,]    1    0
-#>  [8,]    2    1
-#>  [9,]    6    0
-#> [10,]    1    0
+#>  [1,]  396  100
+#>  [2,]    1    0
+#>  [3,]  416  100
+#>  [4,]  416  103
+#>  [5,]  428  115
+#>  [6,]    2    1
+#>  [7,]  402   96
+#>  [8,]  415  105
+#>  [9,]  393  108
+#> [10,]   13    2
 # All "escaped" outbreaks set to deterministic final size:
 finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
 method = "hybrid", nsims = 10)
 #>       [,1] [,2]
-#>  [1,]  412  103
-#>  [2,]  412  103
+#>  [1,]    4    2
+#>  [2,]    1    0
 #>  [3,]  412  103
 #>  [4,]  412  103
 #>  [5,]    1    0
-#>  [6,]    4    1
-#>  [7,]  412  103
+#>  [6,]  412  103
+#>  [7,]   19    2
 #>  [8,]    1    0
-#>  [9,]  412  103
-#> [10,]  412  103
+#>  [9,]    1    0
+#> [10,]    1    0
 ```
