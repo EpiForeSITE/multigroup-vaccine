@@ -11,7 +11,7 @@ test_that("simodeSIR returns correct dimensions", {
 
   # Should return matrix of the correct dimensions
   expect_equal(nrow(result), length(times))
-  expect_equal(ncol(result), length(popsize) * 3)
+  expect_equal(ncol(result), 1 + length(popsize) * 3)
 
   # Sum of all compartments should match the non-vaccinated population total
   expect_all_equal(rowSums(result[, -1]), sum(popsize) - sum(initV))
