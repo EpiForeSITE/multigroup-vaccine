@@ -15,7 +15,8 @@ finalsize(
   initI,
   initV,
   method = "ODE",
-  nsims = 1
+  nsims = 1,
+  nthreads = 1
 )
 }
 \arguments{
@@ -38,6 +39,11 @@ finalsize(
 \item{method}{the method of final size calculation or simulation to use}
 
 \item{nsims}{the number of simulations to run for stochastic methods}
+
+\item{nthreads}{the number of threads (parallel workers) to use for stochastic/hybrid methods.
+Defaults to 1 (single-threaded). Set to 0 or -1 to automatically use all available cores.
+Uses a PSOCK cluster via \code{\link[parallel]{makeCluster}} and
+\code{\link[parallel]{parLapply}}, which works on all platforms including Windows.}
 }
 \value{
 a vector (nsims = 1) or matrix (nsims > 1) with the final number infected from each group (column) in each simulation (row)
@@ -66,4 +72,10 @@ method = "stochastic", nsims = 10)
 # All "escaped" outbreaks set to deterministic final size:
 finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
 method = "hybrid", nsims = 10)
+# Parallel stochastic simulations using 4 threads:
+finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
+method = "stochastic", nsims = 100, nthreads = 4)
+# Use all available cores:
+finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
+method = "hybrid", nsims = 100, nthreads = -1)
 }
