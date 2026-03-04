@@ -11,9 +11,9 @@
 #' @param method the method of final size calculation or simulation to use
 #' @param nsims the number of simulations to run for stochastic methods
 #' @param nthreads the number of threads (parallel workers) to use for stochastic/hybrid methods.
-#' Defaults to 1 (single-threaded). Set to -1 to use all available cores. Uses
-#' \code{\link[parallel]{mclapply}} to fork workers, which parallelizes on macOS/Linux but falls
-#' back to sequential execution on Windows.
+#' Defaults to 1 (single-threaded). Set to 0 or -1 to automatically use all available cores.
+#' Uses a PSOCK cluster via \code{\link[parallel]{makeCluster}} and
+#' \code{\link[parallel]{parLapply}}, which works on all platforms including Windows.
 #' @returns a vector (nsims = 1) or matrix (nsims > 1) with the final number infected from each group (column) in each simulation (row)
 #' @examples
 #' popsize <- c(800, 200)
@@ -57,8 +57,8 @@ finalsize <- function(popsize, R0, contactmatrix, relsusc, reltransm, initR, ini
     return(getFinalSizeAnalytic(transmmatrix, recoveryrate, popsize, initR, initI, initV))
   }
 
-  # Resolve number of parallel workers
-  if(nthreads == -1){
+  # Resolve number of parallel workers (0 or negative => auto-detect)
+  if(nthreads <= 0){
     nthreads <- parallel::detectCores()
   }
   nthreads <- max(1L, min(as.integer(nthreads), nsims))
@@ -77,12 +77,19 @@ finalsize <- function(popsize, R0, contactmatrix, relsusc, reltransm, initR, ini
     return(sim_fun(nsims, transmmatrix, recoveryrate, popsize, initR, initI, initV))
   }
 
-  # Parallel path: batch simulations evenly across workers
+  # Parallel path: batch simulations evenly across workers (cross-platform PSOCK cluster)
   batch_sizes <- diff(round(seq(0, nsims, length.out = nthreads + 1)))
 
-  results <- parallel::mclapply(batch_sizes, function(batch_n) {
+  cl <- parallel::makeCluster(nthreads)
+  on.exit(parallel::stopCluster(cl), add = TRUE)
+  parallel::clusterExport(cl,
+    varlist = c("sim_fun", "transmmatrix", "recoveryrate", "popsize", "initR", "initI", "initV"),
+    envir = environment())
+  parallel::clusterEvalQ(cl, library(multigroup.vaccine))
+
+  results <- parallel::parLapply(cl, batch_sizes, function(batch_n) {
     sim_fun(batch_n, transmmatrix, recoveryrate, popsize, initR, initI, initV)
-  }, mc.cores = nthreads)
+  })
 
   do.call(rbind, results)
 }
