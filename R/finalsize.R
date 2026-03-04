@@ -10,6 +10,10 @@
 #' @param initV initial number of each group vaccinated
 #' @param method the method of final size calculation or simulation to use
 #' @param nsims the number of simulations to run for stochastic methods
+#' @param nthreads the number of threads (parallel workers) to use for stochastic/hybrid methods.
+#' Defaults to 1 (single-threaded). Set to -1 to use all available cores. Uses
+#' \code{\link[parallel]{mclapply}} to fork workers, which parallelizes on macOS/Linux but falls
+#' back to sequential execution on Windows.
 #' @returns a vector (nsims = 1) or matrix (nsims > 1) with the final number infected from each group (column) in each simulation (row)
 #' @examples
 #' popsize <- c(800, 200)
@@ -31,8 +35,14 @@
 #' # All "escaped" outbreaks set to deterministic final size:
 #' finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
 #' method = "hybrid", nsims = 10)
+#' # Parallel stochastic simulations using 4 threads:
+#' finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
+#' method = "stochastic", nsims = 100, nthreads = 4)
+#' # Use all available cores:
+#' finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
+#' method = "hybrid", nsims = 100, nthreads = -1)
 #' @export
-finalsize <- function(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV, method = "ODE", nsims = 1) {
+finalsize <- function(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV, method = "ODE", nsims = 1, nthreads = 1) {
 
   #Use generic recovery rate; final size is independent of recovery rate when R0 is specified
   recoveryrate <- 1
@@ -47,13 +57,32 @@ finalsize <- function(popsize, R0, contactmatrix, relsusc, reltransm, initR, ini
     return(getFinalSizeAnalytic(transmmatrix, recoveryrate, popsize, initR, initI, initV))
   }
 
+  # Resolve number of parallel workers
+  if(nthreads == -1){
+    nthreads <- parallel::detectCores()
+  }
+  nthreads <- max(1L, min(as.integer(nthreads), nsims))
+
+  # Select the simulation function
   if(method == "stochastic"){
-    return(getFinalSizeDist(nsims, transmmatrix, recoveryrate, popsize, initR, initI, initV))
+    sim_fun <- getFinalSizeDist
+  } else if(method == "hybrid"){
+    sim_fun <- getFinalSizeDistEscape
+  } else {
+    stop("Unknown method")
   }
 
-  if(method == "hybrid"){
-    return(getFinalSizeDistEscape(nsims, transmmatrix, recoveryrate, popsize, initR, initI, initV))
+  # Single-threaded path: call directly
+  if(nthreads <= 1L){
+    return(sim_fun(nsims, transmmatrix, recoveryrate, popsize, initR, initI, initV))
   }
 
-  stop("Unknown method")
+  # Parallel path: batch simulations evenly across workers
+  batch_sizes <- diff(round(seq(0, nsims, length.out = nthreads + 1)))
+
+  results <- parallel::mclapply(batch_sizes, function(batch_n) {
+    sim_fun(batch_n, transmmatrix, recoveryrate, popsize, initR, initI, initV)
+  }, mc.cores = nthreads)
+
+  do.call(rbind, results)
 }
