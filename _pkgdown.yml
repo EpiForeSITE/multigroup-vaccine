@@ -9,6 +9,7 @@ articles:
   - contact_matrix_examples
   - measles_agemodel
   - run_model_on_command_line
+  - stochastic_parallel_benchmark
 - title: Experiments/Research
   contents:
   - experiments/age_dist_R0

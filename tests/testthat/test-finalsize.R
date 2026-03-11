@@ -1,5 +1,20 @@
 library(multigroup.vaccine)
 
+make_finalsize_test_inputs <- function() {
+  popsize <- c(120, 80)
+
+  list(
+    popsize = popsize,
+    R0 = 1.8,
+    contactmatrix = contactMatrixPropPref(popsize, c(1, 1.2), c(0.4, 0.5)),
+    relsusc = c(1, 0.9),
+    reltransm = c(1, 1.1),
+    initR = c(0, 0),
+    initI = c(2, 1),
+    initV = c(12, 8)
+  )
+}
+
 test_that("deterministic final size calculations agree: 2 groups, vax at time 0", {
   vacPortion <- c(0.1, 0.1)
   popsize <- c(80000, 20000)
@@ -305,4 +320,116 @@ test_that("getFinalSizeAnalytic with entire population initially infected", {
   # Final size should equal initial recovered plus initial infected
   # what is happening to initV
   expect_equal(result, initR + 1)
+})
+
+test_that("finalsize stochastic simulations are reproducible across thread counts", {
+  args <- make_finalsize_test_inputs()
+
+  set.seed(12345)
+  single_thread <- do.call(
+    finalsize,
+    c(args, list(method = "stochastic", nsims = 6, nthreads = 1))
+  )
+
+  set.seed(12345)
+  multi_thread <- do.call(
+    finalsize,
+    c(args, list(method = "stochastic", nsims = 6, nthreads = 2))
+  )
+
+  expect_equal(single_thread, multi_thread)
+  expect_equal(dim(multi_thread), c(6, length(args$popsize)))
+})
+
+test_that("finalsize hybrid simulations continue to use getFinalSizeDistEscape", {
+  args <- make_finalsize_test_inputs()
+
+  set.seed(54321)
+  from_finalsize <- do.call(
+    finalsize,
+    c(args, list(method = "hybrid", nsims = 5, nthreads = 2))
+  )
+
+  set.seed(54321)
+  from_helper <- getFinalSizeDistEscape(
+    n = 5,
+    transmrates = transmissionRates(
+      args$R0,
+      1,
+      args$relsusc * t(args$reltransm * t(args$contactmatrix))
+    ),
+    recoveryrate = 1,
+    popsize = args$popsize,
+    initR = args$initR,
+    initI = args$initI,
+    initV = args$initV
+  )
+
+  expect_equal(from_finalsize, from_helper)
+  expect_equal(dim(from_finalsize), c(5, length(args$popsize)))
+})
+
+test_that("finalsize accepts auto-detect sentinel values for nthreads", {
+  args <- make_finalsize_test_inputs()
+
+  set.seed(24680)
+  auto_zero <- do.call(
+    finalsize,
+    c(args, list(method = "stochastic", nsims = 4, nthreads = 0))
+  )
+
+  set.seed(24680)
+  auto_minus_one <- do.call(
+    finalsize,
+    c(args, list(method = "stochastic", nsims = 4, nthreads = -1))
+  )
+
+  expect_equal(auto_zero, auto_minus_one)
+  expect_equal(dim(auto_zero), c(4, length(args$popsize)))
+})
+
+test_that("finalsize validates nsims, nthreads, and cluster inputs", {
+  args <- make_finalsize_test_inputs()
+
+  expect_error(
+    do.call(finalsize, c(args, list(method = "stochastic", nsims = 0))),
+    "nsims must be a single positive integer"
+  )
+
+  expect_error(
+    do.call(finalsize, c(args, list(method = "stochastic", nsims = 4, nthreads = 2.5))),
+    "nthreads must be a positive integer, or 0/-1 to auto-detect available cores"
+  )
+
+  expect_error(
+    do.call(finalsize, c(args, list(method = "stochastic", nsims = 4, nthreads = -5))),
+    "nthreads must be a positive integer, or 0/-1 to auto-detect available cores"
+  )
+
+  expect_error(
+    do.call(finalsize, c(args, list(method = "stochastic", nsims = 4, nthreads = NA_real_))),
+    "nthreads must be a single, non-NA numeric value"
+  )
+
+  expect_error(
+    do.call(finalsize, c(args, list(method = "stochastic", nsims = 4, cluster = 1))),
+    "cluster must inherit from 'cluster'"
+  )
+})
+
+test_that("finalsize falls back to one thread when core detection is unavailable", {
+  args <- make_finalsize_test_inputs()
+
+  testthat::local_mocked_bindings(
+    detectCores = function(...) NA_integer_,
+    .package = "parallel"
+  )
+
+  set.seed(11223)
+  result <- do.call(
+    finalsize,
+    c(args, list(method = "stochastic", nsims = 3, nthreads = 0))
+  )
+
+  expect_equal(dim(result), c(3, length(args$popsize)))
 })
