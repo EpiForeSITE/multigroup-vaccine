@@ -1,6 +1,6 @@
 ---
 title: "Benchmarking Sequential and Parallel Stochastic Final Size Simulations"
-output: rmarkdown::html_vignette
+output: rmarkdown::md_document
 vignette: >
   %\VignetteIndexEntry{Benchmarking Sequential and Parallel Stochastic Final Size Simulations}
   %\VignetteEngine{knitr::rmarkdown}
@@ -27,6 +27,31 @@ changes that threshold.
 The hybrid method is intentionally excluded here because `finalsize(method =
 "hybrid")` still delegates to `getFinalSizeDistEscape()` without the new
 parallel path.
+
+## Hardware
+This benchmark is design to run on a variety of machines.
+
+The results shown here were generated on a 2019 Macbook Pro with 2.4 GHz 8-Core Intel Core i9 and 32gb 2400hz DDR4 RAM, running MacOS Sequia 15.7.2.
+
+To generate benchmark results on your own machine, run the code in this vignette and compare the crossover points to those reported here. The exact crossover points will depend on the hardware and software environment, but the general patterns should be similar.
+
+Set the `maxiumum_threads` variable in the code below to adjust the maximum thread count tested based on your machine's capabilities.
+
+```{r hardware}
+detected_threads <- parallel::detectCores()
+if (is.na(detected_threads)) {
+  detected_threads <- 1L
+}
+
+maximum_threads <- 16L
+if (detected_threads < maximum_threads) {
+  message("Detected ", detected_threads, " threads. Adjusting maximum_threads to ", detected_threads, ".")
+  maximum_threads <- detected_threads
+}
+
+thread_options <- sort(unique(c(1L, 2L, 4L, 8L, maximum_threads)))
+message("Thread counts that will be included in the benchmark: ", paste(thread_options, collapse = ", "))
+```
 
 ```{r setup}
 library(multigroup.vaccine)
@@ -67,19 +92,18 @@ benchmark_args <- list(
 
 ## Benchmark Grid
 
-This benchmark now checks thread counts up to `16`, assuming the machine
+This benchmark now checks thread counts up to `maximum_threads`, assuming the machine
 exposes that many cores. The simulation counts are chosen to help identify the
 point where parallel execution begins to win after cluster overhead is amortized.
 
 ```{r}
-detected_threads <- parallel::detectCores()
-if (is.na(detected_threads)) {
-  detected_threads <- 1L
-}
-
 benchmark_nsims <- c(25L, 100L, 500L, 2000L, 10000L, 25000L)
 benchmark_reps <- 2L
-thread_options <- sort(unique(c(1L, 2L, 4L, 8L, 16L)))
+
+if (detected_threads == 1L) {
+  message("Only one thread detected. Parallel benchmarks will be skipped.")
+}
+
 thread_options <- thread_options[thread_options <= detected_threads]
 parallel_thread_options <- thread_options[thread_options > 1L]
 
