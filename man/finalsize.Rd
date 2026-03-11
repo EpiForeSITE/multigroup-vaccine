@@ -77,7 +77,6 @@ method = "stochastic", nsims = 10)
 # All "escaped" outbreaks set to deterministic final size:
 finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
 method = "hybrid", nsims = 10)
-# Parallel stochastic simulations using 4 threads:
-finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
-method = "stochastic", nsims = 100, nthreads = 4)
+# Parallel stochastic simulations are available for interactive use, but are
+# omitted from examples to avoid spawning worker processes during R CMD check.
 }

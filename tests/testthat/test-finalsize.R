@@ -372,6 +372,11 @@ test_that("finalsize hybrid simulations continue to use getFinalSizeDistEscape",
 test_that("finalsize accepts auto-detect sentinel values for nthreads", {
   args <- make_finalsize_test_inputs()
 
+  testthat::local_mocked_bindings(
+    detectCores = function(...) 1L,
+    .package = "parallel"
+  )
+
   set.seed(24680)
   auto_zero <- do.call(
     finalsize,
