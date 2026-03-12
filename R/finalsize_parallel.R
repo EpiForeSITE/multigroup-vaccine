@@ -10,11 +10,17 @@
 #' @keywords internal
 validateFinalsizeNsims <- function(nsims) {
   if (!is.numeric(nsims) || length(nsims) != 1L || is.na(nsims) ||
-      nsims < 1 || nsims != as.integer(nsims)) {
+      !is.finite(nsims)) {
     stop("nsims must be a single positive integer.")
   }
 
-  as.integer(nsims)
+  nsims_int <- as.integer(nsims)
+
+  if (is.na(nsims_int) || nsims < 1 || nsims != nsims_int) {
+    stop("nsims must be a single positive integer.")
+  }
+
+  nsims_int
 }
 
 #' Validate the Number of Threads for `finalsize()`
