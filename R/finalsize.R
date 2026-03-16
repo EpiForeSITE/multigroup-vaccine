@@ -10,6 +10,13 @@
 #' @param initV initial number of each group vaccinated
 #' @param method the method of final size calculation or simulation to use
 #' @param nsims the number of simulations to run for stochastic methods
+#' @param nthreads the number of threads (parallel workers) to use for
+#' stochastic simulations. Defaults to 1 (single-threaded). Set to 0 or -1 to
+#' automatically use all available cores. Ignored for `method = "hybrid"`.
+#' @param cluster an optional \code{\link[parallel:makeCluster]{parallel cluster}} object
+#' to use for stochastic simulations. When supplied, \code{nthreads} is ignored,
+#' allowing callers to provide PSOCK, FORK, MPI, or scheduler-managed clusters.
+#' Ignored for `method = "hybrid"`.
 #' @returns a vector (nsims = 1) or matrix (nsims > 1) with the final number infected from each group (column) in each simulation (row)
 #' @examples
 #' popsize <- c(800, 200)
@@ -31,11 +38,15 @@
 #' # All "escaped" outbreaks set to deterministic final size:
 #' finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
 #' method = "hybrid", nsims = 10)
+#' # Parallel stochastic simulations are available for interactive use, but are
+#' # omitted from examples to avoid spawning worker processes during R CMD check.
 #' @export
-finalsize <- function(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV, method = "ODE", nsims = 1) {
+finalsize <- function(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
+                      method = "ODE", nsims = 1, nthreads = 1, cluster = NULL) {
 
   #Use generic recovery rate; final size is independent of recovery rate when R0 is specified
   recoveryrate <- 1
+  g <- length(popsize)
 
   transmmatrix <- transmissionRates(R0, 1 / recoveryrate, relsusc * t(reltransm * t(contactmatrix)))
 
@@ -47,13 +58,50 @@ finalsize <- function(popsize, R0, contactmatrix, relsusc, reltransm, initR, ini
     return(getFinalSizeAnalytic(transmmatrix, recoveryrate, popsize, initR, initI, initV))
   }
 
-  if(method == "stochastic"){
-    return(getFinalSizeDist(nsims, transmmatrix, recoveryrate, popsize, initR, initI, initV))
-  }
-
-  if(method == "hybrid"){
+  if (method == "hybrid") {
+    nsims <- validateFinalsizeNsims(nsims)
     return(getFinalSizeDistEscape(nsims, transmmatrix, recoveryrate, popsize, initR, initI, initV))
   }
 
-  stop("Unknown method")
+  if (method != "stochastic") {
+    stop("Unknown method")
+  }
+
+  nsims <- validateFinalsizeNsims(nsims)
+  initS <- popsize - initR - initV
+  betaoverNj <- c(t(t(transmmatrix) / popsize))
+  init <- c(initS, initI, initR)
+  names(init) <- c(paste0("S", seq_len(g)), paste0("I", seq_len(g)), paste0("R", seq_len(g)))
+
+  sim_fun <- function(seed) {
+    set.seed(seed)
+    fs <- .Call(
+      "_multigroup_vaccine_sir_finalsize_cpp",
+      init,
+      betaoverNj,
+      recoveryrate,
+      PACKAGE = "multigroup.vaccine"
+    )
+    fs[(2 * g + 1):(3 * g)]  # pull out the final R counts from the full SIR state vector
+  }
+
+  seeds <- as.list(sample.int(.Machine$integer.max, nsims))
+
+  if (is.null(cluster)) {
+    nthreads <- validateFinalsizeThreads(nthreads, nsims)
+
+    if (nthreads <= 1L) {
+      return(do.call(rbind, lapply(seeds, sim_fun)))
+    }
+
+    cluster <- parallel::makeCluster(nthreads)
+    on.exit(parallel::stopCluster(cluster), add = TRUE)
+  } else if (!inherits(cluster, "cluster")) {
+    stop("cluster must inherit from 'cluster'.")
+  }
+
+  parallel::clusterCall(cluster, initializeFinalsizeWorker, getFinalsizeDllPath())
+  results <- parallel::parLapply(cluster, seeds, sim_fun)
+
+  do.call(rbind, results)
 }
