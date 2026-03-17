@@ -341,6 +341,62 @@ test_that("finalsize stochastic simulations are reproducible across thread count
   expect_equal(dim(multi_thread), c(6, length(args$popsize)))
 })
 
+test_that("finalsize stochastic leaves identical RNG progression across thread counts", {
+  args <- make_finalsize_test_inputs()
+
+  set.seed(777)
+  do.call(
+    finalsize,
+    c(args, list(method = "stochastic", nsims = 6, nthreads = 1))
+  )
+  next_single <- runif(5)
+
+  set.seed(777)
+  do.call(
+    finalsize,
+    c(args, list(method = "stochastic", nsims = 6, nthreads = 2))
+  )
+  next_multi <- runif(5)
+
+  expect_equal(next_single, next_multi)
+})
+
+test_that("finalsize stochastic seed argument is reproducible independent of global RNG", {
+  args <- make_finalsize_test_inputs()
+
+  set.seed(1001)
+  from_seed_a <- do.call(
+    finalsize,
+    c(args, list(method = "stochastic", nsims = 6, nthreads = 1, seed = 4321))
+  )
+
+  set.seed(9009)
+  from_seed_b <- do.call(
+    finalsize,
+    c(args, list(method = "stochastic", nsims = 6, nthreads = 2, seed = 4321))
+  )
+
+  expect_equal(from_seed_a, from_seed_b)
+})
+
+test_that("finalsize hybrid seed argument is reproducible independent of global RNG", {
+  args <- make_finalsize_test_inputs()
+
+  set.seed(101)
+  from_seed_a <- do.call(
+    finalsize,
+    c(args, list(method = "hybrid", nsims = 6, seed = 7654))
+  )
+
+  set.seed(202)
+  from_seed_b <- do.call(
+    finalsize,
+    c(args, list(method = "hybrid", nsims = 6, seed = 7654))
+  )
+
+  expect_equal(from_seed_a, from_seed_b)
+})
+
 test_that("finalsize hybrid simulations continue to use getFinalSizeDistEscape", {
   args <- make_finalsize_test_inputs()
 
@@ -419,6 +475,16 @@ test_that("finalsize validates nsims, nthreads, and cluster inputs", {
   expect_error(
     do.call(finalsize, c(args, list(method = "stochastic", nsims = 4, cluster = 1))),
     "cluster must inherit from 'cluster'"
+  )
+
+  expect_error(
+    do.call(finalsize, c(args, list(method = "stochastic", nsims = 4, seed = 1.5))),
+    "seed must be NULL or a single finite integer value"
+  )
+
+  expect_error(
+    do.call(finalsize, c(args, list(method = "stochastic", nsims = 4, seed = NA_real_))),
+    "seed must be NULL or a single finite integer value"
   )
 })
 
