@@ -10,11 +10,79 @@
 #' @keywords internal
 validateFinalsizeNsims <- function(nsims) {
   if (!is.numeric(nsims) || length(nsims) != 1L || is.na(nsims) ||
-      nsims < 1 || nsims != as.integer(nsims)) {
+      !is.finite(nsims)) {
     stop("nsims must be a single positive integer.")
   }
 
-  as.integer(nsims)
+  nsims_int <- as.integer(nsims)
+
+  if (is.na(nsims_int) || nsims < 1 || nsims != nsims_int) {
+    stop("nsims must be a single positive integer.")
+  }
+
+  nsims_int
+}
+
+#' Validate Optional RNG Seed for `finalsize()`
+#'
+#' Internal helper that validates an optional user-provided RNG seed used to
+#' make stochastic simulations reproducible independent of global RNG state.
+#'
+#' @param seed Optional seed value provided by the caller.
+#'
+#' @return `NULL` or a scalar integer seed.
+#'
+#' @keywords internal
+validateFinalsizeSeed <- function(seed) {
+  if (is.null(seed)) {
+    return(NULL)
+  }
+
+  if (!is.numeric(seed) || length(seed) != 1L || is.na(seed) || !is.finite(seed)) {
+    stop("seed must be NULL or a single finite integer value.")
+  }
+
+  seed_int <- as.integer(seed)
+
+  if (is.na(seed_int) || seed != seed_int) {
+    stop("seed must be NULL or a single finite integer value.")
+  }
+
+  seed_int
+}
+
+#' Sample Per-simulation Seeds for `finalsize()`
+#'
+#' Internal helper that generates one RNG seed per stochastic simulation. When
+#' `seed` is supplied, sampling is performed in a local RNG context so the
+#' caller RNG state is not modified.
+#'
+#' @param nsims Integer simulation count.
+#' @param seed Optional integer base seed.
+#'
+#' @return Integer vector of length `nsims`.
+#'
+#' @keywords internal
+sampleFinalsizeSeeds <- function(nsims, seed = NULL) {
+  if (is.null(seed)) {
+    return(sample.int(.Machine$integer.max, nsims))
+  }
+
+  had_seed <- exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
+  if (had_seed) {
+    old_seed <- get(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
+  }
+
+  on.exit({
+    if (had_seed) {
+      assign(".Random.seed", old_seed, envir = .GlobalEnv)
+    } else if (exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) {
+      rm(".Random.seed", envir = .GlobalEnv)
+    }
+  }, add = TRUE)
+
+  set.seed(seed)
+  sample.int(.Machine$integer.max, nsims)
 }
 
 #' Validate the Number of Threads for `finalsize()`

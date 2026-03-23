@@ -29,13 +29,13 @@ The hybrid method is intentionally excluded here because `finalsize(method =
 parallel path.
 
 ## Hardware
-This benchmark is design to run on a variety of machines.
+This benchmark is designed to run on a variety of machines.
 
 The results shown here were generated on a 2019 Macbook Pro with 2.4 GHz 8-Core Intel Core i9 and 32gb 2400hz DDR4 RAM, running MacOS Sequia 15.7.2.
 
 To generate benchmark results on your own machine, run the code in this vignette and compare the crossover points to those reported here. The exact crossover points will depend on the hardware and software environment, but the general patterns should be similar.
 
-Set the `maxiumum_threads` variable in the code below to adjust the maximum thread count tested based on your machine's capabilities.
+Set the `maximum_threads` variable in the code below to adjust the maximum thread count tested based on your machine's capabilities.
 
 ```{r hardware}
 detected_threads <- parallel::detectCores()
