@@ -19,6 +19,9 @@ knitr::opts_chunk$set(
 )
 ```
 
+WARNING: The data and model used in this vignette are for demonstration purposes only and do not reflect real-world conditions accurately. The results are not intended to forecast or predict a measles outbreak size in any specific location.
+DATA: The vaccination data (county level) is not public and so is not included in the package.
+
 Executive Summary
 
 This assessment evaluates the risk of a measles outbreak across Utah counties. Traditional risk assessments rely strictly on raw school vaccination rates. However, this approach ignores a critical factor: age-structured contact patterns.
@@ -325,6 +328,7 @@ for (R0_stochastic in R0_baseline_range) {
       county = c_short,
       population = sum(popsize),
       vax_repnum = vax_Rn,
+      expected_cases = mean(total_infected),
       prob_major_outbreak = prob_major
     )
     
@@ -443,27 +447,60 @@ if(nrow(sim_long) > 0) {
 
 ## 5. Final Risk Summary Matrix {.tabset}
 
-For each county, the **Risk Score** is defined as:
+For each county, the citizen score is defined as the expected outbreak burden after a
+single modeled introduction:
 
-$$\text{Risk Score} = \frac{P_i(x > 100)}{P_t} \times \text{Population}_i$$
+$$R_{citizen,i} = \frac{E[cases_i]}{Population_i} \times 10,000$$
 
-where $P_i(x > 100)$ is the probability of exceeding 100 cases in county $i$ and $P_t$ is the total statewide population. This quantity represents the expected number of at-risk individuals contributed by each county relative to the state as a whole.
+which is then normalized against the statewide county average for the same baseline
+transmissibility scenario to create a relative risk index:
 
+$$R_{relative,i} = \frac{R_{citizen,i}}{\frac{1}{n} \sum_{j=1}^{n} R_{citizen,j}}$$
+
+This formula features:
+* Relative Interpretation: A score of 1.0 represents the state average for that R0 scenario. A score of 2.0 indicates that a county has twice the modeled per-capita outbreak burden of the average county, while a 0.5 indicates half the average burden.
+* Abstraction: By normalizing the per-10,000 score against the state mean, the displayed value becomes a unitless index. This prevents the table from over-emphasizing raw case counts while maintaining clear comparative risk.
+* Interpretation: This is not the probability that a random person you meet currently has measles. It is a model-based per-capita outbreak burden score under the vignette's seeding scenario.
+* Scale Effect: Because the score is per-capita, a small county can rank high when even a modest expected outbreak size is divided by a small population. That makes it useful for comparing relative local intensity, but less suitable as a stand-alone public-facing "hotspot" score.
+* Zero-Risk Scenario: If every county has a citizen score of 0 for a given R0, the relative index is set to 0 for all counties because there is no nonzero statewide baseline to normalize against.
 ```{r}
-total_pop <- sum(unique(stochastic_results[, c("county", "population")])$population)
+citizen_score <- function(expected_cases, population, scale_per = 10000) {
+  ifelse(population > 0, (expected_cases / population) * scale_per, 0)
+}
+
+normalize_citizen_score <- function(score) {
+  avg_score <- mean(score, na.rm = TRUE)
+  if (is.na(avg_score) || avg_score <= 0) {
+    rep(0, length(score))
+  } else {
+    score / avg_score
+  }
+}
 
 make_risk_table <- function(r0_val) {
   stochastic_results %>%
     filter(baseline_R0 == r0_val) %>%
     mutate(
-      risk_score = (prob_major_outbreak * population) / total_pop,
+      citizen_risk_score = citizen_score(expected_cases, population),
+      relative_risk_score = normalize_citizen_score(citizen_risk_score),
+
       `Rv` = round(vax_repnum, 3),
-      `Prob. >100 Cases (%)` = round(prob_major_outbreak * 100, 1),
-      `Risk Score` = round(risk_score, 4),
+      `EV Cases` = round(expected_cases, 1),
+
+      # 3. Formatting the output
+      # A score of 1.2 means 20% higher risk than average.
+      `Relative Risk` = round(relative_risk_score, 2),
       `Population` = scales::comma(population)
     ) %>%
-    select(County = county, `Population`, `Rv`, `Prob. >100 Cases (%)`, `Risk Score`) %>%
-    arrange(desc(`Risk Score`))
+    select(
+      County = county, 
+      `Population`, 
+      `Rv`, 
+      `EV Cases`, 
+      `Relative Risk`
+    ) %>%
+    # Sort by the new index
+    arrange(desc(`Relative Risk`))
 }
 ```
 

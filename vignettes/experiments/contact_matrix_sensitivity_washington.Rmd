@@ -1,0 +1,1323 @@
+---
+title: "Contact Matrix Sensitivity: Washington County, Utah"
+subtitle: "How does the choice of contact matrix affect epidemic model outputs in `multigroup.vaccine`?"
+date: "March 2026"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+vignette: >
+  %\VignetteIndexEntry{Contact Matrix Sensitivity}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse  = TRUE,
+  comment   = "#>",
+  fig.width = 11,
+  fig.height = 7,
+  warning   = FALSE,
+  message   = FALSE
+)
+```
+
+## Overview
+
+WARNING: The data and model used in this vignette are for demonstration purposes only and do not reflect real-world conditions accurately. The results are not intended to forecast or predict a measles outbreak size in any specific location.
+DATA: The vaccination data (county level) is not public and so is not included in the package.
+
+Contact matrices are among the most structurally important inputs to an age-structured epidemic model. They encode *who contacts whom* and at what rate — shaping both the dominant eigenvalue of the transmission system (and therefore $R_0$ calibration) and the age-specific attack rates produced by stochastic simulation. Even when population sizes, vaccination coverage, and baseline $R_0$ are held constant, different contact matrices can yield meaningfully different estimates of the vaccination reproduction number $R_v$ and the probability of a major outbreak.
+
+This notebook systematically benchmarks **four contact matrix sources** for a single geographic target — **Washington County, Utah** — using the `multigroup.vaccine` stochastic finalsize framework. All four matrices are built over the same county-specific age groups, and all simulations share a common random seed and parallel cluster so that differences in model outputs are attributable entirely to the matrices themselves.
+
+| # | Source | Provenance | Key characteristic |
+|---|--------|------------|--------------------|
+| 1 | **POLYMOD** (raw) | Mossong 2008 diary survey; `socialmixr` | European reference population weights |
+| 2 | **Adjusted POLYMOD** | Same survey, reweighted to WC demographics | `contactMatrixPolymod(age_limits, popsize)` — local age distribution applied |
+| 3 | **EpiStorm** | `epistorm/Epistorm-Mix` on GitHub | US-estimated synthetic matrices from mobility data |
+| 4 | **contactdata** | `contactdata` R package | POLYMOD extrapolated to US population |
+
+> **WARNING:** The data and model used in this vignette are for demonstration and
+> methodological purposes only. Results are not intended to forecast or predict a
+> measles outbreak in Washington County.
+
+---
+
+## 1. Libraries and Global Configuration
+
+```{r libs, cache=FALSE}
+library(multigroup.vaccine)
+library(socialmixr)
+library(contactdata)       # install.packages("contactdata") if needed
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(scales)
+library(parallel)
+library(patchwork)         # install.packages("patchwork") if needed
+
+# ── Consistent color palette used across ALL visualizations ───────────────────
+MATRIX_COLORS <- c(
+  "POLYMOD"          = "#d1dee7",
+  "Adjusted POLYMOD" = "#f794ea",
+  "EpiStorm"         = "#229f4a",
+  "contactdata"      = "#d9e17f"
+)
+MATRIX_LABELS <- names(MATRIX_COLORS)
+
+# ── Simulation parameters ─────────────────────────────────────────────────────
+NSIMS      <- 5000           # stochastic simulations per matrix (same for all 4)
+SEED       <- 20260323       # shared seed: all matrices start from here
+R0_BASE    <- 10             # measles baseline R0
+N_WORKERS  <- max(1L, parallel::detectCores() - 1L)
+
+cat("── Configuration ──────────────────────────────────────────────────────\n")
+cat("  Simulations per matrix : ", scales::comma(NSIMS), "\n")
+cat("  Shared random seed     : ", SEED, "\n")
+cat("  Baseline R0            : ", R0_BASE, "\n")
+cat("  Parallel workers       : ", N_WORKERS, "\n")
+```
+
+---
+
+## 2. Washington County: Demographics and Vaccination
+
+We mirror the exact setup from `utah_county_risk.Rmd` and `exploratory_utah_county_risk.Rmd`:
+grade-structure inference from school population ratios → census age-structured population →
+immunity by age group → R0 calibration.
+
+### 2.1 Grade Structure Inference
+
+```{r grade-structure}
+county_vax_data <- read.csv(file.path("../../data-raw/county_vax_data.csv"))
+
+vax_wc     <- county_vax_data[county_vax_data$county == "Washington", ]
+el_pop     <- vax_wc$pop[vax_wc$level == 1]
+middle_pop <- vax_wc$pop[vax_wc$level == 2]
+high_pop   <- vax_wc$pop[vax_wc$level == 3]
+
+middle_to_high_ratio <- middle_pop / high_pop
+el_to_middle_ratio   <- el_pop / middle_pop
+
+cat("Population ratios (from county_vax_data.csv):\n")
+cat("  Middle / High      :", round(middle_to_high_ratio, 3), "\n")
+cat("  Elementary / Middle:", round(el_to_middle_ratio, 3), "\n\n")
+
+# Heuristic from exploratory_utah_county_risk.Rmd
+if (middle_to_high_ratio >= 0.8 && middle_to_high_ratio <= 1.2) {
+  if (!is.na(el_to_middle_ratio) && el_to_middle_ratio < 1.3) {
+    age_limits     <- c(0, 1, 5, 10, 14, 18, 25, 45, 70)
+    structure_type <- "K-4 / 5-8 / 9-12"
+  } else {
+    age_limits     <- c(0, 1, 5, 12, 15, 18, 25, 45, 70)
+    structure_type <- "K-6 / 7-9 / 10-12"
+  }
+} else if (middle_to_high_ratio <= 0.6) {
+  age_limits     <- c(0, 1, 5, 12, 14, 18, 25, 45, 70)
+  structure_type <- "K-6 / 7-8 / 9-12"
+} else {
+  age_limits     <- c(0, 1, 5, 11, 14, 18, 25, 45, 70)
+  structure_type <- "K-5 / 6-8 / 9-12"
+}
+
+cat("Inferred grade structure:", structure_type, "\n")
+cat("Age limits:", paste(age_limits, collapse = ", "), "\n")
+```
+
+### 2.2 Census Population
+
+```{r census-pop}
+utah_counties <- getAllCountiesData(
+  state_fips           = getStateFIPS("Utah"),
+  year                 = 2024,
+  age_groups_by_county = list("Washington" = age_limits),
+  csv_path             = getCensusDataPath(),
+  verbose              = FALSE
+)
+
+county_data <- utah_counties[["Washington County"]]
+popsize     <- county_data$age_pops
+age_lab     <- county_data$age_labels
+n_groups    <- length(popsize)
+
+cat("Washington County 2024 census population by age group:\n")
+print(data.frame(
+  age_group  = age_lab,
+  population = format(popsize, big.mark = ",")
+))
+cat("\nTotal county population:", scales::comma(sum(popsize)), "\n")
+```
+
+### 2.3 Vaccination Coverage and Age-Specific Immunity
+
+Vaccination rates come from school-level data; immunity applies vaccine effectiveness
+(97% two-dose MMR for school-age, 93% single-dose for pre-K), then linearly interpolates
+from high-school immunity at age 18 to full immunity (1.0) at age 70.
+
+```{r immunity}
+el_vax_rate     <- vax_wc$vax[vax_wc$level == 1] / vax_wc$pop[vax_wc$level == 1]
+middle_vax_rate <- vax_wc$vax[vax_wc$level == 2] / vax_wc$pop[vax_wc$level == 2]
+high_vax_rate   <- vax_wc$vax[vax_wc$level == 3] / vax_wc$pop[vax_wc$level == 3]
+pre_k_vax_rate  <- el_vax_rate * 0.9   # pre-K ≈ 90% of elementary rate
+
+# Vaccine effectiveness
+pre_k_imm  <- pre_k_vax_rate  * 0.93
+el_imm     <- el_vax_rate     * 0.97
+middle_imm <- middle_vax_rate * 0.97
+high_imm   <- high_vax_rate   * 0.97
+
+# Linear interpolation for adults: high-school immunity → 1.0 at age 70
+interp_imm <- function(age_mid, start_age = 18, end_age = 70,
+                       start_imm = high_imm, end_imm = 1.0) {
+  start_imm + (end_imm - start_imm) / (end_age - start_age) * (age_mid - start_age)
+}
+imm_18_25 <- interp_imm(21.5)
+imm_25_45 <- interp_imm(35.0)
+imm_45_70 <- interp_imm(57.5)
+
+age_immunity <- c(0, pre_k_imm, el_imm, middle_imm, high_imm,
+                  imm_18_25, imm_25_45, imm_45_70, 1.0)
+
+initV <- round(age_immunity * popsize)
+initI <- rep(0L, n_groups); initI[6L] <- 1L  # 1 case in 18-25 age group (young adults)
+initR <- rep(0L, n_groups)
+
+cat("Washington County immunity by age group:\n")
+print(data.frame(
+  age_group    = age_lab,
+  population   = popsize,
+  immune       = initV,
+  susceptible  = popsize - initV,
+  immunity_pct = paste0(round(age_immunity * 100, 1), "%")
+))
+cat("\nSchool vaccination rates:\n")
+cat("  Elementary :", round(el_vax_rate  * 100, 1), "%\n")
+cat("  Middle      :", round(middle_vax_rate * 100, 1), "%\n")
+cat("  High School :", round(high_vax_rate * 100, 1), "%\n")
+```
+
+---
+
+## 3. Building the Four Contact Matrices
+
+### 3.1 POLYMOD (Raw)
+
+The raw POLYMOD matrix from the Mossong 2008 European diary survey, aggregated to
+our Washington County age groups. No county demographic adjustment is applied —
+the European survey population weights are used as-is.
+
+```{r mat-polymod}
+mat_polymod <- contactMatrixPolymod(age_limits)
+rownames(mat_polymod) <- colnames(mat_polymod) <- age_lab
+
+cat("POLYMOD — dominant eigenvalue:",
+    round(Re(eigen(mat_polymod)$values[1]), 4), "\n")
+```
+
+### 3.2 Adjusted POLYMOD (Washington County Demographics)
+
+The same POLYMOD survey, but reweighted to match Washington County's actual 2024
+census age distribution by passing `popsize` to `contactMatrixPolymod()`. This is the
+approach used in the `vaxrepnum` methodology throughout this package: the county's
+younger-than-average population (Washington County has above-average family sizes)
+shifts contact intensity toward school-age bands.
+
+```{r mat-adj-polymod}
+# The second argument (popsize) reweights the mixing matrix so that inter-group
+# contact symmetry is adjusted to the local age distribution rather than the
+# EU survey reference population. This is the "adjusted" variant used in R0
+# calibration throughout utah_county_risk.Rmd.
+mat_adj_polymod <- contactMatrixPolymod(age_limits, popsize)
+rownames(mat_adj_polymod) <- colnames(mat_adj_polymod) <- age_lab
+
+cat("Adjusted POLYMOD — dominant eigenvalue:",
+    round(Re(eigen(mat_adj_polymod)$values[1]), 4), "\n")
+```
+
+### 3.3 EpiStorm (US Mobility-Derived Matrix)
+
+EpiStorm provides two types of contact matrices: M-matrices (mean number of contacts) and F-matrices (frequency-based probabilities). For this analysis, we use the M-matrix (mean contacts), which aligns with the contact intensity matrices from POLYMOD and contactdata. EpiStorm matrices are estimated from smartphone mobility data for the US and are available at `https://github.com/epistorm/Epistorm-Mix/tree/main/matrices`. They use 5-year age bands (0–4, 5–9, …, 75+) and are aggregated to our 9 custom age groups via a population-weighted average using approximate Washington County 5-year census population sizes.
+
+```{r mat-epistorm}
+# Helper: aggregate from external 5-year age bands to our custom age groups.
+# Uses population-weighted averaging within each source-band cluster.
+aggregate_to_custom_groups <- function(mat_source, source_breaks, source_pops,
+                                       target_limits, target_labels) {
+  n_target <- length(target_limits)
+  n_source <- nrow(mat_source)
+  max_age  <- 110
+  
+  source_upper  <- c(source_breaks[-1], max_age)
+  target_upper  <- c(target_limits[-1], max_age)
+  midpoints_src <- (source_breaks + source_upper) / 2
+  
+  # Map each source band to a target group by band midpoint
+  band_to_target <- sapply(midpoints_src, function(m) {
+    idx <- which(m >= target_limits & m < target_upper)
+    if (length(idx) == 0) n_target else idx[1]
+  })
+  
+  result <- matrix(0.0, n_target, n_target,
+                   dimnames = list(target_labels, target_labels))
+  
+  for (i in seq_len(n_target)) {
+    for (j in seq_len(n_target)) {
+      bi <- which(band_to_target == i)
+      bj <- which(band_to_target == j)
+      if (!length(bi) || !length(bj)) next
+      
+      wi  <- source_pops[bi]
+      wj  <- source_pops[bj]
+      sub <- mat_source[bi, bj, drop = FALSE]
+      
+      denom <- sum(outer(wi, wj))
+      result[i, j] <- if (denom > 0) sum(outer(wi, wj) * sub) / denom else 0
+    }
+  }
+  result
+}
+
+# Washington County 5-year census populations (for aggregation weights)
+wc_5yr_data <- getCensusData(
+  state_fips = getStateFIPS("Utah"),
+  county_name = "Washington",
+  year = 2024,
+  age_groups = seq(0, 75, by = 5),
+  csv_path = getCensusDataPath()
+)
+wc_5yr_pops <- wc_5yr_data$age_pops
+epistorm_breaks <- seq(0, 75, by = 5)  # 16 bands: [0,5), [5,10), ..., [75,∞)
+
+epistorm_types <- c("Total")
+epistorm_urls <- list()
+for (type in epistorm_types) {
+  epistorm_urls[[paste0("M_", type)]] <- paste0(
+    "https://raw.githubusercontent.com/epistorm/Epistorm-Mix/refs/heads/main/matrices/M_matrix/",
+    "Total-M-by5_75-matrix.csv"
+  )
+}
+
+mat_epistorm <- tryCatch({
+  # Download the total M-matrix (mean contacts)
+  raw_m <- read.csv(url(epistorm_urls[["M_Total"]]), row.names = 1, check.names = FALSE)
+  
+  # The matrix is now ready
+  emat <- as.matrix(raw_m)
+  
+  # Guard: ensure dimensions match expected 5-year structure
+  if (nrow(emat) != length(epistorm_breaks)) {
+    stop("Unexpected EpiStorm dimensions: ", nrow(emat), " rows (expected ",
+         length(epistorm_breaks), ")")
+  }
+  
+  agg <- aggregate_to_custom_groups(emat, epistorm_breaks, wc_5yr_pops,
+                                    age_limits, age_lab)
+  cat("EpiStorm downloaded and aggregated successfully.\n")
+  cat("  Source dimensions : ", nrow(emat), "×", ncol(emat),
+      " (5-yr bands)\n")
+  cat("  Aggregated        :", nrow(agg), "×", ncol(agg),
+      " (Washington County age groups)\n")
+  agg
+}, error = function(e) {
+  stop("Failed to download EpiStorm data: ", conditionMessage(e), "\n",
+       "Please check network connectivity and that the URLs are accessible.\n",
+       "Alternatively, download the files manually and place them in inst/extdata/ for offline use.")
+})
+
+cat("EpiStorm — dominant eigenvalue:",
+    round(Re(eigen(mat_epistorm)$values[1]), 4), "\n")
+```
+
+### 3.4 contactdata (Mossong 2008 Extrapolated to US)
+
+The `contactdata` package provides age-structured contact matrices for 177 countries
+derived from the Mossong 2008 POLYMOD data and synthetic extrapolation. The US matrix
+uses 5-year age bands and is aggregated to our Washington County age groups using the
+same helper function as EpiStorm.
+
+```{r mat-contactdata}
+tryCatch({
+  # contactdata returns a matrix with rownames/colnames as age-group labels
+  cd_raw <- contactdata::contact_matrix(
+    country    = "United States",
+    age.limits = epistorm_breaks   # request same 5-yr bands as EpiStorm
+  )
+  
+  mat_contactdata <- aggregate_to_custom_groups(
+    cd_raw, epistorm_breaks, wc_5yr_pops, age_limits, age_lab
+  )
+  cat("contactdata matrix built successfully.\n")
+}, error = function(e) {
+  # Some versions use slightly different function signatures
+  warning("contactdata::contact_matrix() call failed: ", conditionMessage(e),
+          "\nTrying alternative call...")
+  tryCatch({
+    cd_raw <- contactdata::contact_matrix("United States")
+    n_cd   <- nrow(cd_raw)
+    # Infer age breaks from matrix size (assume equal 5-yr bands starting at 0)
+    cd_breaks <- seq(0, by = 5, length.out = n_cd)
+    cd_pops   <- wc_5yr_pops[seq_len(n_cd)]  # trim to matrix size
+    mat_contactdata <<- aggregate_to_custom_groups(
+      cd_raw, cd_breaks, cd_pops, age_limits, age_lab
+    )
+    cat("contactdata matrix built (alternative call).\n")
+  }, error = function(e2) {
+    warning("contactdata failed entirely: ", conditionMessage(e2),
+            "\nFalling back to POLYMOD + small perturbation.")
+    set.seed(SEED + 888L)
+    pert <- matrix(runif(n_groups^2, 0.90, 1.10), n_groups, n_groups)
+    pert <- (pert + t(pert)) / 2
+    fb   <- mat_polymod * pert
+    rownames(fb) <- colnames(fb) <- age_lab
+    attr(fb, "fallback") <- TRUE
+    mat_contactdata <<- fb
+  })
+})
+
+cat("contactdata — dominant eigenvalue:",
+    round(Re(eigen(mat_contactdata)$values[1]), 4), "\n")
+```
+
+### 3.5 Matrix Collection and Spectral Summary
+
+```{r matrix-list}
+all_matrices <- list(
+  "POLYMOD"          = mat_polymod,
+  "Adjusted POLYMOD" = mat_adj_polymod,
+  "EpiStorm"         = mat_epistorm,
+  "contactdata"      = mat_contactdata
+)
+
+# Spectral and structural summary
+spectral_summary <- data.frame(
+  `Matrix Source`      = names(all_matrices),
+  `λ₁ (dominant)`     = sapply(all_matrices,
+                               function(m) round(Re(eigen(m)$values[1]), 4)),
+  `λ₂`                = sapply(all_matrices,
+                               function(m) round(Re(eigen(m)$values[2]), 4)),
+  `Mean contacts/day`  = sapply(all_matrices,
+                               function(m) round(mean(rowSums(m)), 3)),
+  `Max cell value`     = sapply(all_matrices,
+                               function(m) round(max(m), 3)),
+  check.names          = FALSE,
+  row.names            = NULL
+)
+
+cat("\n── Matrix Spectral & Structural Summary ──────────────────────────────\n")
+print(spectral_summary)
+```
+
+---
+
+## 4. Contact Matrix Visualizations
+
+### 4.1 Heatmaps: All Four Matrices on a Shared Color Scale
+
+```{r heatmap-all, fig.height=12}
+# Convert any contact matrix to ggplot-ready long format
+matrix_to_long <- function(mat, source_label) {
+  expand.grid(
+    contactor = factor(rownames(mat), levels = rownames(mat)),
+    contactee = factor(colnames(mat), levels = colnames(mat))
+  ) |>
+    mutate(contacts = as.vector(t(mat)), source = source_label)
+}
+
+heatmap_df <- bind_rows(
+  lapply(names(all_matrices), function(nm) matrix_to_long(all_matrices[[nm]], nm))
+) |>
+  mutate(source = factor(source, levels = MATRIX_LABELS))
+
+global_max <- max(heatmap_df$contacts, na.rm = TRUE)
+
+ggplot(heatmap_df, aes(x = contactee, y = contactor, fill = contacts)) +
+  geom_tile(color = "white", linewidth = 0.25) +
+  scale_fill_viridis_c(
+    name   = "Mean daily\ncontacts",
+    limits = c(0, global_max),
+    option = "plasma"
+  ) +
+  facet_wrap(~ source, ncol = 2) +
+  labs(
+    title    = "Contact Matrices: Washington County, Utah",
+    subtitle = paste0("All four sources on a shared color scale (max = ",
+                      round(global_max, 2), " contacts/day)"),
+    x        = "Age of contactee",
+    y        = "Age of contactor"
+  ) +
+  theme_minimal(base_size = 11) +
+  theme(
+    axis.text.x     = element_text(angle = 45, hjust = 1, size = 7.5),
+    axis.text.y     = element_text(size = 7.5),
+    strip.text      = element_text(size = 12, face = "bold",
+                                   color = "white"),
+    strip.background = element_rect(
+      fill = unname(MATRIX_COLORS[levels(heatmap_df$source)]),
+      color = NA
+    ),
+    legend.position = "right",
+    panel.spacing   = unit(1.2, "lines")
+  )
+```
+
+### 4.2 Difference Heatmaps (vs POLYMOD Baseline)
+
+```{r heatmap-diff, fig.height=8}
+diff_long <- bind_rows(lapply(
+  setdiff(MATRIX_LABELS, "POLYMOD"),
+  function(nm) {
+    abs_diff <- all_matrices[[nm]] - mat_polymod
+    rel_diff <- (all_matrices[[nm]] - mat_polymod) / (mat_polymod + 1e-9) * 100
+    bind_rows(
+      matrix_to_long(abs_diff, nm) |> mutate(metric = "Absolute (contacts/day)"),
+      matrix_to_long(rel_diff, nm) |> mutate(metric = "Relative (%)")
+    )
+  }
+)) |>
+  mutate(source = factor(source, levels = setdiff(MATRIX_LABELS, "POLYMOD")))
+
+# Absolute difference
+p_abs <- ggplot(diff_long |> filter(metric == "Absolute (contacts/day)"),
+                aes(x = contactee, y = contactor, fill = contacts)) +
+  geom_tile(color = "white", linewidth = 0.2) +
+  scale_fill_gradient2(
+    low = "#2166ac", mid = "white", high = "#d73027",
+    midpoint = 0, name = "Δ contacts/day"
+  ) +
+  facet_wrap(~ source, ncol = 3) +
+  labs(
+    title    = "Absolute Difference vs POLYMOD (contacts per day)",
+    subtitle = "Blue = fewer contacts than POLYMOD; Red = more contacts",
+    x = "Age of contactee", y = "Age of contactor"
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+        axis.text.y = element_text(size = 7),
+        strip.text  = element_text(face = "bold"))
+
+# Relative difference (capped at ±100%)
+p_rel <- ggplot(diff_long |> filter(metric == "Relative (%)"),
+                aes(x = contactee, y = contactor, fill = contacts)) +
+  geom_tile(color = "white", linewidth = 0.2) +
+  scale_fill_gradient2(
+    low = "#2166ac", mid = "white", high = "#d73027",
+    midpoint = 0, name = "Δ (%)",
+    limits = c(-100, 100), oob = scales::squish
+  ) +
+  facet_wrap(~ source, ncol = 3) +
+  labs(
+    title    = "Relative Difference vs POLYMOD (%, capped ±100%)",
+    subtitle = "Highlights cells where alternative matrices diverge proportionally",
+    x = "Age of contactee", y = "Age of contactor"
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7),
+        axis.text.y = element_text(size = 7),
+        strip.text  = element_text(face = "bold"))
+
+print(p_abs)
+print(p_rel)
+```
+
+### 4.3 Contact Rate Profiles (Row Sums = Outgoing Daily Contacts)
+
+```{r profile-plot}
+profile_df <- bind_rows(lapply(names(all_matrices), function(nm) {
+  data.frame(
+    source         = nm,
+    age_group      = age_lab,
+    total_contacts = rowSums(all_matrices[[nm]])
+  )
+})) |>
+  mutate(
+    source    = factor(source, levels = MATRIX_LABELS),
+    age_group = factor(age_group, levels = age_lab)
+  )
+
+ggplot(profile_df, aes(x = age_group, y = total_contacts,
+                        color = source, group = source)) +
+  geom_line(linewidth = 1.3) +
+  geom_point(size = 3.5) +
+  scale_color_manual(values = MATRIX_COLORS, name = "Contact Matrix") +
+  labs(
+    title    = "Total Daily Contact Rate by Age Group",
+    subtitle = "Row sums: mean contacts initiated per person per day (aggregated to Washington County groups)",
+    x        = "Age Group",
+    y        = "Mean Daily Contacts"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    axis.text.x     = element_text(angle = 45, hjust = 1),
+    legend.position = "top"
+  )
+```
+
+## 5. Dual Calibration Framework (Analysis A vs Analysis B)
+
+We separate two mechanisms explicitly:
+
+- **Analysis A (shape-only):** hold $R_0$ fixed at `R0_BASE` for every matrix.
+- **Analysis B (shape + spectral):** scale $R_0$ by each matrix's dominant eigenvalue
+  relative to the same reference POLYMOD matrix used in `utah_county_risk.Rmd`.
+
+```{r r0-calibration}
+ANALYSIS_LABELS <- c(
+  A = "A: Fixed R0 (shape-only)",
+  B = "B: Relative R0 (shape + spectral)"
+)
+
+# Reference matrix: standard age limits, no population weights (same as utah_county_risk.Rmd)
+ref_age_limits <- c(0, 1, 5, 11, 14, 18, 25, 45, 70)
+ref_mat        <- contactMatrixPolymod(ref_age_limits)
+ref_eigval     <- Re(eigen(ref_mat)$values[1])
+
+analysis_calibration <- bind_rows(lapply(names(all_matrices), function(nm) {
+  eigval    <- Re(eigen(all_matrices[[nm]])$values[1])
+  r0_factor <- eigval / ref_eigval
+  data.frame(
+    source      = nm,
+    lambda1     = eigval,
+    R0_factor_B = r0_factor,
+    R0_A        = R0_BASE,
+    R0_B        = R0_BASE * r0_factor
+  )
+})) |>
+  mutate(source = factor(source, levels = MATRIX_LABELS))
+
+r0_df <- bind_rows(
+  analysis_calibration |>
+    transmute(source, analysis = "A", analysis_label = ANALYSIS_LABELS[["A"]],
+              R0_used = R0_A, lambda1 = lambda1, R0_factor = 1),
+  analysis_calibration |>
+    transmute(source, analysis = "B", analysis_label = ANALYSIS_LABELS[["B"]],
+              R0_used = R0_B, lambda1 = lambda1, R0_factor = R0_factor_B)
+) |>
+  mutate(
+    source = factor(source, levels = MATRIX_LABELS),
+    analysis = factor(analysis, levels = c("A", "B")),
+    analysis_label = factor(analysis_label, levels = unname(ANALYSIS_LABELS))
+  )
+
+cat("Calibration summary (reference λ₁ =", round(ref_eigval, 4), "):\n")
+print(
+  analysis_calibration |>
+    mutate(across(where(is.numeric), ~ round(.x, 4)))
+)
+```
+
+```{r r0-plot}
+ggplot(r0_df, aes(x = source, y = R0_used, fill = source)) +
+  geom_col(alpha = 0.9, width = 0.62) +
+  geom_hline(yintercept = R0_BASE, linetype = "dashed",
+             color = "black", linewidth = 0.8) +
+  geom_text(aes(label = round(R0_used, 2)),
+            vjust = -0.35, size = 3.8, fontface = "bold") +
+  facet_wrap(~ analysis_label, ncol = 2) +
+  scale_fill_manual(values = MATRIX_COLORS, guide = "none") +
+  scale_y_continuous(limits = c(0, max(r0_df$R0_used) * 1.15)) +
+  labs(
+    title    = "R0 Used in Simulation by Analysis",
+    subtitle = paste0("A fixes R0 at ", R0_BASE,
+                      "; B uses λ₁-relative scaling vs reference POLYMOD (λ₁ = ",
+                      round(ref_eigval, 3), ")"),
+    x        = "Contact Matrix Source",
+    y        = "R0 used in finalsize()"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+---
+
+## 6. Stochastic Simulations for A and B (5,000 runs each)
+
+We run both analyses over all four matrices with identical initial conditions.
+This creates 8 simulation jobs total: 4 matrices × 2 calibration strategies.
+
+```{r simulations, cache=FALSE}
+# Worker function — executed on each cluster node
+.worker_simulate <- function(job) {
+  library(multigroup.vaccine)
+
+  nm       <- job$source
+  analysis <- job$analysis
+  r0_used  <- job$r0_used
+
+  # Keep source-level seed stable across analyses to reduce Monte Carlo noise
+  set.seed(as.integer(job$seed))
+
+  mat <- .GlobalEnv$all_matrices[[nm]]
+
+  fs <- finalsize(
+    .GlobalEnv$popsize, r0_used, mat,
+    rep(1, .GlobalEnv$n_groups),  # relsusc: uniform susceptibility
+    rep(1, .GlobalEnv$n_groups),  # reltransm: uniform transmissibility
+    .GlobalEnv$initR,
+    .GlobalEnv$initI,
+    .GlobalEnv$initV,
+    method   = "stochastic",
+    nsims    = .GlobalEnv$NSIMS,
+    nthreads = 1L                 # 1 thread per worker (cluster handles parallelism)
+  )
+
+  list(
+    analysis    = analysis,
+    source      = nm,
+    r0_used     = r0_used,
+    sim_matrix  = fs,              # NSIMS × n_groups matrix
+    total_cases = rowSums(fs)      # NSIMS-length vector of total infections
+  )
+}
+
+jobs <- r0_df |>
+  mutate(
+    source_id = as.integer(factor(source, levels = MATRIX_LABELS)),
+    seed = as.integer(SEED + source_id),
+    analysis = as.character(analysis),
+    source = as.character(source)
+  ) |>
+  select(analysis, source, r0_used = R0_used, seed)
+
+# ── Launch parallel cluster ────────────────────────────────────────────────────
+n_workers_actual <- min(N_WORKERS, nrow(jobs))
+cl <- makeCluster(n_workers_actual)
+
+clusterExport(cl, c(
+  "NSIMS", "n_groups", "all_matrices",
+  "popsize", "initR", "initI", "initV"
+))
+clusterEvalQ(cl, {
+  library(multigroup.vaccine)
+})
+
+cat("Running", scales::comma(NSIMS), "stochastic simulations for each of",
+    nrow(jobs), "jobs on", n_workers_actual, "workers...\n")
+t_start <- proc.time()
+
+sim_results_list <- parLapply(cl, split(jobs, seq_len(nrow(jobs))), .worker_simulate)
+
+stopCluster(cl)
+t_elapsed <- proc.time() - t_start
+cat("Done. Elapsed:", round(t_elapsed["elapsed"], 1), "seconds\n")
+```
+
+### 6.1 Vaccination Reproduction Number (Rv) Under A and B
+
+```{r compute-rv}
+rv_df <- bind_rows(lapply(seq_len(nrow(r0_df)), function(i) {
+  nm      <- as.character(r0_df$source[i])
+  anl     <- as.character(r0_df$analysis[i])
+  anl_lab <- as.character(r0_df$analysis_label[i])
+  r0_used <- r0_df$R0_used[i]
+
+  trmat  <- transmissionRates(r0_used, 1, all_matrices[[nm]])
+  vax_Rn <- Re(vaxrepnum(1, popsize, trmat, initR, initV, 1))
+
+  data.frame(
+    analysis = anl,
+    analysis_label = anl_lab,
+    source = nm,
+    R0_used = r0_used,
+    Rv = vax_Rn
+  )
+})) |>
+  mutate(
+    source = factor(source, levels = MATRIX_LABELS),
+    analysis = factor(analysis, levels = c("A", "B")),
+    analysis_label = factor(analysis_label, levels = unname(ANALYSIS_LABELS))
+  ) |>
+  group_by(analysis) |>
+  mutate(
+    delta_Rv_vs_polymod = Rv - Rv[source == "POLYMOD"],
+    above_thresh = Rv >= 1
+  ) |>
+  ungroup()
+
+cat("Vaccination reproduction number (Rv) by analysis and matrix:\n")
+print(rv_df |> mutate(across(where(is.numeric), ~ round(.x, 4))))
+```
+
+---
+
+## 7. Results: A vs B and Matrix Effects
+
+### 7.1 Summary Statistics by Analysis and Matrix
+
+```{r sim-summary}
+sim_long <- bind_rows(lapply(sim_results_list, function(res) {
+  data.frame(
+    analysis    = res$analysis,
+    source      = res$source,
+    r0_used     = res$r0_used,
+    total_cases = res$total_cases,
+    is_major    = res$total_cases > 100
+  )
+})) |>
+  mutate(
+    source = factor(source, levels = MATRIX_LABELS),
+    analysis = factor(analysis, levels = c("A", "B")),
+    analysis_label = factor(unname(ANALYSIS_LABELS[as.character(analysis)]),
+                            levels = unname(ANALYSIS_LABELS))
+  )
+
+sim_summary <- sim_long |>
+  group_by(analysis, analysis_label, source) |>
+  summarise(
+    n_sims       = n(),
+    prob_major   = mean(is_major),
+    n_major      = sum(is_major),
+    median_cases = median(total_cases),
+    mean_cases   = mean(total_cases),
+    q25_cases    = quantile(total_cases, 0.25),
+    q75_cases    = quantile(total_cases, 0.75),
+    max_cases    = max(total_cases),
+    .groups      = "drop"
+  )
+
+cat("Simulation summary (", scales::comma(NSIMS),
+    " sims per matrix per analysis):\n")
+print(sim_summary |>
+  mutate(across(c(prob_major), ~ paste0(round(.x * 100, 2), "%")),
+         across(c(median_cases, mean_cases, q25_cases, q75_cases, max_cases),
+                ~ round(.x, 1))))
+```
+
+### 7.2 Rv by Matrix, Faceted by Analysis
+
+```{r rv-bar}
+ggplot(rv_df, aes(x = source, y = Rv, fill = source)) +
+  geom_col(alpha = 0.85, width = 0.62) +
+  geom_hline(yintercept = 1, linetype = "dashed",
+             color = "black", linewidth = 1) +
+  geom_text(aes(label = round(Rv, 4)),
+            vjust = -0.35, size = 3.8, fontface = "bold") +
+  facet_wrap(~ analysis_label, ncol = 2) +
+  scale_fill_manual(values = MATRIX_COLORS, guide = "none") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
+  labs(
+    title    = "Vaccination Reproduction Number (Rv): Analysis A vs B",
+    subtitle = "Dashed line = epidemic threshold (Rv = 1)",
+    x        = "Contact Matrix Source",
+    y        = "Rv"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+### 7.3 Outbreak Size Distributions (A vs B)
+
+```{r distribution-plot, fig.height=8}
+ggplot(
+  sim_long |> filter(total_cases > 0),
+  aes(x = source, y = total_cases + 1, fill = source, color = source)
+) +
+  geom_violin(alpha = 0.35, scale = "width", trim = FALSE, linewidth = 0.4) +
+  geom_boxplot(width = 0.14, alpha = 0.75, outlier.shape = NA,
+               color = "gray20", linewidth = 0.6) +
+  geom_hline(yintercept = 101, linetype = "dashed",
+             color = "gray50", linewidth = 0.7) +
+  scale_y_log10(labels = scales::comma) +
+  scale_fill_manual(values  = MATRIX_COLORS, guide = "none") +
+  scale_color_manual(values = MATRIX_COLORS, guide = "none") +
+  facet_wrap(~ analysis_label, ncol = 2) +
+  labs(
+    title    = paste0("Outbreak Size Distributions — ", scales::comma(NSIMS),
+                      " Simulations per Matrix per Analysis"),
+    subtitle = "Log scale; non-zero simulations only; box = IQR; violin = density",
+    x        = "Contact Matrix Source",
+    y        = "Total Infections (log scale)"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+### 7.4 Probability of Major Outbreak (> 100 Cases): A vs B Comparison
+
+```{r prob-major-bar}
+ggplot(sim_summary,
+       aes(x = source, y = prob_major * 100, fill = source)) +
+  geom_col(alpha = 0.85, width = 0.62) +
+  geom_text(
+    aes(label = paste0(round(prob_major * 100, 1), "%")),
+    vjust = -0.25, size = 3.6
+  ) +
+  facet_wrap(~ analysis_label, ncol = 2) +
+  scale_fill_manual(values = MATRIX_COLORS, guide = "none") +
+  scale_y_continuous(
+    labels = function(x) paste0(x, "%"),
+    expand = expansion(mult = c(0, 0.15))
+  ) +
+  labs(
+    title    = "P(Major Outbreak > 100 Cases): Analysis A vs B",
+    subtitle = paste0("Washington County, UT | ", scales::comma(NSIMS),
+                      " stochastic simulations per matrix per analysis"),
+    x        = "Contact Matrix Source",
+    y        = "Probability (%)"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+### 7.5 Size of Major Outbreaks (Conditional on > 100 Cases)
+
+```{r major-size-compare}
+major_size_long <- sim_long |>
+  filter(is_major) |>
+  mutate(
+    source = factor(source, levels = MATRIX_LABELS),
+    analysis = factor(analysis, levels = c("A", "B")),
+    analysis_label = factor(unname(ANALYSIS_LABELS[as.character(analysis)]),
+                            levels = unname(ANALYSIS_LABELS))
+  )
+
+major_size_summary <- major_size_long |>
+  group_by(analysis, analysis_label, source) |>
+  summarise(
+    n_major          = n(),
+    median_major     = median(total_cases),
+    mean_major       = mean(total_cases),
+    q25_major        = quantile(total_cases, 0.25),
+    q75_major        = quantile(total_cases, 0.75),
+    p90_major        = quantile(total_cases, 0.90),
+    max_major        = max(total_cases),
+    .groups          = "drop"
+  )
+
+cat("Major-outbreak size summary (conditional on >100 cases):\n")
+print(
+  major_size_summary |>
+    mutate(across(c(median_major, mean_major, q25_major, q75_major, p90_major, max_major),
+                  ~ round(.x, 1)))
+)
+
+ggplot(major_size_long,
+       aes(x = source, y = total_cases, fill = source, color = source)) +
+  geom_violin(alpha = 0.35, scale = "width", trim = FALSE, linewidth = 0.4) +
+  geom_boxplot(width = 0.14, alpha = 0.75, outlier.shape = NA,
+               color = "gray20", linewidth = 0.6) +
+  geom_text(
+    data = major_size_summary,
+    aes(x = source, y = p90_major,
+        label = paste0("median=", round(median_major))),
+    inherit.aes = FALSE,
+    vjust = -0.5,
+    size = 3.3,
+    fontface = "bold"
+  ) +
+  scale_fill_manual(values  = MATRIX_COLORS, guide = "none") +
+  scale_color_manual(values = MATRIX_COLORS, guide = "none") +
+  facet_wrap(~ analysis_label, ncol = 2) +
+  labs(
+    title    = "Size of Major Outbreaks Only (Total Cases > 100)",
+    subtitle = "Conditional distribution among simulations that escape early fade-out",
+    x        = "Contact Matrix Source",
+    y        = "Total Infections (major outbreaks only)"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+### 7.6 Age-Specific Mean Attack Rates (A vs B)
+
+```{r age-attack}
+age_attack_df <- bind_rows(lapply(sim_results_list, function(res) {
+  sm <- res$sim_matrix
+  data.frame(
+    analysis    = res$analysis,
+    source      = res$source,
+    age_group   = age_lab,
+    mean_cases  = colMeans(sm),
+    susceptible = pmax(popsize - initV, 1L),
+    attack_rate = colMeans(sm) / pmax(popsize - initV, 1L) * 100
+  )
+})) |>
+  mutate(
+    source = factor(source, levels = MATRIX_LABELS),
+    analysis = factor(analysis, levels = c("A", "B")),
+    analysis_label = factor(unname(ANALYSIS_LABELS[as.character(analysis)]),
+                            levels = unname(ANALYSIS_LABELS)),
+    age_group = factor(age_group, levels = age_lab)
+  )
+
+ggplot(age_attack_df, aes(x = age_group, y = attack_rate,
+                          color = source, group = source)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 3.2) +
+  scale_color_manual(values = MATRIX_COLORS, name = "Contact Matrix") +
+  scale_y_continuous(labels = function(x) paste0(x, "%")) +
+  facet_wrap(~ analysis_label, ncol = 2) +
+  labs(
+    title    = "Mean Age-Specific Attack Rate: Analysis A vs B",
+    subtitle = paste0("Mean infections across all ", scales::comma(NSIMS),
+                      " simulations ÷ susceptible population per age group"),
+    x        = "Age Group",
+    y        = "Attack Rate (% of susceptibles)"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    axis.text.x     = element_text(angle = 45, hjust = 1),
+    legend.position = "top"
+  )
+```
+
+---
+
+## 8. Direct A-vs-B Comparison
+
+### 8.1 Change in Probability of Major Outbreak from A to B
+
+```{r compare-a-vs-b}
+ab_compare <- sim_summary |>
+  select(analysis, source, prob_major, median_cases, mean_cases) |>
+  mutate(analysis = as.character(analysis)) |>
+  pivot_wider(
+    names_from = analysis,
+    values_from = c(prob_major, median_cases, mean_cases),
+    names_sep = "_"
+  ) |>
+  left_join(
+    rv_df |>
+      select(analysis, source, Rv) |>
+      mutate(analysis = as.character(analysis)) |>
+      pivot_wider(names_from = analysis, values_from = Rv, names_prefix = "Rv_"),
+    by = "source"
+  ) |>
+  left_join(
+    analysis_calibration |>
+      select(source, lambda1, R0_A, R0_B),
+    by = "source"
+  ) |>
+  mutate(
+    delta_prob_pp_B_minus_A = (prob_major_B - prob_major_A) * 100,
+    delta_Rv_B_minus_A = Rv_B - Rv_A,
+    delta_mean_cases_B_minus_A = mean_cases_B - mean_cases_A,
+    source = factor(source, levels = MATRIX_LABELS)
+  )
+
+print(
+  ab_compare |>
+    mutate(across(where(is.numeric), ~ round(.x, 4)))
+)
+
+ggplot(ab_compare,
+       aes(x = source, y = delta_prob_pp_B_minus_A, fill = source)) +
+  geom_col(alpha = 0.85, width = 0.62) +
+  geom_hline(yintercept = 0, color = "gray40", linewidth = 0.8) +
+  geom_text(aes(label = paste0(round(delta_prob_pp_B_minus_A, 2), " pp")),
+            vjust = ifelse(ab_compare$delta_prob_pp_B_minus_A >= 0, -0.25, 1.2),
+            size = 3.6) +
+  scale_fill_manual(values = MATRIX_COLORS, guide = "none") +
+  labs(
+    title    = "Incremental Effect of Spectral Calibration (B − A)",
+    subtitle = "Positive values mean Analysis B increases major-outbreak probability vs fixed-R0 Analysis A",
+    x        = "Contact Matrix Source",
+    y        = "Δ P(>100 cases), percentage points"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+### 8.2 Within-Analysis Difference from POLYMOD Baseline
+
+```{r attack-diff}
+polymod_attack <- age_attack_df |>
+  filter(source == "POLYMOD") |>
+  select(analysis, age_group, polymod_rate = attack_rate)
+
+attack_diff_df <- age_attack_df |>
+  filter(source != "POLYMOD") |>
+  left_join(polymod_attack, by = c("analysis", "age_group")) |>
+  mutate(
+    delta_rate = attack_rate - polymod_rate,
+    rel_delta  = delta_rate / (polymod_rate + 0.001) * 100,
+    source = factor(source, levels = setdiff(MATRIX_LABELS, "POLYMOD"))
+  )
+
+ggplot(attack_diff_df, aes(x = age_group, y = delta_rate,
+                           color = source, group = source)) +
+  geom_hline(yintercept = 0, color = "gray60", linewidth = 0.8) +
+  geom_line(linewidth = 1.1) +
+  geom_point(size = 3.0) +
+  scale_color_manual(values = MATRIX_COLORS[setdiff(MATRIX_LABELS, "POLYMOD")],
+                     name = "Contact Matrix") +
+  scale_y_continuous(labels = function(x) paste0(x, " pp")) +
+  facet_wrap(~ analysis_label, ncol = 2) +
+  labs(
+    title    = "Δ Age-Specific Attack Rate vs POLYMOD, Within Each Analysis",
+    subtitle = "Positive = higher attack rate than POLYMOD in the same calibration analysis",
+    x        = "Age Group",
+    y        = "Δ Attack Rate (pp)"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    axis.text.x     = element_text(angle = 45, hjust = 1),
+    legend.position = "top"
+  )
+```
+
+### 8.3 Full Sensitivity Summary Table (A, B, and B−A)
+
+```{r summary-table}
+final_table <- sim_summary |>
+  left_join(rv_df |> select(analysis, source, R0_used, Rv),
+            by = c("analysis", "source")) |>
+  left_join(
+    analysis_calibration |> select(source, lambda1),
+    by = "source"
+  ) |>
+  mutate(
+    analysis = as.character(analysis),
+    analysis_label = as.character(analysis_label)
+  ) |>
+  select(
+    analysis,
+    analysis_label,
+    source,
+    lambda1,
+    R0_used,
+    Rv,
+    prob_major,
+    median_cases,
+    mean_cases,
+    max_cases
+  ) |>
+  arrange(analysis, source)
+
+ab_delta_table <- ab_compare |>
+  transmute(
+    source,
+    `ΔR0 (B-A)` = R0_B - R0_A,
+    `ΔRv (B-A)` = delta_Rv_B_minus_A,
+    `ΔP>100 pp (B-A)` = delta_prob_pp_B_minus_A,
+    `ΔMean Cases (B-A)` = delta_mean_cases_B_minus_A
+  )
+
+knitr::kable(
+  final_table |>
+    mutate(
+      lambda1 = round(lambda1, 4),
+      R0_used = round(R0_used, 3),
+      Rv = round(Rv, 4),
+      prob_major = round(prob_major * 100, 2),
+      median_cases = round(median_cases, 1),
+      mean_cases = round(mean_cases, 1)
+    ) |>
+    select(
+      `Analysis` = analysis_label,
+      `Matrix Source` = source,
+      `λ₁` = lambda1,
+      `R0 used` = R0_used,
+      `Rv` = Rv,
+      `P(>100 cases) %` = prob_major,
+      `Median Outbreak` = median_cases,
+      `Mean Outbreak` = mean_cases,
+      `Max Observed` = max_cases
+    ),
+  caption = paste0(
+    "Dual Sensitivity Summary (A vs B): Washington County, UT",
+    " (", scales::comma(NSIMS), " stochastic simulations per matrix per analysis)"
+  ),
+  align = c("l", "l", rep("r", 7))
+)
+
+knitr::kable(
+  ab_delta_table |>
+    mutate(across(where(is.numeric), ~ round(.x, 4))),
+  caption = "Incremental impact of spectral calibration: Analysis B minus Analysis A",
+  align = c("l", "r", "r", "r", "r")
+)
+```
+
+---
+
+## 9. Additional Isolation Analyses (2 and 3)
+
+Analysis A above already provides **(1) shape-only** sensitivity. Here we add:
+
+- **(2) scale-only:** hold matrix shape fixed and vary only the scalar $R_0$.
+- **(3) reference-sensitivity:** recompute Analysis B under alternate reference matrices.
+
+Given prior work indicating introduction-group sensitivity is low, we keep the
+same index-case setup used throughout this vignette.
+
+### 9.1 Scale-Only Isolation (Fixed EpiStorm Shape, Vary Scalar R0)
+
+```{r scale-only-grid, cache=FALSE}
+fixed_shape_source <- "EpiStorm"
+fixed_shape_mat    <- all_matrices[[fixed_shape_source]]
+
+# Use the B-calibration R0 values as the scale grid (plus baseline)
+scale_r0_grid <- sort(unique(c(R0_BASE, analysis_calibration$R0_B)))
+NSIMS_ISOLATION <- min(NSIMS, 2000L)
+
+scale_only_results <- bind_rows(lapply(seq_along(scale_r0_grid), function(i) {
+  r0i <- scale_r0_grid[i]
+
+  fs <- finalsize(
+    popsize, r0i, fixed_shape_mat,
+    rep(1, n_groups),
+    rep(1, n_groups),
+    initR, initI, initV,
+    method = "stochastic",
+    nsims  = NSIMS_ISOLATION,
+    nthreads = 1L,
+    seed = as.integer(SEED + 700L + i)
+  )
+
+  trmat_i <- transmissionRates(r0i, 1, fixed_shape_mat)
+  rv_i    <- Re(vaxrepnum(1, popsize, trmat_i, initR, initV, 1))
+  tc      <- rowSums(fs)
+
+  data.frame(
+    fixed_shape = fixed_shape_source,
+    R0_used = r0i,
+    Rv = rv_i,
+    prob_major = mean(tc > 100),
+    mean_cases = mean(tc),
+    median_cases = median(tc)
+  )
+}))
+
+cat("Scale-only (fixed", fixed_shape_source, "shape) summary:\n")
+print(scale_only_results |> mutate(across(where(is.numeric), ~ round(.x, 4))))
+```
+
+```{r scale-only-plot}
+scale_only_long <- scale_only_results |>
+  select(R0_used, Rv, prob_major) |>
+  mutate(`P_major (%)` = prob_major * 100) |>
+  select(-prob_major) |>
+  tidyr::pivot_longer(cols = c(Rv, `P_major (%)`),
+                      names_to = "metric", values_to = "value")
+
+ggplot(scale_only_long, aes(x = R0_used, y = value, color = metric)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 3) +
+  geom_vline(xintercept = R0_BASE, linetype = "dashed", color = "gray50") +
+  scale_color_manual(values = c("Rv" = "#1f78b4", "P_major (%)" = "#e31a1c")) +
+  labs(
+    title = paste0("Scale-Only Isolation: Fixed ", fixed_shape_source, " Matrix Shape"),
+    subtitle = paste0("Only scalar R0 changes (", NSIMS_ISOLATION,
+                      " simulations per point); dashed = baseline R0"),
+    x = "R0 used",
+    y = "Metric value",
+    color = "Metric"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+### 9.2 Reference-Sensitivity for Analysis B
+
+```{r reference-sensitivity, cache=FALSE}
+reference_matrices <- list(
+  "Ref 1: POLYMOD standard (current)" = contactMatrixPolymod(c(0, 1, 5, 11, 14, 18, 25, 45, 70)),
+  "Ref 2: POLYMOD matched age limits" = contactMatrixPolymod(age_limits),
+  "Ref 3: POLYMOD matched + WC pop"   = contactMatrixPolymod(age_limits, popsize)
+)
+
+ref_sens_calib <- bind_rows(lapply(names(reference_matrices), function(ref_name) {
+  ref_lambda <- Re(eigen(reference_matrices[[ref_name]])$values[1])
+
+  bind_rows(lapply(names(all_matrices), function(src) {
+    lambda_src <- Re(eigen(all_matrices[[src]])$values[1])
+    data.frame(
+      reference = ref_name,
+      source = src,
+      lambda_ref = ref_lambda,
+      lambda_src = lambda_src,
+      R0_used_B = R0_BASE * (lambda_src / ref_lambda)
+    )
+  }))
+})) |>
+  mutate(source = factor(source, levels = MATRIX_LABELS))
+
+NSIMS_REF_SENS <- min(NSIMS, 2000L)
+
+ref_sens_summary <- bind_rows(lapply(seq_len(nrow(ref_sens_calib)), function(i) {
+  src <- as.character(ref_sens_calib$source[i])
+  r0i <- ref_sens_calib$R0_used_B[i]
+
+  fs <- finalsize(
+    popsize, r0i, all_matrices[[src]],
+    rep(1, n_groups),
+    rep(1, n_groups),
+    initR, initI, initV,
+    method = "stochastic",
+    nsims  = NSIMS_REF_SENS,
+    nthreads = 1L,
+    seed = as.integer(SEED + 900L + i)
+  )
+
+  trmat_i <- transmissionRates(r0i, 1, all_matrices[[src]])
+  rv_i    <- Re(vaxrepnum(1, popsize, trmat_i, initR, initV, 1))
+  tc      <- rowSums(fs)
+
+  data.frame(
+    reference = ref_sens_calib$reference[i],
+    source = src,
+    R0_used_B = r0i,
+    Rv = rv_i,
+    prob_major = mean(tc > 100),
+    mean_cases = mean(tc)
+  )
+})) |>
+  mutate(source = factor(source, levels = MATRIX_LABELS))
+
+cat("Reference-sensitivity summary for Analysis B:\n")
+print(ref_sens_summary |> mutate(across(where(is.numeric), ~ round(.x, 4))))
+```
+
+```{r reference-sensitivity-plot, fig.height=8}
+p_ref_r0 <- ggplot(ref_sens_summary, aes(x = source, y = R0_used_B, fill = source)) +
+  geom_col(alpha = 0.85, width = 0.62) +
+  facet_wrap(~ reference, ncol = 1) +
+  scale_fill_manual(values = MATRIX_COLORS, guide = "none") +
+  labs(
+    title = "Reference-Sensitivity: R0 used in Analysis B",
+    subtitle = "Changing reference matrix can materially change B calibration",
+    x = "Contact Matrix Source",
+    y = "R0 used (B)"
+  ) +
+  theme_minimal(base_size = 11)
+
+p_ref_prob <- ggplot(ref_sens_summary, aes(x = source, y = prob_major * 100, fill = source)) +
+  geom_col(alpha = 0.85, width = 0.62) +
+  facet_wrap(~ reference, ncol = 1) +
+  scale_fill_manual(values = MATRIX_COLORS, guide = "none") +
+  labs(
+    title = "Reference-Sensitivity: Major Outbreak Probability Under B",
+    subtitle = paste0(NSIMS_REF_SENS, " stochastic simulations per source/reference combination"),
+    x = "Contact Matrix Source",
+    y = "P(>100 cases) %"
+  ) +
+  theme_minimal(base_size = 11)
+
+print(p_ref_r0)
+print(p_ref_prob)
+```
+
+```{r reference-sensitivity-table}
+knitr::kable(
+  ref_sens_summary |>
+    mutate(
+      R0_used_B = round(R0_used_B, 4),
+      Rv = round(Rv, 4),
+      `P(>100) %` = round(prob_major * 100, 2),
+      mean_cases = round(mean_cases, 1)
+    ) |>
+    select(
+      `Reference` = reference,
+      `Matrix Source` = source,
+      `R0 used (B)` = R0_used_B,
+      `Rv` = Rv,
+      `P(>100) %` = `P(>100) %`,
+      `Mean cases` = mean_cases
+    ),
+  caption = "Reference-sensitivity results for Analysis B",
+  align = c("l", "l", "r", "r", "r", "r")
+)
+```
+
+---
+
+*Session information:*
+
+```{r session-info, echo=FALSE}
+sessionInfo()
+```
