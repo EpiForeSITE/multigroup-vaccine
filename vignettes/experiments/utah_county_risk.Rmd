@@ -47,10 +47,43 @@ if (length(existing_bundle) == 0) {
 bundle_path <- existing_bundle[1]
 load(bundle_path)
 
+if (!exists("county_static_metrics")) {
+  static_metric_candidates <- c(
+    file.path("outputs", "utah_county_risk", "county_static_metrics.csv"),
+    file.path("..", "outputs", "utah_county_risk", "county_static_metrics.csv"),
+    file.path("..", "..", "outputs", "utah_county_risk", "county_static_metrics.csv"),
+    file.path("..", "..", "..", "outputs", "utah_county_risk", "county_static_metrics.csv")
+  )
+
+  existing_static_metrics <- static_metric_candidates[file.exists(static_metric_candidates)]
+  if (length(existing_static_metrics) > 0) {
+    county_static_metrics <- read.csv(existing_static_metrics[1], stringsAsFactors = FALSE)
+  }
+}
+
+if (!exists("large_outbreak_threshold_frac")) {
+  large_outbreak_threshold_frac <- 0.01
+}
+
+if (!exists("large_outbreak_min_cases")) {
+  large_outbreak_min_cases <- 20
+}
+
+if (!"prob_large_outbreak" %in% names(stochastic_results) &&
+    "prob_major_outbreak" %in% names(stochastic_results)) {
+  stochastic_results$prob_large_outbreak <- stochastic_results$prob_major_outbreak
+}
+
+if (!"large_outbreak_threshold_cases" %in% names(stochastic_results) &&
+    "susceptible_population" %in% names(stochastic_results)) {
+  stochastic_results$large_outbreak_threshold_cases <- stochastic_results$susceptible_population * large_outbreak_threshold_frac
+}
+
 required_objects <- c(
   "stochastic_results",
   "simulation_stats_by_county",
   "simulation_stats_statewide",
+  "county_static_metrics",
   "R0_baseline",
   "R0_baseline_range",
   "nsims_stochastic"
@@ -64,220 +97,248 @@ cat("Loaded:", normalizePath(bundle_path), "\n")
 cat("Rows in stochastic_results:", nrow(stochastic_results), "\n")
 ```
 
-## 2. Internal Scoring Design
+## 2. Tunable Scoring Design
 
-At this stage, outputs are internal and county-resolved. We still use a relative formulation so scores communicate comparative risk, not deterministic forecasts.
+This notebook now emphasizes directly interpretable outputs first and uses simple,
+tunable score formulas only as an optional summary layer. The main goal is to
+avoid hiding epidemiologically meaningful quantities behind percentile ranks.
 
-### Decision Guide (Briefing Use)
+### Decision Guide
 
-- Use `risk_relative_mean1` for county-level interpretation within a given baseline $R_0$ scenario.
-- Use `risk_latent` trends across $R_0$ values to understand how risk structure shifts as transmissibility assumptions change.
-- Treat scores as comparative indicators, not forecasts of exact outbreak counts.
-- Use component contributions (`burden_weighted`, `major_weighted`, `transmission_weighted`, `tail_weighted`) to explain *why* a county is elevated.
+- Use the raw metrics in the exported CSV whenever possible: `school_vax_rate`, `county_immunity_pct`, `county_susceptible_pct`, `vax_repnum`, `prob_large_outbreak`, and `expected_cases_per_10k`.
+- Use `vulnerability_score` to answer "how favorable are conditions for sustained transmission here?"
+- Use `priority_score` to answer "where would an outbreak create the most operational burden?"
+
+### Tunable Parameters
+
+The composite scores are defined with explicit caps and weights so the influence
+of each raw metric can be adjusted transparently.
+
+```{r score-parameters}
+score_params <- list(
+  large_outbreak_threshold_frac = large_outbreak_threshold_frac,
+  large_outbreak_min_cases = large_outbreak_min_cases,
+  rv_excess_cap = 1.0,
+  susceptible_pct_cap = 0.15,
+  per_10k_population_floor = 10000,
+  expected_cases_per_10k_cap = 100,
+  tail_cases_per_10k_cap = 250,
+  expected_cases_cap = 250,
+  p95_cases_cap = 500,
+  weights_vulnerability = c(transmission = 0.50, outbreak = 0.30, susceptibility = 0.20),
+  weights_priority = c(expected = 0.35, tail = 0.25, outbreak = 0.20, transmission = 0.20)
+)
+
+weight_sets <- score_params[c("weights_vulnerability", "weights_priority")]
+for (weight_name in names(weight_sets)) {
+  if (abs(sum(weight_sets[[weight_name]]) - 1) > 1e-9) {
+    stop(paste("Weight set does not sum to 1:", weight_name))
+  }
+}
+
+cap01 <- function(x, cap) {
+  ifelse(is.na(x), 0, pmin(x / cap, 1))
+}
+```
 
 ### Assumptions and Limitations
 
-- Weights are heuristic (`0.35/0.35/0.20/0.10`) and encode policy judgment about component importance.
-- `percentile01` is rank-based: it preserves ordering, not absolute distance between counties.
-- Missing component values are replaced with `0` before percentile ranking.
-- Relative scores are scenario-specific; they should not be interpreted as absolute risk probabilities.
-- Results depend on simulation design choices (seed distribution, $k$ threshold for major outbreaks, and modeled vaccine effects).
+- Caps are policy choices, not inferred epidemiologic constants.
+- `vulnerability_score` and `priority_score` are decision-support summaries, not mechanistic parameters.
+- `prob_large_outbreak` depends on the chosen threshold, currently `max(1% of susceptible population, 20 cases)`.
+- Population-normalized burden metrics are stabilized with a population floor so tiny counties do not dominate the score simply because a few cases translate to extreme per-10k values.
+- `tail_cases_per_10k` is still a Monte Carlo tail estimate and therefore noisier than means.
 
-## 3. Relative Risk Score Formulation
+## 3. Simple Risk Score Formulation
 
-For county $c$ in baseline scenario $r$, define four normalized components:
+For county $c$ in baseline scenario $r$, define capped components:
 
 $$
 \begin{aligned}
-B_{c,r} &= \text{percentile01}\left(\log(1 + \text{expected cases per 10k})\right) \\
-M_{c,r} &= \text{percentile01}\left(P(\text{outbreak} > k)\right) \\
-E_{c,r} &= \text{percentile01}\left(\max(R_v - 1, 0)\right) \\
-T_{c,r} &= \text{percentile01}\left(\log(1 + q_{95}(\text{cases per 10k}))\right)
+V_{c,r} &= \min\left(\frac{\max(R_v - 1, 0)}{c_{Rv}}, 1\right) \\
+O_{c,r} &= P(\text{outbreak exceeds threshold}) \\
+S_{c,r} &= \min\left(\frac{\text{susceptible \%}}{c_S}, 1\right) \\
+E_{c,r} &= \min\left(\frac{\text{expected cases}}{c_E}, 1\right) \\
+T_{c,r} &= \min\left(\frac{q_{95}(\text{cases})}{c_T}, 1\right)
 \end{aligned}
 $$
 
-`percentile01` converts each county's raw metric into a simple relative position from 0 to 1, compared only against other counties in the same baseline $R_0$ scenario.
+These are easier to interpret than percentile ranks and let the two scores answer different questions:
 
-1. Take one metric (for example, major-outbreak probability) and sort counties from lowest to highest.
-2. Convert each county's position in that sorted list to a 0-1 scale.
-3. Use that 0-1 value in the weighted score.
+- $V$: how far above the herd-immunity threshold the county is
+- $O$: how often an introduction grows into a large outbreak
+- $S$: susceptible population share scaled to a chosen cap
+- $E$: expected outbreak size in total cases
+- $T$: high-end outbreak size in total cases
 
-So for a given component, a county near `0` is near the low end among peers, a county near `1` is near the high end, and `0.5` is around the middle.
-
-Mathematically, for component value $x_{c,r}$:
-
-$$
-\operatorname{percentile01}(x_{c,r}) = \frac{\operatorname{rank}_r(\widetilde{x}_{c,r}) - 1}{N_r - 1},
-\qquad
-\widetilde{x}_{c,r} =
-\begin{cases}
-x_{c,r}, & x_{c,r}\neq \mathrm{NA} \\
-0, & x_{c,r}=\mathrm{NA}
-\end{cases}
-$$
-
-with $N_r$ counties in scenario $r$. This maps values to $[0,1]$ (lowest $\to 0$, highest $\to 1$), and tied values receive the same percentile rank.
-
-With weights $w_B=0.35$, $w_M=0.35$, $w_E=0.20$, $w_T=0.10$:
+We then define two transparent score variants:
 
 $$
-S_{c,r} = w_B B_{c,r} + w_M M_{c,r} + w_E E_{c,r} + w_T T_{c,r}
+\text{Vulnerability}_{c,r} = 0.50V_{c,r} + 0.30O_{c,r} + 0.20S_{c,r}
 $$
 
-The primary internal metric is normalized so county mean risk is 1.0 within each baseline $R_0$ scenario:
-
 $$
-\operatorname{RiskRelative}_{c,r} = \frac{S_{c,r}}{\mu_r}
+\text{Priority}_{c,r} = 0.35E_{c,r} + 0.25T_{c,r} + 0.20O_{c,r} + 0.20V_{c,r}
 $$
-
-So a value of 1.2 means 20% higher modeled risk than the scenario mean, and 0.8 means 20% lower.
-
-For standardized reporting, we also compute
-
-$$
-\operatorname{RiskZ}_{c,r} = \frac{S_{c,r} - \mu_r}{\sigma_r}
-$$
-
-where $\mu_r,\sigma_r$ are county-level mean and SD of $S_{c,r}$ within scenario $r$.
-
-### Worked Example (One County)
-
-Suppose one county has component percentiles:
-
-- $B_{c,r}=0.70$, $M_{c,r}=0.60$, $E_{c,r}=0.20$, $T_{c,r}=0.50$
-
-Then:
-
-$$
-S_{c,r} = 0.35(0.70) + 0.35(0.60) + 0.20(0.20) + 0.10(0.50) = 0.545
-$$
-
-If the scenario mean latent score is $\mu_r=0.50$, then
-
-$$
-\operatorname{RiskRelative}_{c,r} = \frac{0.545}{0.50} = 1.09
-$$
-
-Interpretation: this county is about 9% above the scenario-average modeled risk level.
-
-### Why These Four Weighted Variables
-
-- **Burden component ($w_B=0.35$)**: captures expected impact size while normalizing by population; answers "how much total burden might this county see relative to peers?"
-- **Major outbreak probability ($w_M=0.35$)**: captures event likelihood; answers "how likely is a non-trivial outbreak to occur at all?"
-- **Escape/transmission component ($w_E=0.20$)**: uses $\max(R_v - 1, 0)$ to represent escape risk beyond herd-immunity threshold; answers "is sustained transmission still plausible?"
-- **Tail severity component ($w_T=0.10$)**: uses the upper-tail quantile ($q_{95}$) to retain rare-but-severe behavior; answers "how bad can outcomes get in adverse realizations?"
-
-The weighting prioritizes expected burden and major-outbreak likelihood, while still retaining mechanistic escape risk and severe-tail information.
 
 ```{r risk-formulation}
-# Join simulation summary and tail statistics
 risk_input <- stochastic_results %>%
   left_join(
     simulation_stats_by_county %>%
       select(baseline_R0, county, p95_cases),
     by = c("baseline_R0", "county")
   ) %>%
+  left_join(
+    county_static_metrics %>%
+      select(
+        county,
+        school_vax_rate,
+        total_enrolled,
+        total_vaccinated,
+        immune_population,
+        static_susceptible_population = susceptible_population,
+        county_immunity_pct,
+        county_susceptible_pct,
+        R0_factor
+      ),
+    by = "county"
+  ) %>%
   mutate(
+    p95_cases = replace_na(p95_cases, 0),
+    susceptible_population = coalesce(susceptible_population, static_susceptible_population),
+    large_outbreak_threshold_cases = pmax(
+      coalesce(
+        large_outbreak_threshold_cases,
+        susceptible_population * large_outbreak_threshold_frac
+      ),
+      large_outbreak_min_cases
+    ),
+    population_for_rate = pmax(population, score_params$per_10k_population_floor),
     expected_cases_per_10k = ifelse(population > 0, expected_cases / population * 10000, 0),
     tail_cases_per_10k = ifelse(population > 0, p95_cases / population * 10000, 0),
-    rv_excess = pmax(vax_repnum - 1, 0)
+    expected_cases_per_10k_stabilized = expected_cases / population_for_rate * 10000,
+    tail_cases_per_10k_stabilized = p95_cases / population_for_rate * 10000,
+    rv_excess = pmax(vax_repnum - 1, 0),
+    vulnerability_transmission_component = cap01(rv_excess, score_params$rv_excess_cap),
+    vulnerability_outbreak_component = replace_na(prob_large_outbreak, 0),
+    vulnerability_susceptibility_component = cap01(county_susceptible_pct, score_params$susceptible_pct_cap),
+    priority_expected_component = cap01(expected_cases, score_params$expected_cases_cap),
+    priority_tail_component = cap01(p95_cases, score_params$p95_cases_cap),
+    priority_outbreak_component = replace_na(prob_large_outbreak, 0),
+    priority_transmission_component = cap01(rv_excess, score_params$rv_excess_cap)
   )
 
-# Percentile-rank scaling helper (robust to scale and outliers)
-percentile01 <- function(x) {
-  dplyr::percent_rank(replace_na(x, 0))
-}
-
-# Weight set (sum should be 1)
-weights <- c(
-  burden = 0.35,
-  major = 0.35,
-  transmission = 0.20,
-  tail = 0.10
-)
-
-if (abs(sum(weights) - 1) > 1e-9) {
-  stop("Risk weights must sum to 1.")
-}
-
 risk_scores_internal <- risk_input %>%
+  mutate(
+    vulnerability_transmission_weighted =
+      score_params$weights_vulnerability[["transmission"]] * vulnerability_transmission_component,
+    vulnerability_outbreak_weighted =
+      score_params$weights_vulnerability[["outbreak"]] * vulnerability_outbreak_component,
+    vulnerability_susceptibility_weighted =
+      score_params$weights_vulnerability[["susceptibility"]] * vulnerability_susceptibility_component,
+    priority_expected_weighted =
+      score_params$weights_priority[["expected"]] * priority_expected_component,
+    priority_tail_weighted =
+      score_params$weights_priority[["tail"]] * priority_tail_component,
+    priority_outbreak_weighted =
+      score_params$weights_priority[["outbreak"]] * priority_outbreak_component,
+    priority_transmission_weighted =
+      score_params$weights_priority[["transmission"]] * priority_transmission_component,
+    vulnerability_score =
+      vulnerability_transmission_weighted +
+      vulnerability_outbreak_weighted +
+      vulnerability_susceptibility_weighted,
+    priority_score =
+      priority_expected_weighted +
+      priority_tail_weighted +
+      priority_outbreak_weighted +
+      priority_transmission_weighted
+  ) %>%
   group_by(baseline_R0) %>%
   mutate(
-    burden_component = percentile01(log1p(expected_cases_per_10k)),
-    major_component = percentile01(prob_major_outbreak),
-    transmission_component = percentile01(rv_excess),
-    tail_component = percentile01(log1p(tail_cases_per_10k)),
-    risk_latent =
-      weights[["burden"]] * burden_component +
-      weights[["major"]] * major_component +
-      weights[["transmission"]] * transmission_component +
-      weights[["tail"]] * tail_component,
-    latent_center = mean(risk_latent, na.rm = TRUE),
-    latent_scale = sd(risk_latent, na.rm = TRUE),
-    risk_relative_mean1 = ifelse(latent_center > 0, risk_latent / latent_center, 1),
-    risk_relative_latent = risk_relative_mean1,
-    risk_relative_z = ifelse(latent_scale > 0, (risk_latent - latent_center) / latent_scale, 0),
-    burden_weighted = weights[["burden"]] * burden_component,
-    major_weighted = weights[["major"]] * major_component,
-    transmission_weighted = weights[["transmission"]] * transmission_component,
-    tail_weighted = weights[["tail"]] * tail_component
+    vulnerability_score_center = mean(vulnerability_score, na.rm = TRUE),
+    vulnerability_score_scale = sd(vulnerability_score, na.rm = TRUE),
+    vulnerability_relative_mean1 = ifelse(vulnerability_score_center > 0, vulnerability_score / vulnerability_score_center, 1),
+    vulnerability_relative_z = ifelse(vulnerability_score_scale > 0, (vulnerability_score - vulnerability_score_center) / vulnerability_score_scale, 0),
+    priority_score_center = mean(priority_score, na.rm = TRUE),
+    priority_score_scale = sd(priority_score, na.rm = TRUE),
+    priority_relative_mean1 = ifelse(priority_score_center > 0, priority_score / priority_score_center, 1),
+    priority_relative_z = ifelse(priority_score_scale > 0, (priority_score - priority_score_center) / priority_score_scale, 0)
   ) %>%
   ungroup()
 ```
 
 ## 4. Internal Per-County Breakdown (Restricted)
 
-This table is intended for internal analysis only and includes county-level metrics and each weighted score component.
+This table now shows raw metrics, capped score inputs, and the two primary score variants.
 
 ```{r county-breakdown-internal}
 risk_county_breakdown_baseline <- risk_scores_internal %>%
   filter(baseline_R0 == R0_baseline) %>%
-  arrange(desc(risk_relative_mean1)) %>%
+  arrange(desc(vulnerability_score), desc(priority_score)) %>%
   transmute(
     county,
     population,
+    school_vax_rate,
+    county_immunity_pct,
+    county_susceptible_pct,
+    susceptible_population,
+    large_outbreak_threshold_cases,
+    vax_repnum,
+    rv_excess,
+    prob_large_outbreak,
     expected_cases,
     expected_cases_per_10k,
-    prob_major_outbreak,
-    vax_repnum,
+    expected_cases_per_10k_stabilized,
     p95_cases,
     tail_cases_per_10k,
-    burden_component,
-    major_component,
-    transmission_component,
-    tail_component,
-    burden_weighted,
-    major_weighted,
-    transmission_weighted,
-    tail_weighted,
-    risk_latent,
-    risk_relative_latent,
-    risk_relative_mean1,
-    risk_relative_z
+    tail_cases_per_10k_stabilized,
+    vulnerability_transmission_component,
+    vulnerability_outbreak_component,
+    vulnerability_susceptibility_component,
+    priority_expected_component,
+    priority_tail_component,
+    priority_outbreak_component,
+    priority_transmission_component,
+    vulnerability_score,
+    priority_score,
+    vulnerability_relative_mean1,
+    vulnerability_relative_z,
+    priority_relative_mean1,
+    priority_relative_z
   )
 
 knitr::kable(
   risk_county_breakdown_baseline %>%
     mutate(
       population = comma(population),
+      school_vax_rate = round(school_vax_rate, 3),
+      county_immunity_pct = round(county_immunity_pct, 3),
+      county_susceptible_pct = round(county_susceptible_pct, 3),
+      susceptible_population = comma(susceptible_population),
+      large_outbreak_threshold_cases = round(large_outbreak_threshold_cases, 1),
+      vax_repnum = round(vax_repnum, 3),
+      rv_excess = round(rv_excess, 3),
+      prob_large_outbreak = round(prob_large_outbreak, 4),
       expected_cases = round(expected_cases, 2),
       expected_cases_per_10k = round(expected_cases_per_10k, 3),
-      prob_major_outbreak = round(prob_major_outbreak, 4),
-      vax_repnum = round(vax_repnum, 4),
+      expected_cases_per_10k_stabilized = round(expected_cases_per_10k_stabilized, 3),
       p95_cases = round(p95_cases, 1),
       tail_cases_per_10k = round(tail_cases_per_10k, 3),
-      burden_component = round(burden_component, 3),
-      major_component = round(major_component, 3),
-      transmission_component = round(transmission_component, 3),
-      tail_component = round(tail_component, 3),
-      burden_weighted = round(burden_weighted, 3),
-      major_weighted = round(major_weighted, 3),
-      transmission_weighted = round(transmission_weighted, 3),
-      tail_weighted = round(tail_weighted, 3),
-      risk_latent = round(risk_latent, 3),
-      risk_relative_latent = round(risk_relative_latent, 3),
-      risk_relative_mean1 = round(risk_relative_mean1, 3),
-      risk_relative_z = round(risk_relative_z, 3)
+      tail_cases_per_10k_stabilized = round(tail_cases_per_10k_stabilized, 3),
+      vulnerability_transmission_component = round(vulnerability_transmission_component, 3),
+      vulnerability_outbreak_component = round(vulnerability_outbreak_component, 3),
+      vulnerability_susceptibility_component = round(vulnerability_susceptibility_component, 3),
+      priority_expected_component = round(priority_expected_component, 3),
+      priority_tail_component = round(priority_tail_component, 3),
+      priority_outbreak_component = round(priority_outbreak_component, 3),
+      priority_transmission_component = round(priority_transmission_component, 3),
+      vulnerability_score = round(vulnerability_score, 3),
+      priority_score = round(priority_score, 3),
+      vulnerability_relative_mean1 = round(vulnerability_relative_mean1, 3),
+      vulnerability_relative_z = round(vulnerability_relative_z, 3),
+      priority_relative_mean1 = round(priority_relative_mean1, 3),
+      priority_relative_z = round(priority_relative_z, 3)
     ),
   caption = paste0("Internal county-level metric breakdown for baseline R0 = ", R0_baseline)
 )
@@ -285,74 +346,146 @@ knitr::kable(
 
 ## 5. Risk Score Definitions
 
-The model reports several risk score variants for complementary purposes:
+The model now reports two primary score variants:
 
-- `risk_latent`: the primary weighted composite score, defined as
-  $$
-  S_{c,r} = w_B B_{c,r} + w_M M_{c,r} + w_E E_{c,r} + w_T T_{c,r}
-  $$
-  where larger values indicate higher modeled relative risk burden for that county/scenario.
-- `risk_relative_latent` and `risk_relative_mean1`: mean-normalized latent score within each baseline $R_0$,
-  $$
-  \frac{S_{c,r}}{\mu_r}
-  $$
-  so `1.0` is the scenario mean, `1.2` is 20% above mean, and `0.8` is 20% below mean.
-- `risk_relative_z`: standardized latent score,
-  $$
-  \frac{S_{c,r} - \mu_r}{\sigma_r}
-  $$
-  interpreted in standard deviation units.
+- `vulnerability_score`: emphasizes the conditions for sustained transmission and is intentionally close to population-neutral.
+- `priority_score`: emphasizes expected and upper-tail burden, while still preserving some weight on outbreak probability and transmission potential.
+  It is the more operational ranking.
 
-For cross-$R_0$ trend visualization, `risk_latent` is preferred. For within-scenario county interpretation, `risk_relative_mean1` is usually easiest to communicate.
+For communication, the raw metrics should usually be shown first and the two scores second.
 
 ## 6. County Risk Scores Only
 
 ```{r county-scores-only}
 risk_scores_only_baseline <- risk_scores_internal %>%
   filter(baseline_R0 == R0_baseline) %>%
-  arrange(desc(risk_relative_mean1)) %>%
+  arrange(desc(vulnerability_score), desc(priority_score)) %>%
   transmute(
     county,
-    risk_relative_latent,
-    risk_relative_z
+    vulnerability_score,
+    priority_score,
+    vulnerability_relative_mean1,
+    vulnerability_relative_z,
+    priority_relative_mean1,
+    priority_relative_z
   )
 
 knitr::kable(
   risk_scores_only_baseline %>%
     mutate(
-      risk_relative_latent = round(risk_relative_latent, 3),
-      risk_relative_z = round(risk_relative_z, 3)
+      vulnerability_score = round(vulnerability_score, 3),
+      priority_score = round(priority_score, 3),
+      vulnerability_relative_mean1 = round(vulnerability_relative_mean1, 3),
+      vulnerability_relative_z = round(vulnerability_relative_z, 3),
+      priority_relative_mean1 = round(priority_relative_mean1, 3),
+      priority_relative_z = round(priority_relative_z, 3)
     ),
-  caption = paste0("County risk scores only for baseline R0 = ", R0_baseline)
+  caption = paste0("County score variants for baseline R0 = ", R0_baseline)
 )
 ```
 
-## 7. Latent Risk Across R0 Scenarios
+## 7. Scores Across R0 Scenarios
 
 ```{r risk-across-r0-internal}
-risk_latent_summary <- risk_scores_internal %>%
+risk_score_summary_by_r0 <- risk_scores_internal %>%
   group_by(baseline_R0) %>%
   summarise(
-    mean_latent = mean(risk_latent, na.rm = TRUE),
-    p25_latent = quantile(risk_latent, 0.25, na.rm = TRUE),
-    p50_latent = quantile(risk_latent, 0.50, na.rm = TRUE),
-    p75_latent = quantile(risk_latent, 0.75, na.rm = TRUE),
+    mean_vulnerability = mean(vulnerability_score, na.rm = TRUE),
+    p25_vulnerability = quantile(vulnerability_score, 0.25, na.rm = TRUE),
+    p50_vulnerability = quantile(vulnerability_score, 0.50, na.rm = TRUE),
+    p75_vulnerability = quantile(vulnerability_score, 0.75, na.rm = TRUE),
+    mean_priority = mean(priority_score, na.rm = TRUE),
+    p25_priority = quantile(priority_score, 0.25, na.rm = TRUE),
+    p50_priority = quantile(priority_score, 0.50, na.rm = TRUE),
+    p75_priority = quantile(priority_score, 0.75, na.rm = TRUE),
     .groups = "drop"
   )
 
-ggplot(risk_latent_summary, aes(x = baseline_R0, y = p50_latent)) +
-  geom_ribbon(aes(ymin = p25_latent, ymax = p75_latent), alpha = 0.25, fill = "#3182bd") +
-  geom_line(linewidth = 1.0, color = "#08519c") +
-  geom_line(aes(y = mean_latent), linewidth = 0.9, linetype = "dashed", color = "#525252") +
+score_summary_long <- bind_rows(
+  risk_score_summary_by_r0 %>%
+    transmute(
+      baseline_R0,
+      score_type = "Vulnerability",
+      mean_score = mean_vulnerability,
+      p25_score = p25_vulnerability,
+      p50_score = p50_vulnerability,
+      p75_score = p75_vulnerability
+    ),
+  risk_score_summary_by_r0 %>%
+    transmute(
+      baseline_R0,
+      score_type = "Priority",
+      mean_score = mean_priority,
+      p25_score = p25_priority,
+      p50_score = p50_priority,
+      p75_score = p75_priority
+    )
+)
+
+ggplot(score_summary_long, aes(x = baseline_R0, y = p50_score, color = score_type, fill = score_type)) +
+  geom_ribbon(aes(ymin = p25_score, ymax = p75_score), alpha = 0.20, color = NA) +
+  geom_line(linewidth = 1.0) +
+  geom_line(aes(y = mean_score), linewidth = 0.8, linetype = "dashed") +
   labs(
-    title = "Latent Risk Across Baseline R0",
+    title = "Vulnerability and Priority Scores Across Baseline R0",
     x = "Baseline R0",
-    y = "Latent risk score"
+    y = "Score"
   ) +
   theme_minimal()
 ```
 
-## 8. Export Outputs
+## 8. Frontend-Ready Metrics
+
+This flat file is intended to be passed directly to a frontend. It keeps the raw
+county metrics visible rather than forcing the UI to depend on a single composite
+score. Static county metrics are repeated across baseline $R_0$ scenarios so the
+frontend can filter and display from one CSV.
+
+```{r frontend-risk-metrics}
+frontend_risk_metrics <- risk_scores_internal %>%
+  transmute(
+    baseline_R0,
+    county,
+    population,
+    susceptible_population,
+    large_outbreak_threshold_cases,
+    total_enrolled,
+    total_vaccinated,
+    school_vax_rate,
+    immune_population,
+    county_immunity_pct,
+    county_susceptible_pct,
+    R0_factor,
+    vax_repnum,
+    rv_excess,
+    expected_cases,
+    expected_cases_per_10k,
+    expected_cases_per_10k_stabilized,
+    prob_large_outbreak,
+    p95_cases,
+    tail_cases_per_10k,
+    tail_cases_per_10k_stabilized,
+    vulnerability_transmission_component,
+    vulnerability_outbreak_component,
+    vulnerability_susceptibility_component,
+    priority_expected_component,
+    priority_tail_component,
+    priority_outbreak_component,
+    priority_transmission_component,
+    vulnerability_score,
+    priority_score,
+    vulnerability_relative_mean1,
+    vulnerability_relative_z,
+    priority_relative_mean1,
+    priority_relative_z
+  ) %>%
+  arrange(baseline_R0, desc(vulnerability_score), desc(priority_score), county)
+
+frontend_risk_metrics_baseline <- frontend_risk_metrics %>%
+  filter(baseline_R0 == R0_baseline)
+```
+
+## 9. Export Outputs
 
 ```{r export-risk-scores, cache=FALSE}
 export_dir <- file.path("outputs", "utah_county_risk")
@@ -379,8 +512,20 @@ write.csv(
 )
 
 write.csv(
-  risk_latent_summary,
-  file.path(export_dir, "risk_scores_internal_latent_summary_by_r0.csv"),
+  risk_score_summary_by_r0,
+  file.path(export_dir, "risk_score_summary_by_r0.csv"),
+  row.names = FALSE
+)
+
+write.csv(
+  frontend_risk_metrics,
+  file.path(export_dir, "frontend_risk_metrics_all_r0.csv"),
+  row.names = FALSE
+)
+
+write.csv(
+  frontend_risk_metrics_baseline,
+  file.path(export_dir, "frontend_risk_metrics_baseline_r0.csv"),
   row.names = FALSE
 )
 
@@ -389,11 +534,13 @@ save(
   risk_scores_internal,
   risk_county_breakdown_baseline,
   risk_scores_only_baseline,
-  risk_latent_summary,
-  weights,
+  risk_score_summary_by_r0,
+  frontend_risk_metrics,
+  frontend_risk_metrics_baseline,
+  score_params,
   file = file.path(export_dir, "risk_scores_internal_private.RData")
 )
 
 cat("Saved risk score outputs to:", normalizePath(export_dir), "\n")
-cat("Outputs are internal-only and include county-level breakdowns.\n")
+cat("Frontend-ready metric CSVs now include school vaccination, immunity, susceptibility, and simulation outputs.\n")
 ```

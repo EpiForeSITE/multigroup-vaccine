@@ -288,14 +288,16 @@ p %>% layout(
 
 If an infection is introduced, Rv​ tells us if it can spread, but pure stochastic simulations tell us how bad it might get.
 
-For this analysis, we run 250 independent simulations per county (assuming introduction by a young adult 18-25).
+For this analysis, we run 1000 independent simulations per county (assuming introduction by a young adult 18-25). This is a practical increase from the earlier 250-run setup and substantially reduces Monte Carlo noise in the probability and tail summaries used downstream.
 
-    Major Outbreak Threshold: We define a major outbreak as >100 absolute cases.
+    Large Outbreak Threshold: We define a large outbreak as total infections exceeding the larger of 1% of the county's susceptible population or 20 cases. This prevents tiny counties from being classified as "large outbreak" after only one or two cases.
 
-    Herd Immunity Logic: If a county's Rv​<1, the mathematical probability of a major outbreak is forced to 0, as transmission chains will naturally extinguish.
+    Herd Immunity Logic: If a county's Rv​<1, the modeled probability of a large outbreak is forced to 0, as transmission chains will naturally extinguish.
 
 ```{r stochastic-sims, cache=TRUE}
-nsims_stochastic <- 250
+nsims_stochastic <- 1000
+large_outbreak_threshold_frac <- 0.01
+large_outbreak_min_cases <- 20
 
 results_list <- vector("list", length(R0_baseline_range) * length(utah_counties))
 sim_list     <- vector("list", length(R0_baseline_range) * length(utah_counties))
@@ -306,6 +308,11 @@ for (R0_stochastic in R0_baseline_range) {
     c_short <- gsub(" County", "", county_name)
     popsize <- utah_counties[[county_name]]$age_pops
     initV <- round(county_immunity[[county_name]] * popsize)
+    susceptible_population <- sum(popsize) - sum(initV)
+    large_outbreak_threshold_cases <- max(
+      susceptible_population * large_outbreak_threshold_frac,
+      large_outbreak_min_cases
+    )
     initI <- rep(0, length(popsize)); initI[6] <- 1  # Intro in young adults
     
     R0_eff <- R0_stochastic * county_R0_factors$R0_factor[county_R0_factors$county == c_short]
@@ -320,16 +327,18 @@ for (R0_stochastic in R0_baseline_range) {
     
     total_infected <- rowSums(fs_stochastic)
     
-    # Logic Gate: If Rv < 1, probability of major escape is effectively 0
-    prob_major <- ifelse(vax_Rn < 1, 0, mean(total_infected > 100))
+    # Logic Gate: If Rv < 1, probability of large escape is effectively 0
+    prob_large <- ifelse(vax_Rn < 1, 0, mean(total_infected > large_outbreak_threshold_cases))
     
     results_list[[idx]] <- data.frame(
       baseline_R0 = R0_stochastic,
       county = c_short,
       population = sum(popsize),
+      susceptible_population = susceptible_population,
+      large_outbreak_threshold_cases = large_outbreak_threshold_cases,
       vax_repnum = vax_Rn,
       expected_cases = mean(total_infected),
-      prob_major_outbreak = prob_major
+      prob_large_outbreak = prob_large
     )
     
     # Store all sims for Rv >= 1 counties (bimodal distribution visible)
@@ -338,7 +347,9 @@ for (R0_stochastic in R0_baseline_range) {
         baseline_R0 = R0_stochastic,
         county = c_short,
         total_cases = total_infected,
-        is_major = total_infected > 100
+        susceptible_population = susceptible_population,
+        large_outbreak_threshold_cases = large_outbreak_threshold_cases,
+        is_large_outbreak = total_infected > large_outbreak_threshold_cases
       )
     }
     
@@ -350,17 +361,17 @@ stochastic_results <- bind_rows(results_list)
 sim_long           <- bind_rows(sim_list)
 ```
 
-Probability of a Major Outbreak (>100 Cases)
+Probability of a Large Outbreak
 
-This chart shows the real-world consequence probability. Counties missing from this list possess a protective Rv​<1 (herd immunity). Use the slider to adjust the baseline R0​.
+This chart shows the probability that an introduction exceeds the larger of 1% of susceptible population or 20 cases. Counties missing from this list possess a protective Rv​<1 (herd immunity). Use the slider to adjust the baseline R0​.
 
 ```{r}
 # Counties that have prob > 0 at any R0 level
 all_prob_counties <- stochastic_results %>%
-  filter(prob_major_outbreak > 0) %>% pull(county) %>% unique()
+  filter(prob_large_outbreak > 0) %>% pull(county) %>% unique()
 prob_order <- stochastic_results %>%
   filter(baseline_R0 == 10, county %in% all_prob_counties) %>%
-  arrange(prob_major_outbreak) %>% pull(county)
+  arrange(prob_large_outbreak) %>% pull(county)
 
 p_prob <- plot_ly()
 for (r0_val in R0_baseline_range) {
@@ -369,12 +380,12 @@ for (r0_val in R0_baseline_range) {
   df_sub$county_f <- factor(df_sub$county, levels = prob_order)
 
   p_prob <- p_prob %>% add_trace(
-    data = df_sub, x = ~prob_major_outbreak * 100, y = ~county_f,
+    data = df_sub, x = ~prob_large_outbreak * 100, y = ~county_f,
     type = "bar", orientation = "h",
     marker = list(color = "#8b08b0"),
-    text = ~paste0(round(prob_major_outbreak * 100, 1), "%"),
+    text = ~paste0(round(prob_large_outbreak * 100, 1), "%"),
     textposition = "outside",
-    hovertext = ~paste0(county, "<br>Prob: ", round(prob_major_outbreak * 100, 1), "%"),
+    hovertext = ~paste0(county, "<br>Prob: ", round(prob_large_outbreak * 100, 1), "%"),
     hoverinfo = "text",
     visible = (r0_val == 10),
     name = paste0("R0 = ", r0_val)
@@ -388,7 +399,7 @@ steps_prob <- lapply(seq_along(R0_baseline_range), function(i) {
 })
 
 p_prob %>% layout(
-  title = "Probability of Outbreak Exceeding 100 Cases",
+  title = "Probability of Outbreak Exceeding max(1% of Susceptibles, 20 Cases)",
   xaxis = list(title = "Probability (%)", range = c(0, 105)),
   yaxis = list(title = ""),
   sliders = list(list(active = 2, currentvalue = list(prefix = "Baseline R0 = "), steps = steps_prob)),
@@ -398,7 +409,7 @@ p_prob %>% layout(
 
 Full Outbreak Distribution
 
-All 250 simulations per county are shown (for counties with Rv​≥1). The bimodal distribution — a spike at zero (chains that fizzle out) and a heavier right tail (sustained outbreaks) — is a hallmark of stochastic transmission near the herd immunity threshold.
+All 1000 simulations per county are shown (for counties with Rv​≥1). The bimodal distribution — a spike at zero (chains that fizzle out) and a heavier right tail (sustained outbreaks) — is a hallmark of stochastic transmission near the herd immunity threshold.
 
 ```{r}
 if(nrow(sim_long) > 0) {
@@ -413,14 +424,14 @@ if(nrow(sim_long) > 0) {
   for (r0_val in R0_baseline_range) {
     df_sub <- sim_long %>% filter(baseline_R0 == r0_val)
     df_sub$county_f <- factor(df_sub$county, levels = order_all_full)
-    # Color: red = major outbreak (>100), grey = fizzled
-    dot_colors <- ifelse(df_sub$is_major, "#d62728", "#aaaaaa")
+    # Color: red = large outbreak (> max(1% of susceptible population, 20 cases)), grey = fizzled
+    dot_colors <- ifelse(df_sub$is_large_outbreak, "#d62728", "#aaaaaa")
 
     p_dots <- p_dots %>% add_trace(
       data = df_sub, x = ~total_cases, y = ~county_f, type = "scatter", mode = "markers",
       marker = list(color = dot_colors, size = 4, opacity = 0.25),
       hovertext = ~paste0(county, "<br>Cases: ", scales::comma(total_cases),
-                          "<br>", ifelse(is_major, "Major outbreak", "Fizzled")),
+                          "<br>", ifelse(is_large_outbreak, "Large outbreak", "Fizzled")),
       hoverinfo = "text",
       visible = (r0_val == 10),
       name = paste0("R0 = ", r0_val)
@@ -450,6 +461,43 @@ if(nrow(sim_long) > 0) {
 This vignette now stops at simulation outputs and exports reusable datasets for downstream risk-score development in a separate notebook.
 
 ```{r export-simulation-outputs, cache=FALSE}
+school_vax_summary <- county_vax_data %>%
+  filter(county != "Online") %>%
+  group_by(county) %>%
+  summarise(
+    total_enrolled = sum(pop),
+    total_vaccinated = sum(vax),
+    school_vax_rate = ifelse(total_enrolled > 0, total_vaccinated / total_enrolled, NA_real_),
+    .groups = "drop"
+  )
+
+# These county-level metrics are derived from the exact same immunity vectors used
+# to initialize the stochastic simulations, so the frontend can display them
+# directly without recomputing the simulation setup logic.
+county_static_metrics <- bind_rows(lapply(names(utah_counties), function(county_name) {
+  county_short <- gsub(" County", "", county_name)
+  popsize <- utah_counties[[county_name]]$age_pops
+  initV <- round(county_immunity[[county_name]] * popsize)
+  total_pop <- sum(popsize)
+  immune_population <- sum(initV)
+  susceptible_population <- total_pop - immune_population
+
+  data.frame(
+    county = county_short,
+    population = total_pop,
+    immune_population = immune_population,
+    susceptible_population = susceptible_population,
+    county_immunity_pct = ifelse(total_pop > 0, immune_population / total_pop, NA_real_),
+    county_susceptible_pct = ifelse(total_pop > 0, susceptible_population / total_pop, NA_real_),
+    stringsAsFactors = FALSE
+  )
+})) %>%
+  left_join(school_vax_summary, by = "county") %>%
+  left_join(
+    county_R0_factors %>% select(county, R0_factor),
+    by = "county"
+  )
+
 if (nrow(sim_long) > 0) {
   simulation_stats_by_county <- sim_long %>%
     group_by(baseline_R0, county) %>%
@@ -460,7 +508,7 @@ if (nrow(sim_long) > 0) {
       p90_cases = as.numeric(quantile(total_cases, 0.90)),
       p95_cases = as.numeric(quantile(total_cases, 0.95)),
       max_cases = max(total_cases),
-      prob_major_outbreak = mean(is_major),
+      prob_large_outbreak = mean(is_large_outbreak),
       prob_fizzle = mean(total_cases == 0),
       .groups = "drop"
     )
@@ -474,7 +522,7 @@ if (nrow(sim_long) > 0) {
     p90_cases = numeric(),
     p95_cases = numeric(),
     max_cases = numeric(),
-    prob_major_outbreak = numeric(),
+    prob_large_outbreak = numeric(),
     prob_fizzle = numeric()
   )
 }
@@ -487,7 +535,7 @@ simulation_stats_statewide <- stochastic_results %>%
     n_herd_immunity = sum(vax_repnum < 1),
     mean_expected_cases = mean(expected_cases),
     median_expected_cases = median(expected_cases),
-    mean_prob_major = mean(prob_major_outbreak),
+    mean_prob_large = mean(prob_large_outbreak),
     .groups = "drop"
   )
 
@@ -506,6 +554,9 @@ write.csv(simulation_stats_by_county,
 write.csv(simulation_stats_statewide,
           file.path(export_dir, "simulation_stats_statewide.csv"),
           row.names = FALSE)
+write.csv(county_static_metrics,
+          file.path(export_dir, "county_static_metrics.csv"),
+          row.names = FALSE)
 write.csv(vaxrepnum_sensitivity,
           file.path(export_dir, "vaxrepnum_sensitivity.csv"),
           row.names = FALSE)
@@ -518,11 +569,14 @@ save(
   sim_long,
   simulation_stats_by_county,
   simulation_stats_statewide,
+  county_static_metrics,
   vaxrepnum_sensitivity,
   threshold_counts,
   county_R0_factors,
   R0_baseline,
   R0_baseline_range,
+  large_outbreak_threshold_frac,
+  large_outbreak_min_cases,
   nsims_stochastic,
   file = file.path(export_dir, "utah_county_simulation_bundle.RData")
 )
