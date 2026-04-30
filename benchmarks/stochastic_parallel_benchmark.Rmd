@@ -1,0 +1,446 @@
+---
+title: "Benchmarking Sequential and Parallel Stochastic Final Size Simulations"
+output: rmarkdown::md_document
+vignette: >
+  %\VignetteIndexEntry{Benchmarking Sequential and Parallel Stochastic Final Size Simulations}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This vignette benchmarks the stochastic `finalsize()` workflow with:
+
+1. `nthreads = 1` for the sequential baseline,
+2. `finalsize()` creating a fresh cluster internally for each call, and
+3. pre-built clusters passed through the `cluster` argument.
+
+The main goal is to identify the crossover point where parallel execution
+becomes faster than sequential execution, and to see how much cluster reuse
+changes that threshold.
+
+The hybrid method is intentionally excluded here because `finalsize(method =
+"hybrid")` still delegates to `getFinalSizeDistEscape()` without the new
+parallel path.
+
+## Hardware
+This benchmark is designed to run on a variety of machines.
+
+The results shown here were generated on a 2019 Macbook Pro with 2.4 GHz 8-Core Intel Core i9 and 32gb 2400hz DDR4 RAM, running MacOS Sequia 15.7.2.
+
+To generate benchmark results on your own machine, run the code in this vignette and compare the crossover points to those reported here. The exact crossover points will depend on the hardware and software environment, but the general patterns should be similar.
+
+Set the `maximum_threads` variable in the code below to adjust the maximum thread count tested based on your machine's capabilities.
+
+```{r hardware}
+detected_threads <- parallel::detectCores()
+if (is.na(detected_threads)) {
+  detected_threads <- 1L
+}
+
+maximum_threads <- 16L
+if (detected_threads < maximum_threads) {
+  message("Detected ", detected_threads, " threads. Adjusting maximum_threads to ", detected_threads, ".")
+  maximum_threads <- detected_threads
+}
+
+thread_options <- sort(unique(c(1L, 2L, 4L, 8L, maximum_threads)))
+message("Thread counts that will be included in the benchmark: ", paste(thread_options, collapse = ", "))
+```
+
+```{r setup}
+library(multigroup.vaccine)
+library(knitr)
+```
+
+## Benchmark Scenario
+
+The benchmark uses a two-group model that is still lightweight enough to render
+as a vignette while exercising the stochastic simulation path.
+
+```{r}
+popsize <- c(600, 400)
+R0 <- 1.9
+contactmatrix <- contactMatrixPropPref(
+  popsize = popsize,
+  contactrate = c(1, 1.3),
+  ingroup = c(0.35, 0.45)
+)
+relsusc <- c(1.0, 0.9)
+reltransm <- c(1.0, 1.1)
+initR <- c(0, 0)
+initI <- c(2, 1)
+initV <- c(90, 60)
+
+benchmark_args <- list(
+  popsize = popsize,
+  R0 = R0,
+  contactmatrix = contactmatrix,
+  relsusc = relsusc,
+  reltransm = reltransm,
+  initR = initR,
+  initI = initI,
+  initV = initV,
+  method = "stochastic"
+)
+```
+
+## Benchmark Grid
+
+This benchmark now checks thread counts up to `maximum_threads`, assuming the machine
+exposes that many cores. The simulation counts are chosen to help identify the
+point where parallel execution begins to win after cluster overhead is amortized.
+
+```{r}
+benchmark_nsims <- c(25L, 100L, 500L, 2000L, 10000L, 25000L)
+benchmark_reps <- 2L
+
+if (detected_threads == 1L) {
+  message("Only one thread detected. Parallel benchmarks will be skipped.")
+}
+
+thread_options <- thread_options[thread_options <= detected_threads]
+parallel_thread_options <- thread_options[thread_options > 1L]
+
+benchmark_grid <- expand.grid(
+  nsims = benchmark_nsims,
+  nthreads = thread_options
+)
+
+kable(benchmark_grid, caption = "Simulation counts and thread counts included in the benchmark.")
+```
+
+## Reproducibility Check
+
+Before comparing timings, verify that sequential, fresh-cluster parallel, and
+reused-cluster parallel execution all return identical stochastic draws under
+the same random seed.
+
+```{r}
+if (length(parallel_thread_options) > 0L) {
+  comparison_threads <- parallel_thread_options[1]
+  comparison_cluster <- parallel::makeCluster(comparison_threads)
+  on.exit(parallel::stopCluster(comparison_cluster), add = TRUE)
+
+  set.seed(20260311)
+  sequential_result <- do.call(
+    finalsize,
+    c(benchmark_args, list(nsims = 50L, nthreads = 1L))
+  )
+
+  set.seed(20260311)
+  fresh_cluster_result <- do.call(
+    finalsize,
+    c(benchmark_args, list(nsims = 50L, nthreads = comparison_threads))
+  )
+
+  set.seed(20260311)
+  reused_cluster_result <- do.call(
+    finalsize,
+    c(benchmark_args, list(nsims = 50L, cluster = comparison_cluster))
+  )
+
+  reproducibility_check <- data.frame(
+    nsims = 50L,
+    comparison_threads = comparison_threads,
+    fresh_matches_sequential = isTRUE(all.equal(sequential_result, fresh_cluster_result)),
+    reused_matches_sequential = isTRUE(all.equal(sequential_result, reused_cluster_result))
+  )
+} else {
+  reproducibility_check <- data.frame(
+    nsims = 50L,
+    comparison_threads = NA_integer_,
+    fresh_matches_sequential = NA,
+    reused_matches_sequential = NA
+  )
+}
+
+kable(reproducibility_check, caption = "Reproducibility check across execution modes.")
+```
+
+## Timing Helpers
+
+The helper below measures elapsed time for three execution modes:
+
+- `sequential`: `nthreads = 1`
+- `fresh_cluster`: `finalsize()` creates and destroys a cluster internally
+- `reused_cluster`: a pre-built cluster is reused across benchmark replicates
+
+```{r}
+run_benchmark_case <- function(nsims, mode, nthreads = 1L, cluster = NULL, reps = 2L) {
+  elapsed <- numeric(reps)
+
+  for (rep in seq_len(reps)) {
+    seed <- 5000L + rep
+    elapsed[rep] <- unname(system.time({
+      set.seed(seed)
+
+      if (mode == "reused_cluster") {
+        do.call(
+          finalsize,
+          c(benchmark_args, list(nsims = nsims, cluster = cluster))
+        )
+      } else {
+        do.call(
+          finalsize,
+          c(benchmark_args, list(nsims = nsims, nthreads = nthreads))
+        )
+      }
+    })["elapsed"])
+  }
+
+  data.frame(
+    nsims = nsims,
+    mode = mode,
+    nthreads = nthreads,
+    replicate = seq_len(reps),
+    elapsed = elapsed
+  )
+}
+
+run_full_benchmark <- function(nsims_values, parallel_threads, reps = 2L) {
+  reusable_clusters <- vector("list", length(parallel_threads))
+  names(reusable_clusters) <- as.character(parallel_threads)
+
+  if (length(parallel_threads) > 0L) {
+    for (i in seq_along(parallel_threads)) {
+      reusable_clusters[[i]] <- parallel::makeCluster(parallel_threads[i])
+    }
+
+    on.exit(
+      invisible(lapply(reusable_clusters, parallel::stopCluster)),
+      add = TRUE
+    )
+  }
+
+  results <- list()
+  idx <- 1L
+
+  for (nsims in nsims_values) {
+    results[[idx]] <- run_benchmark_case(
+      nsims = nsims,
+      mode = "sequential",
+      nthreads = 1L,
+      reps = reps
+    )
+    idx <- idx + 1L
+
+    for (thread_count in parallel_threads) {
+      results[[idx]] <- run_benchmark_case(
+        nsims = nsims,
+        mode = "fresh_cluster",
+        nthreads = thread_count,
+        reps = reps
+      )
+      idx <- idx + 1L
+
+      results[[idx]] <- run_benchmark_case(
+        nsims = nsims,
+        mode = "reused_cluster",
+        nthreads = thread_count,
+        cluster = reusable_clusters[[as.character(thread_count)]],
+        reps = reps
+      )
+      idx <- idx + 1L
+    }
+  }
+
+  do.call(rbind, results)
+}
+
+benchmark_results <- run_full_benchmark(
+  nsims_values = benchmark_nsims,
+  parallel_threads = parallel_thread_options,
+  reps = benchmark_reps
+)
+
+kable(
+  benchmark_results,
+  digits = 3,
+  caption = "Elapsed time (seconds) for each benchmark replicate."
+)
+```
+
+## Timing Summary
+
+```{r}
+mean_elapsed <- aggregate(
+  elapsed ~ nsims + mode + nthreads,
+  data = benchmark_results,
+  FUN = mean
+)
+min_elapsed <- aggregate(
+  elapsed ~ nsims + mode + nthreads,
+  data = benchmark_results,
+  FUN = min
+)
+max_elapsed <- aggregate(
+  elapsed ~ nsims + mode + nthreads,
+  data = benchmark_results,
+  FUN = max
+)
+
+benchmark_summary <- merge(mean_elapsed, min_elapsed, by = c("nsims", "mode", "nthreads"))
+benchmark_summary <- merge(benchmark_summary, max_elapsed, by = c("nsims", "mode", "nthreads"))
+names(benchmark_summary) <- c("nsims", "mode", "nthreads", "mean_elapsed", "min_elapsed", "max_elapsed")
+
+baseline <- benchmark_summary[
+  benchmark_summary$mode == "sequential",
+  c("nsims", "mean_elapsed")
+]
+names(baseline)[2] <- "sequential_mean_elapsed"
+
+benchmark_summary <- merge(benchmark_summary, baseline, by = "nsims")
+benchmark_summary$speedup_vs_sequential <- benchmark_summary$sequential_mean_elapsed / benchmark_summary$mean_elapsed
+benchmark_summary$relative_runtime_pct <- 100 * benchmark_summary$mean_elapsed / benchmark_summary$sequential_mean_elapsed
+benchmark_summary <- benchmark_summary[order(benchmark_summary$nsims, benchmark_summary$mode, benchmark_summary$nthreads), ]
+
+kable(
+  benchmark_summary,
+  digits = 3,
+  caption = "Average timing summary and speedup relative to the sequential baseline."
+)
+```
+
+## Crossover Summary
+
+This table reports the first `nsims` value where a given parallel configuration
+became faster than the sequential baseline.
+
+```{r}
+parallel_summary <- benchmark_summary[benchmark_summary$mode != "sequential", ]
+
+crossover_summary <- do.call(
+  rbind,
+  lapply(split(parallel_summary, list(parallel_summary$mode, parallel_summary$nthreads), drop = TRUE), function(x) {
+    x <- x[order(x$nsims), ]
+    faster_nsims <- x$nsims[x$speedup_vs_sequential > 1]
+
+    data.frame(
+      mode = x$mode[1],
+      nthreads = x$nthreads[1],
+      first_faster_nsims = if (length(faster_nsims) > 0L) faster_nsims[1] else NA_integer_,
+      best_observed_speedup = max(x$speedup_vs_sequential)
+    )
+  })
+)
+
+crossover_summary <- crossover_summary[order(crossover_summary$mode, crossover_summary$nthreads), ]
+
+kable(
+  crossover_summary,
+  digits = 3,
+  caption = "Observed crossover point for each parallel configuration."
+)
+```
+
+## Timing Plots
+
+```{r fig.width = 8, fig.height = 5}
+plot_data <- benchmark_summary
+plot_data$label <- ifelse(
+  plot_data$mode == "sequential",
+  "sequential (1 thread)",
+  paste(plot_data$mode, "-", plot_data$nthreads, "threads")
+)
+
+plot_labels <- unique(plot_data$label)
+plot_nsims <- sort(unique(plot_data$nsims))
+plot_colors <- seq_along(plot_labels)
+plot_lty <- c(1, rep(c(2, 3), length.out = length(plot_labels) - 1))
+plot_pch <- ifelse(
+  grepl("^fresh_cluster", plot_labels),
+  1,
+  ifelse(grepl("^reused_cluster", plot_labels), 2, 15)
+)
+
+plot(
+  range(plot_nsims),
+  range(plot_data$mean_elapsed),
+  type = "n",
+  xlab = "Number of simulations (nsims)",
+  ylab = "Mean elapsed time (seconds)",
+  main = "Stochastic finalsize() runtime by execution mode"
+)
+
+for (i in seq_along(plot_labels)) {
+  current <- plot_data[plot_data$label == plot_labels[i], ]
+  current <- current[order(current$nsims), ]
+  lines(current$nsims, current$mean_elapsed, type = "b", pch = plot_pch[i], col = plot_colors[i], lty = plot_lty[i])
+}
+
+legend(
+  "topleft",
+  legend = plot_labels,
+  col = plot_colors,
+  lty = plot_lty,
+  pch = plot_pch,
+  bty = "n",
+  cex = 0.8
+)
+```
+
+```{r fig.width = 8, fig.height = 5}
+parallel_plot_data <- benchmark_summary[benchmark_summary$mode != "sequential", ]
+parallel_plot_data$label <- paste(parallel_plot_data$mode, "-", parallel_plot_data$nthreads, "threads")
+parallel_labels <- unique(parallel_plot_data$label)
+parallel_pch <- ifelse(grepl("^fresh_cluster", parallel_labels), 1, 2)
+
+if (nrow(parallel_plot_data) > 0L) {
+  plot(
+    range(plot_nsims),
+    range(parallel_plot_data$speedup_vs_sequential),
+    type = "n",
+    xlab = "Number of simulations (nsims)",
+    ylab = "Speedup relative to sequential",
+    main = "Observed crossover from sequential to parallel"
+  )
+
+  for (i in seq_along(parallel_labels)) {
+    current <- parallel_plot_data[parallel_plot_data$label == parallel_labels[i], ]
+    current <- current[order(current$nsims), ]
+    lines(
+      current$nsims,
+      current$speedup_vs_sequential,
+      type = "b",
+      pch = parallel_pch[i],
+      col = i,
+      lty = ifelse(grepl("fresh", parallel_labels[i]), 2, 1)
+    )
+  }
+
+  abline(h = 1, lty = 2, col = "gray40")
+  legend(
+    "topleft",
+    legend = parallel_labels,
+    col = seq_along(parallel_labels),
+    lty = ifelse(grepl("fresh", parallel_labels), 2, 1),
+    pch = parallel_pch,
+    bty = "n",
+    cex = 0.8
+  )
+} else {
+  plot.new()
+  text(
+    0.5,
+    0.5,
+    "Only one worker is available on this machine.\nNo parallel speedup curve can be drawn."
+  )
+}
+```
+
+## Interpretation
+
+- Small workloads often favor sequential execution because PSOCK cluster startup
+  and teardown overhead dominate the total runtime.
+- The `first_faster_nsims` column is the main practical metric for deciding when
+  the stochastic parallel path is worth using on this machine.
+- Comparing `fresh_cluster` and `reused_cluster` shows how much of the overhead
+  comes from cluster creation rather than the simulation work itself.
+- If `reused_cluster` becomes faster much earlier than `fresh_cluster`, that is
+  a strong signal that cluster reuse is valuable for repeated stochastic calls.
