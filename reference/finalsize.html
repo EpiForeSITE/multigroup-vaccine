@@ -9,7 +9,7 @@ reproduction number, contact/transmission assumptions, and initial conditions"><
 
     <a class="navbar-brand me-2" href="../index.html">multigroup.vaccine</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,7 +52,10 @@ reproduction number, contact/transmission assumptions, and initial conditions</p
 <span>  <span class="va">initI</span>,</span>
 <span>  <span class="va">initV</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"ODE"</span>,</span>
-<span>  nsims <span class="op">=</span> <span class="fl">1</span></span>
+<span>  nsims <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  nthreads <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  cluster <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  seed <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -99,6 +102,25 @@ reproduction number, contact/transmission assumptions, and initial conditions</p
 <dt id="arg-nsims">nsims<a class="anchor" aria-label="anchor" href="#arg-nsims"></a></dt>
 <dd><p>the number of simulations to run for stochastic methods</p></dd>
 
+
+<dt id="arg-nthreads">nthreads<a class="anchor" aria-label="anchor" href="#arg-nthreads"></a></dt>
+<dd><p>the number of threads (parallel workers) to use for
+stochastic simulations. Defaults to 1 (single-threaded). Set to 0 or -1 to
+automatically use all available cores. Ignored for <code>method = "hybrid"</code>.</p></dd>
+
+
+<dt id="arg-cluster">cluster<a class="anchor" aria-label="anchor" href="#arg-cluster"></a></dt>
+<dd><p>an optional <code><a href="https://rdrr.io/r/parallel/makeCluster.html" class="external-link">parallel cluster</a></code> object
+to use for stochastic simulations. When supplied, <code>nthreads</code> is ignored,
+allowing callers to provide PSOCK, FORK, MPI, or scheduler-managed clusters.
+Ignored for <code>method = "hybrid"</code>.</p></dd>
+
+
+<dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
+<dd><p>optional integer base random seed for stochastic methods. When
+supplied, <code>finalsize()</code> is reproducible for that seed regardless of
+<code>nthreads</code> and independent of caller RNG state.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -125,31 +147,47 @@ reproduction number, contact/transmission assumptions, and initial conditions</p
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 411.6174 102.8034</span>
 <span class="r-in"><span><span class="fu">finalsize</span><span class="op">(</span><span class="va">popsize</span>, <span class="va">R0</span>, <span class="va">contactmatrix</span>, <span class="va">relsusc</span>, <span class="va">reltransm</span>, <span class="va">initR</span>, <span class="va">initI</span>, <span class="va">initV</span>,</span></span>
 <span class="r-in"><span>method <span class="op">=</span> <span class="st">"stochastic"</span>, nsims <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       [,1] [,2]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]  396  100</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]    1    0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]  416  100</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]  416  103</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]  428  115</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]    2    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,]  402   96</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]  415  105</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]  393  108</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]   13    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        R1  R2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]   1   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]   1   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]   1   1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]   1   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]   1   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] 390  85</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] 441 106</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] 349  77</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]   5   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]   1   0</span>
 <span class="r-in"><span><span class="co"># All "escaped" outbreaks set to deterministic final size:</span></span></span>
 <span class="r-in"><span><span class="fu">finalsize</span><span class="op">(</span><span class="va">popsize</span>, <span class="va">R0</span>, <span class="va">contactmatrix</span>, <span class="va">relsusc</span>, <span class="va">reltransm</span>, <span class="va">initR</span>, <span class="va">initI</span>, <span class="va">initV</span>,</span></span>
 <span class="r-in"><span>method <span class="op">=</span> <span class="st">"hybrid"</span>, nsims <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       [,1] [,2]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]    4    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]    2    1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]    1    0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]  412  103</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]  412  103</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]    1    0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]  412  103</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,]   19    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]    6    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]   10    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]    1    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,]    1    0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]    1    0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]    1    0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]    1    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]  412  103</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]  412  103</span>
+<span class="r-in"><span><span class="co"># Stochastic runs can be reproduced directly with seed:</span></span></span>
+<span class="r-in"><span><span class="fu">finalsize</span><span class="op">(</span><span class="va">popsize</span>, <span class="va">R0</span>, <span class="va">contactmatrix</span>, <span class="va">relsusc</span>, <span class="va">reltransm</span>, <span class="va">initR</span>, <span class="va">initI</span>, <span class="va">initV</span>,</span></span>
+<span class="r-in"><span>method <span class="op">=</span> <span class="st">"stochastic"</span>, nsims <span class="op">=</span> <span class="fl">10</span>, nthreads <span class="op">=</span> <span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">2026</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        R1  R2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]  21   3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]   1   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] 469 121</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] 441 107</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] 402  90</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]   1   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,]  10   0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] 425 108</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]   1   2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] 414 112</span>
+<span class="r-in"><span><span class="co"># Parallel stochastic simulations are available for interactive use, but are</span></span></span>
+<span class="r-in"><span><span class="co"># omitted from examples to avoid spawning worker processes during R CMD check.</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

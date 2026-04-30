@@ -1,7 +1,7 @@
 # Age distribution effect on R0
 
 This vignette shows the effects of the age distribution of the Short
-Creek community on the basic reproduction number $R_{0}$, compared to
+Creek community on the basic reproduction number $`R_0`$, compared to
 other populations with different age distributions.
 
 Warning: The data and calculations in this vignette are for
@@ -10,6 +10,7 @@ accurately. The assumptions may not be accurate and may not reflect true
 risk of measles outbreaks in these communities.
 
 ``` r
+
 library(multigroup.vaccine)
 library(socialmixr)
 ```
@@ -17,12 +18,14 @@ library(socialmixr)
 ## Age groups
 
 ``` r
+
 agelims <- c(0, 1, 5, 12, 14, 18, 25, 45, 70)
 ```
 
 ## Getting city population data for Short Creek community
 
 ``` r
+
 # Load city data files
 hildale_path <- system.file("extdata", "hildale_ut_2023.csv", package = "multigroup.vaccine")
 colorado_city_path <- system.file("extdata", "colorado_city_az_2023.csv", package = "multigroup.vaccine")
@@ -52,6 +55,7 @@ agepops <- round(hildale$age_pops + colorado_city$age_pops + centennial_park$age
 ## Getting data from Washington County, Utah (where Hildale is located)
 
 ``` r
+
 utah_fips <- getStateFIPS("Utah")
 census_csv <- getCensusDataPath()
 county <- "Washington County"
@@ -70,6 +74,7 @@ county_pops <- county_data$age_pops
 ## Getting Utah State and national data:
 
 ``` r
+
 state_ageprop <- c(0.0143, 0.0572, 0.1119, 0.0330, 0.0658, 0.1164, 0.2844, 0.2360, 0.0840)
 state_agepops <- 3503613 * state_ageprop / sum(state_ageprop)
 
@@ -80,6 +85,7 @@ us_agepops <- 340100000 * us_ageprop / sum(us_ageprop)
 ## School data
 
 ``` r
+
 schoolpops <- c(250, 350, 190, 86, 150, 84, 114, 108, 205)
 schoolagegroups <- c(3, 3, 3, 4, 4, 4, 5, 5, 5)
 ```
@@ -87,6 +93,7 @@ schoolagegroups <- c(3, 3, 3, 4, 4, 4, 5, 5, 5)
 ## Create contact matrix for Short Creek
 
 ``` r
+
 #Readjust the school populations to match the age data:
 for(a in unique(schoolagegroups)){
   inds <- which(schoolagegroups == a)
@@ -101,15 +108,17 @@ grouppops <- c(agepops[1:(min(schoolagegroups)-1)],
 ## Create contact matrices for other populations
 
 ``` r
+
 mijpolymod <- contactMatrixPolymod(agelims)
 mijwashingtoncounty <- contactMatrixPolymod(agelims, county_pops)
 mijutahstate <- contactMatrixPolymod(agelims, state_agepops)
 mijusa <- contactMatrixPolymod(agelims, us_agepops)
 ```
 
-## Calculate $R_{0}$ adjustment factors
+## Calculate $`R_0`$ adjustment factors
 
 ``` r
+
 eigpolymod <- eigen(mijpolymod)$values[1]
 R0factorShortCreek <- eigen(cm)$values[1] / eigpolymod
 R0factorWashingtonCounty <- eigen(mijwashingtoncounty)$values[1] / eigpolymod

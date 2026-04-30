@@ -14,6 +14,7 @@ This vignette demonstrates how to use the census data functions in the
 We’ll walk through a complete example using Utah county data.
 
 ``` r
+
 library(multigroup.vaccine)
 library(socialmixr)
 
@@ -29,6 +30,7 @@ function looks up the FIPS code for a state by name. FIPS codes are
 standardized identifiers used by the U.S. Census Bureau.
 
 ``` r
+
 # Get FIPS code for Utah
 utah_fips <- getStateFIPS("Utah")
 cat("Utah FIPS code:", utah_fips, "\n")
@@ -52,6 +54,7 @@ function returns all counties in a state. This is useful for exploring
 available data.
 
 ``` r
+
 # List all counties in Utah
 utah_counties <- listCounties(
   state_fips = utah_fips,
@@ -85,6 +88,7 @@ function retrieves population data for a specific county, organized by
 age groups.
 
 ``` r
+
 # Define age groups for analysis
 # These represent: 0-4, 5-11, 12-17, 18-24, 25-44, 45-64, 65+
 age_limits <- c(0, 5, 12, 18, 25, 45, 65)
@@ -130,6 +134,7 @@ Let’s visualize the age distribution to better understand the population
 structure.
 
 ``` r
+
 # Create a bar plot of age distribution
 age_percentages <- 100 * washington_data$age_pops / washington_data$total_pop
 
@@ -160,6 +165,7 @@ above.](census_functions_demo_files/figure-html/plot-age-distribution-1.png)
 Let’s compare the age distributions of three different Utah counties.
 
 ``` r
+
 # Get data for three counties
 counties_to_compare <- c("Salt Lake County", "Utah County", "Washington County")
 county_data_list <- list()
@@ -213,6 +219,7 @@ estimates. Let’s demonstrate using Hildale, UT as an example.
 ### Example 1: Default 5-year Age Groups
 
 ``` r
+
 # Get path to Hildale data
 hildale_path <- system.file("extdata", "hildale_ut_2023.csv", package = "multigroup.vaccine")
 
@@ -265,6 +272,7 @@ pre-school (0-4), elementary (5-11), middle school (12-13), high school
 (14-17), and adult groups.
 
 ``` r
+
 # Define school-aligned age groups
 school_age_groups <- c(0, 5, 12, 14, 18, 25, 45, 65)
 
@@ -304,6 +312,7 @@ for (i in seq_along(hildale_school$age_labels)) {
 ### Visualizing the Comparison
 
 ``` r
+
 # Create a comparison visualization
 oldpar <- par(mfrow = c(1, 2), mar = c(5, 4, 4, 2))
 
@@ -339,6 +348,7 @@ of population on
 y-axis.](census_functions_demo_files/figure-html/compare-aggregations-1.png)
 
 ``` r
+
 
 par(oldpar)
 ```

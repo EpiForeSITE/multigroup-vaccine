@@ -9,6 +9,7 @@ non-school-aged population were imputed based on assumptions and are not
 based on actual vaccination information for those age groups.
 
 ``` r
+
 library(multigroup.vaccine)
 library(socialmixr)
 ```
@@ -19,6 +20,7 @@ The following census-designated cities / places are assumed to comprise
 the Short Creek community:
 
 ``` r
+
 hildale_path <- system.file("extdata", "hildale_ut_2023.csv", package = "multigroup.vaccine")
 colorado_city_path <- system.file("extdata", "colorado_city_az_2023.csv", package = "multigroup.vaccine")
 centennial_park_path <- system.file("extdata", "centennial_park_az_2023.csv", package = "multigroup.vaccine")
@@ -29,6 +31,7 @@ centennial_park_path <- system.file("extdata", "centennial_park_az_2023.csv", pa
 For measles outbreak modeling, let’s use the following age groups:
 
 ``` r
+
 agelims <- c(0, 1, 5, 12, 14, 18, 25, 45, 70)
 ageveff <- c(0.93, 0.93, rep(0.97, 6), 1)
 ```
@@ -36,6 +39,7 @@ ageveff <- c(0.93, 0.93, rep(0.97, 6), 1)
 ## Getting City Population Data
 
 ``` r
+
 hildale <- getCityData(
   city_name = "Hildale city, Utah",
   csv_path = hildale_path,
@@ -60,6 +64,7 @@ agepops <- round(hildale$age_pops + colorado_city$age_pops + centennial_park$age
 ## School data
 
 ``` r
+
 schoolpops <- c(250, 350, 190, 86, 150, 84, 114, 108, 205)
 schoolagegroups <- c(3, 3, 3, 4, 4, 4, 5, 5, 5)
 schoolvax <- c(16, 129, 80, 20, 55, 50, 27, 40, 93)
@@ -87,6 +92,7 @@ knitr::kable(data.frame(school = c(paste0("elem",1:3),
 ## Create contact matrix and immunization vector
 
 ``` r
+
 #Readjust the school populations to match the age data:
 for(a in unique(schoolagegroups)){
   inds <- which(schoolagegroups == a)
@@ -138,6 +144,7 @@ knitr::kable(data.frame(group = rownames(cm),
 ## Set up outbreak analysis
 
 ``` r
+
 mijpolymod <- contactMatrixPolymod(agelims)
 R0factor <- eigen(cm)$values[1] / eigen(mijpolymod)$values[1]
 
@@ -172,6 +179,7 @@ knitr::kable(data.frame(R0 = R0vals,
 ## Run deterministic outbreaks
 
 ``` r
+
 escapesize <- matrix(0, length(R0vals), length(grouppops))
 for (i in seq_along(R0vals)) {
 
@@ -211,6 +219,7 @@ knitr::kable(data.frame(R0 = R0vals, outbreakSize = round(escapesizetot)),
 ## Run full stochastic simulations
 
 ``` r
+
 R0 <- 10
 R0local <- R0 * R0factor
 

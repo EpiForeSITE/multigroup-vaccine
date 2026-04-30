@@ -18,12 +18,14 @@ modeling and outbreak forecasting.
 ### From CRAN (recommended)(when available)
 
 ``` r
+
 install.packages("multigroup.vaccine")
 ```
 
 ### From R-universe
 
 ``` r
+
 install.packages("multigroup.vaccine", 
                  repos = "https://epiforesite.r-universe.dev")
 ```
@@ -31,6 +33,7 @@ install.packages("multigroup.vaccine",
 ### From GitHub
 
 ``` r
+
 # install.packages("remotes")
 remotes::install_github("EpiForeSITE/multigroup-vaccine")
 ```
@@ -50,6 +53,7 @@ The package depends on the following R packages:
 Launch the `shiny` dashboard for interactive modeling:
 
 ``` r
+
 library(multigroup.vaccine)
 run_my_app()
 ```
@@ -69,6 +73,7 @@ example of comparing populations with different vaccination rates:
 #### Two-Group Population Comparison
 
 ``` r
+
 # Compare two populations with different vaccination rates
 results <- finalsize(
   popsize = c(10000, 10000),         # Equal population sizes
@@ -106,6 +111,7 @@ Comprehensive documentation and vignettes are available at:
 View all available vignettes:
 
 ``` r
+
 browseVignettes("multigroup.vaccine")
 ```
 
@@ -137,6 +143,7 @@ If you use this package in your research, please obtain citation
 information in R:
 
 ``` r
+
 citation("multigroup.vaccine")
 ```
 
@@ -145,6 +152,7 @@ citation("multigroup.vaccine")
 For local development:
 
 ``` r
+
 # Clone the repository
 # git clone https://github.com/EpiForeSITE/multigroup-vaccine.git
 

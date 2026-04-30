@@ -1,6 +1,7 @@
 # Measles Age-Structured Model
 
 ``` r
+
 library(multigroup.vaccine)
 library(socialmixr)
 ```
@@ -21,6 +22,7 @@ vector using the lower limit (minimum age) of each group, starting with
 0:
 
 ``` r
+
 # under 1, 1-4, 5-11, 12-17, 18-24, 25-44, 45-69, 70 plus
 age_limits <- c(0, 1, 5, 12, 18, 25, 45, 70)
 ```
@@ -29,6 +31,7 @@ Next we collect census data from Washington County, Utah, using our
 custom age group choice:
 
 ``` r
+
 # Get data for Washington County, Utah
 washington_data <- getCensusData(
   state_fips = getStateFIPS("Utah"),
@@ -49,6 +52,7 @@ by data and should not be taken as the actual levels of immunization
 against measles in Washington County.
 
 ``` r
+
 age_immunity <- c(0, 0.77, 0.83, 0.85, 0.87, 0.90, 0.92, 1)
 ```
 
@@ -59,6 +63,7 @@ county after an introduction.
 Initial population size of each state:
 
 ``` r
+
 popsize <- washington_data$age_pops
 
 initV <- round(age_immunity * popsize)  # initially immune cases 
@@ -70,11 +75,12 @@ initR <- rep(0, length(popsize))  # no recent prior measles outbreaks
 ```
 
 Transmission matrix ingredients: contact matrix, relative susceptibility
-and transmissibility, and the basic reproduction number ($R_{0}$). The
+and transmissibility, and the basic reproduction number ($`R_0`$). The
 contact matrix uses Polymod contact survey data, adjusted for local
 population distribution:
 
 ``` r
+
 contactmatrix <- contactMatrixPolymod(age_limits, popsize)
 relsusc <- rep(1, length(popsize))      # Assume no age differences in susceptibility
 reltransm <- rep(1, length(popsize))    # or transmissibility per contact
@@ -87,17 +93,19 @@ deterministic solution produced by the
 function:
 
 ``` r
+
 fs <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV)
 round(sum(fs))
 #> [1] 7573
 ```
 
-Under the model assumptions and with $R_{0}$ = 10, there could be an
+Under the model assumptions and with $`R_0`$ = 10, there could be an
 outbreak of more than 7,500 measles cases in this county.
 
 Here’s how the outbreak size looks for each age group:
 
 ``` r
+
 names(fs) <- washington_data$age_labels
 round(fs)
 #> under1   1to4  5to11 12to17 18to24 25to44 45to69 70plus 
@@ -112,6 +120,7 @@ which the stochastic simulation is suspended and replaced with the
 deterministic solution above.
 
 ``` r
+
 fs_hybrid <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV, method = "hybrid", nsims = 30)
 colnames(fs_hybrid) <- washington_data$age_labels
 fs_hybrid

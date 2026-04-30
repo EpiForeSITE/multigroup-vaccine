@@ -25,16 +25,22 @@
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/getFinalSizeDist.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/getFinalSizeDistEscape.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/getFinalSizeODE.html</loc></url>
+<url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/getFinalsizeDllPath.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/getSizeAtTime.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/getStateFIPS.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/index.html</loc></url>
+<url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/initializeFinalsizeWorker.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/listCounties.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/odeSIR.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/processCensusDataBySex.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/processCensusDataTotal.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/run_my_app.html</loc></url>
+<url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/sampleFinalsizeSeeds.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/simodeSIR.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/transmissionRates.html</loc></url>
+<url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/validateFinalsizeNsims.html</loc></url>
+<url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/validateFinalsizeSeed.html</loc></url>
+<url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/validateFinalsizeThreads.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/vaxrepnum.html</loc></url>
 </urlset>
 

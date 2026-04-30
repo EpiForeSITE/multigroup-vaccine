@@ -6,6 +6,7 @@ functions in this R package. After installing the package (see
 instructions in README), load it:
 
 ``` r
+
 library(multigroup.vaccine)
 ```
 
@@ -16,6 +17,7 @@ individuals and with the following parameters:
   80,000 (A) and the other with size 20,000 (B)
 
 ``` r
+
 popsize <- c(80000, 20000)
 ```
 
@@ -37,6 +39,7 @@ B. This means that an individual in Group B makes 1.7 contacts for every
 1 made by an individual in group A.
 
 ``` r
+
 relcontact <- c(1, 1.7)
 ```
 
@@ -50,12 +53,14 @@ contact rates of each group. The latter element ensures that the overall
 number of A-to-B and B-to-A contacts are equal, for contact symmetry.
 
 ``` r
+
 incontact <- c(0.2, 0.5)
 ```
 
 With the above elements, we calculate the contact matrix as follows
 
 ``` r
+
 contactmatrix <- contactMatrixPropPref(popsize, relcontact, incontact)
 ```
 
@@ -69,6 +74,7 @@ contactmatrix <- contactMatrixPropPref(popsize, relcontact, incontact)
   than group A.
 
 ``` r
+
 relsusc <- c(1, 1.05)
 ```
 
@@ -79,6 +85,7 @@ relsusc <- c(1, 1.05)
   infectious members of group A.
 
 ``` r
+
 reltransm <- c(1, 1.01)
 ```
 
@@ -86,11 +93,12 @@ reltransm <- c(1, 1.01)
   enough to describe the *relative* transmission rates from one group to
   another, but we still need an absolute measure of how transmissible
   the disease is. This is often quantified by a basic reproduction
-  number ($R_{0}$), defined as the average number of transmissions from
+  number ($`R_0`$), defined as the average number of transmissions from
   a typical infectious individual if the rest of the population is
-  susceptible. Here we set $R_{0}$ to 1.75.
+  susceptible. Here we set $`R_0`$ to 1.75.
 
 ``` r
+
 R0 <- 1.75
 ```
 
@@ -101,6 +109,7 @@ R0 <- 1.75
   (compartment V).
 
 ``` r
+
 initR <- c(0, 0)
 initI <- c(0, 1)
 initV <- c(0.3, 0.2) * popsize
@@ -114,6 +123,7 @@ initV <- c(0.3, 0.2) * popsize
   equations.
 
 ``` r
+
 finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV)
 #> [1] 14139.571  8749.608
 ```
@@ -127,6 +137,7 @@ despite the fact that they comprise only one fifth of the population.
   trajectory:
 
 ``` r
+
 finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV, method = "analytic")
 #> [1] 14139.570  8749.609
 ```
@@ -144,19 +155,20 @@ method, especially for models with a large number of groups.
   argument, which defaults to 1 if unspecified.
 
 ``` r
+
 finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV, method = "stochastic",
           nsims = 10)
-#>        [,1] [,2]
-#>  [1,] 14440 9015
-#>  [2,]     0    1
-#>  [3,] 14509 8900
-#>  [4,] 14005 8509
+#>          R1   R2
+#>  [1,]     0    1
+#>  [2,] 13981 8573
+#>  [3,]     0    1
+#>  [4,] 14701 9016
 #>  [5,]     0    1
-#>  [6,] 13805 8591
-#>  [7,]     0    1
-#>  [8,] 13846 8710
-#>  [9,]     8    5
-#> [10,]     0    1
+#>  [6,]     0    1
+#>  [7,] 14282 8832
+#>  [8,] 14236 8994
+#>  [9,]     9    1
+#> [10,]     1    4
 ```
 
 Each row of the output has the results of one of the stochastic
@@ -168,7 +180,7 @@ above.
 
 - **Final outbreak size (hybrid method)**. The simulations for the
   stochastic method can be slow when the simulated outbreak grows to a
-  large size. When $R_{0} > 1$, we typically see the “bimodal”
+  large size. When $`R_0 > 1`$, we typically see the “bimodal”
   distribution of outcomes in stochastic simulations in which one set of
   simulated outbreaks have small final size while another set “escape”
   to a size that is quite close to the size predicted by the
@@ -180,17 +192,18 @@ above.
   result from the ODE method.
 
 ``` r
+
 finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV, method = "hybrid",
           nsims = 10)
 #>        [,1] [,2]
 #>  [1,]     0    1
-#>  [2,]     1    1
-#>  [3,] 14140 8750
-#>  [4,]     0    1
-#>  [5,]     3    2
+#>  [2,]     2    2
+#>  [3,]     0    4
+#>  [4,] 14140 8750
+#>  [5,] 14140 8750
 #>  [6,] 14140 8750
 #>  [7,]     0    1
-#>  [8,]     2    3
+#>  [8,]     8    4
 #>  [9,] 14140 8750
 #> [10,]     0    1
 ```
