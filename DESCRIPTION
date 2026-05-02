@@ -32,7 +32,7 @@ Imports:
     parallel,
     bslib (>= 0.9.0),
     htmltools,
-    socialmixr,
+    socialmixr (>= 0.6.0),
     Rcpp
 Suggests:
     knitr,

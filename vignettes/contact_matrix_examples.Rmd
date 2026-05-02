@@ -56,10 +56,10 @@ The `socialmixr` R package includes functions that allow us to see the number of
 ```{r}
 cmAll <- suppressMessages(
     suppressWarnings(socialmixr::contact_matrix(socialmixr::polymod,
-                                                age.limits = agelims)$matrix))
+                                                age_limits = agelims)$matrix))
 cmSchool <- suppressMessages(
     suppressWarnings(socialmixr::contact_matrix(socialmixr::polymod,
-                                                age.limits = agelims,
+                                                age_limits = agelims,
                                                 filter = list(cnt_school = 1))$matrix))
 
 knitr::kable(round(cmAll, 2), format = "markdown")
