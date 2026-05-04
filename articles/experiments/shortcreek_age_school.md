@@ -21,9 +21,9 @@ the Short Creek community:
 
 ``` r
 
-hildale_path <- system.file("extdata", "hildale_ut_2023.csv", package = "multigroup.vaccine")
-colorado_city_path <- system.file("extdata", "colorado_city_az_2023.csv", package = "multigroup.vaccine")
-centennial_park_path <- system.file("extdata", "centennial_park_az_2023.csv", package = "multigroup.vaccine")
+hildale_path <- system.file("extdata", "hildale_ut_2024.csv", package = "multigroup.vaccine")
+colorado_city_path <- system.file("extdata", "colorado_city_az_2024.csv", package = "multigroup.vaccine")
+centennial_park_path <- system.file("extdata", "centennial_park_az_2024.csv", package = "multigroup.vaccine")
 ```
 
 ## Measles Model Setup
@@ -96,7 +96,9 @@ knitr::kable(data.frame(school = c(paste0("elem",1:3),
 #Readjust the school populations to match the age data:
 for(a in unique(schoolagegroups)){
   inds <- which(schoolagegroups == a)
-  schoolpops[inds] <- round(agepops[a] * schoolpops[inds] / sum(schoolpops[inds]))
+  schoolpopsnew <- round(agepops[a] * schoolpops[inds] / sum(schoolpops[inds]))
+  schoolvax[inds] <- round(schoolpopsnew * schoolvax[inds] / schoolpops[inds])
+  schoolpops[inds] <- schoolpopsnew
 }
 cm <- contactMatrixAgeSchool(agelims, agepops, schoolagegroups, schoolpops, schportion = 0.7)
 grouppops <- c(agepops[1:(min(schoolagegroups)-1)],
@@ -119,27 +121,30 @@ groupimm <- round(groupvax * groupveff)
 
 knitr::kable(data.frame(group = rownames(cm),
                         size = grouppops,
-                        immunity = paste0(round(100 * groupimm / grouppops),"%")),
+                        vax = round(groupvax),
+                        vaxpc = paste0(round(100 * groupvax / grouppops), "%"),
+                        immune = groupimm,
+                        immunepc= paste0(round(100 * groupimm / grouppops), "%")),
              row.names = FALSE, format = "markdown")
 ```
 
-| group    | size | immunity |
-|:---------|-----:|:---------|
-| under1   |  113 | 0%       |
-| 1to4     |  450 | 24%      |
-| 5to11s1  |  281 | 6%       |
-| 5to11s2  |  393 | 32%      |
-| 5to11s3  |  213 | 37%      |
-| 12to13s4 |   85 | 22%      |
-| 12to13s5 |  149 | 36%      |
-| 12to13s6 |   83 | 58%      |
-| 14to17s7 |  178 | 15%      |
-| 14to17s8 |  169 | 23%      |
-| 14to17s9 |  320 | 28%      |
-| 18to24   |  892 | 23%      |
-| 25to44   | 1279 | 58%      |
-| 45to69   |  962 | 92%      |
-| 70+      |   63 | 100%     |
+| group    | size | vax | vaxpc | immune | immunepc |
+|:---------|-----:|----:|:------|-------:|:---------|
+| under1   |  141 |   0 | 0%    |      0 | 0%       |
+| 1to4     |  562 | 160 | 29%   |    149 | 27%      |
+| 5to11s1  |  296 |  19 | 6%    |     18 | 6%       |
+| 5to11s2  |  414 | 153 | 37%   |    148 | 36%      |
+| 5to11s3  |  225 |  95 | 42%   |     92 | 41%      |
+| 12to13s4 |   94 |  22 | 23%   |     21 | 22%      |
+| 12to13s5 |  164 |  60 | 37%   |     58 | 35%      |
+| 12to13s6 |   92 |  55 | 60%   |     53 | 58%      |
+| 14to17s7 |  166 |  39 | 23%   |     38 | 23%      |
+| 14to17s8 |  158 |  59 | 37%   |     57 | 36%      |
+| 14to17s9 |  299 | 136 | 45%   |    132 | 44%      |
+| 18to24   |  817 | 307 | 38%   |    298 | 36%      |
+| 25to44   | 1391 | 922 | 66%   |    894 | 64%      |
+| 45to69   | 1016 | 965 | 95%   |    936 | 92%      |
+| 70+      |   80 |  80 | 100%  |     80 | 100%     |
 
 ## Set up outbreak analysis
 
@@ -169,12 +174,12 @@ knitr::kable(data.frame(R0 = R0vals,
 
 |  R0 | R0local | Rvax |
 |----:|--------:|-----:|
-|   7 |    13.4 |  9.8 |
-|   8 |    15.3 | 11.2 |
-|   9 |    17.2 | 12.7 |
-|  10 |    19.2 | 14.1 |
-|  11 |    21.1 | 15.5 |
-|  12 |    23.0 | 16.9 |
+|   7 |    12.7 |  8.3 |
+|   8 |    14.5 |  9.5 |
+|   9 |    16.4 | 10.7 |
+|  10 |    18.2 | 11.8 |
+|  11 |    20.0 | 13.0 |
+|  12 |    21.8 | 14.2 |
 
 ## Run deterministic outbreaks
 
@@ -209,12 +214,12 @@ knitr::kable(data.frame(R0 = R0vals, outbreakSize = round(escapesizetot)),
 
 |  R0 | outbreakSize |
 |----:|-------------:|
-|   7 |         3094 |
-|   8 |         3108 |
-|   9 |         3117 |
-|  10 |         3123 |
-|  11 |         3127 |
-|  12 |         3129 |
+|   7 |         2882 |
+|   8 |         2902 |
+|   9 |         2915 |
+|  10 |         2923 |
+|  11 |         2928 |
+|  12 |         2932 |
 
 ## Run full stochastic simulations
 
@@ -247,26 +252,33 @@ knitr::kable(os, row.names = FALSE, format = "markdown")
 | outbreakSize | freq |
 |:-------------|-----:|
 | 1            |    8 |
-| 3115         |    1 |
-| 3117         |    2 |
-| 3118         |    2 |
-| 3119         |    4 |
-| 3120         |    6 |
-| 3121         |   10 |
-| 3122         |    2 |
-| 3123         |   14 |
-| 3124         |   15 |
-| 3125         |    6 |
-| 3126         |    7 |
-| 3127         |    6 |
-| 3128         |   10 |
-| 3129         |    4 |
-| 3130         |    3 |
+| 2            |    1 |
+| 2913         |    3 |
+| 2916         |    2 |
+| 2917         |    3 |
+| 2918         |    4 |
+| 2919         |    3 |
+| 2920         |    3 |
+| 2921         |    2 |
+| 2922         |    7 |
+| 2923         |    9 |
+| 2924         |    6 |
+| 2925         |   10 |
+| 2926         |    7 |
+| 2927         |    7 |
+| 2928         |    7 |
+| 2929         |    7 |
+| 2930         |    4 |
+| 2931         |    1 |
+| 2932         |    3 |
+| 2933         |    1 |
+| 2935         |    1 |
+| 2936         |    1 |
 
 ## Final comments
 
-These results show a high likelihood of more than 3,000 measles
-infections in this community after an introduction, which comprises all
+These results show a high likelihood of nearly 3,000 measles infections
+in this community after an introduction, which comprises all
 unvaccinated individuals and a small number of vaccinated individuals
 also getting infected. This is consistent with the high transmissibility
 of measles and the large number of children and low vaccination rates in

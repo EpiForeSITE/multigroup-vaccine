@@ -86,9 +86,9 @@ based on actual vaccination information for those age groups.</p>
 <p>The following census-designated cities / places are assumed to
 comprise the Short Creek community:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">hildale_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"hildale_ut_2023.csv"</span>, package <span class="op">=</span> <span class="st">"multigroup.vaccine"</span><span class="op">)</span></span>
-<span><span class="va">colorado_city_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"colorado_city_az_2023.csv"</span>, package <span class="op">=</span> <span class="st">"multigroup.vaccine"</span><span class="op">)</span></span>
-<span><span class="va">centennial_park_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"centennial_park_az_2023.csv"</span>, package <span class="op">=</span> <span class="st">"multigroup.vaccine"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">hildale_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"hildale_ut_2024.csv"</span>, package <span class="op">=</span> <span class="st">"multigroup.vaccine"</span><span class="op">)</span></span>
+<span><span class="va">colorado_city_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"colorado_city_az_2024.csv"</span>, package <span class="op">=</span> <span class="st">"multigroup.vaccine"</span><span class="op">)</span></span>
+<span><span class="va">centennial_park_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"centennial_park_az_2024.csv"</span>, package <span class="op">=</span> <span class="st">"multigroup.vaccine"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="measles-model-setup">Measles Model Setup<a class="anchor" aria-label="anchor" href="#measles-model-setup"></a>
@@ -199,7 +199,9 @@ groups:</p>
 <code class="sourceCode R"><span><span class="co">#Readjust the school populations to match the age data:</span></span>
 <span><span class="kw">for</span><span class="op">(</span><span class="va">a</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">schoolagegroups</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
 <span>  <span class="va">inds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">schoolagegroups</span> <span class="op">==</span> <span class="va">a</span><span class="op">)</span></span>
-<span>  <span class="va">schoolpops</span><span class="op">[</span><span class="va">inds</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">agepops</span><span class="op">[</span><span class="va">a</span><span class="op">]</span> <span class="op">*</span> <span class="va">schoolpops</span><span class="op">[</span><span class="va">inds</span><span class="op">]</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">schoolpops</span><span class="op">[</span><span class="va">inds</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">schoolpopsnew</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">agepops</span><span class="op">[</span><span class="va">a</span><span class="op">]</span> <span class="op">*</span> <span class="va">schoolpops</span><span class="op">[</span><span class="va">inds</span><span class="op">]</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">schoolpops</span><span class="op">[</span><span class="va">inds</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">schoolvax</span><span class="op">[</span><span class="va">inds</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">schoolpopsnew</span> <span class="op">*</span> <span class="va">schoolvax</span><span class="op">[</span><span class="va">inds</span><span class="op">]</span> <span class="op">/</span> <span class="va">schoolpops</span><span class="op">[</span><span class="va">inds</span><span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="va">schoolpops</span><span class="op">[</span><span class="va">inds</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">schoolpopsnew</span></span>
 <span><span class="op">}</span></span>
 <span><span class="va">cm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../../reference/contactMatrixAgeSchool.html">contactMatrixAgeSchool</a></span><span class="op">(</span><span class="va">agelims</span>, <span class="va">agepops</span>, <span class="va">schoolagegroups</span>, <span class="va">schoolpops</span>, schportion <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span></span>
 <span><span class="va">grouppops</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">agepops</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">schoolagegroups</span><span class="op">)</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span><span class="op">]</span>,</span>
@@ -222,88 +224,139 @@ groups:</p>
 <span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">cm</span><span class="op">)</span>,</span>
 <span>                        size <span class="op">=</span> <span class="va">grouppops</span>,</span>
-<span>                        immunity <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">100</span> <span class="op">*</span> <span class="va">groupimm</span> <span class="op">/</span> <span class="va">grouppops</span><span class="op">)</span>,<span class="st">"%"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                        vax <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">groupvax</span><span class="op">)</span>,</span>
+<span>                        vaxpc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">100</span> <span class="op">*</span> <span class="va">groupvax</span> <span class="op">/</span> <span class="va">grouppops</span><span class="op">)</span>, <span class="st">"%"</span><span class="op">)</span>,</span>
+<span>                        immune <span class="op">=</span> <span class="va">groupimm</span>,</span>
+<span>                        immunepc<span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fl">100</span> <span class="op">*</span> <span class="va">groupimm</span> <span class="op">/</span> <span class="va">grouppops</span><span class="op">)</span>, <span class="st">"%"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>             row.names <span class="op">=</span> <span class="cn">FALSE</span>, format <span class="op">=</span> <span class="st">"markdown"</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="left">group</th>
 <th align="right">size</th>
-<th align="left">immunity</th>
+<th align="right">vax</th>
+<th align="left">vaxpc</th>
+<th align="right">immune</th>
+<th align="left">immunepc</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td align="left">under1</td>
-<td align="right">113</td>
+<td align="right">141</td>
+<td align="right">0</td>
+<td align="left">0%</td>
+<td align="right">0</td>
 <td align="left">0%</td>
 </tr>
 <tr class="even">
 <td align="left">1to4</td>
-<td align="right">450</td>
-<td align="left">24%</td>
+<td align="right">562</td>
+<td align="right">160</td>
+<td align="left">29%</td>
+<td align="right">149</td>
+<td align="left">27%</td>
 </tr>
 <tr class="odd">
 <td align="left">5to11s1</td>
-<td align="right">281</td>
+<td align="right">296</td>
+<td align="right">19</td>
+<td align="left">6%</td>
+<td align="right">18</td>
 <td align="left">6%</td>
 </tr>
 <tr class="even">
 <td align="left">5to11s2</td>
-<td align="right">393</td>
-<td align="left">32%</td>
+<td align="right">414</td>
+<td align="right">153</td>
+<td align="left">37%</td>
+<td align="right">148</td>
+<td align="left">36%</td>
 </tr>
 <tr class="odd">
 <td align="left">5to11s3</td>
-<td align="right">213</td>
-<td align="left">37%</td>
+<td align="right">225</td>
+<td align="right">95</td>
+<td align="left">42%</td>
+<td align="right">92</td>
+<td align="left">41%</td>
 </tr>
 <tr class="even">
 <td align="left">12to13s4</td>
-<td align="right">85</td>
+<td align="right">94</td>
+<td align="right">22</td>
+<td align="left">23%</td>
+<td align="right">21</td>
 <td align="left">22%</td>
 </tr>
 <tr class="odd">
 <td align="left">12to13s5</td>
-<td align="right">149</td>
-<td align="left">36%</td>
+<td align="right">164</td>
+<td align="right">60</td>
+<td align="left">37%</td>
+<td align="right">58</td>
+<td align="left">35%</td>
 </tr>
 <tr class="even">
 <td align="left">12to13s6</td>
-<td align="right">83</td>
+<td align="right">92</td>
+<td align="right">55</td>
+<td align="left">60%</td>
+<td align="right">53</td>
 <td align="left">58%</td>
 </tr>
 <tr class="odd">
 <td align="left">14to17s7</td>
-<td align="right">178</td>
-<td align="left">15%</td>
+<td align="right">166</td>
+<td align="right">39</td>
+<td align="left">23%</td>
+<td align="right">38</td>
+<td align="left">23%</td>
 </tr>
 <tr class="even">
 <td align="left">14to17s8</td>
-<td align="right">169</td>
-<td align="left">23%</td>
+<td align="right">158</td>
+<td align="right">59</td>
+<td align="left">37%</td>
+<td align="right">57</td>
+<td align="left">36%</td>
 </tr>
 <tr class="odd">
 <td align="left">14to17s9</td>
-<td align="right">320</td>
-<td align="left">28%</td>
+<td align="right">299</td>
+<td align="right">136</td>
+<td align="left">45%</td>
+<td align="right">132</td>
+<td align="left">44%</td>
 </tr>
 <tr class="even">
 <td align="left">18to24</td>
-<td align="right">892</td>
-<td align="left">23%</td>
+<td align="right">817</td>
+<td align="right">307</td>
+<td align="left">38%</td>
+<td align="right">298</td>
+<td align="left">36%</td>
 </tr>
 <tr class="odd">
 <td align="left">25to44</td>
-<td align="right">1279</td>
-<td align="left">58%</td>
+<td align="right">1391</td>
+<td align="right">922</td>
+<td align="left">66%</td>
+<td align="right">894</td>
+<td align="left">64%</td>
 </tr>
 <tr class="even">
 <td align="left">45to69</td>
-<td align="right">962</td>
+<td align="right">1016</td>
+<td align="right">965</td>
+<td align="left">95%</td>
+<td align="right">936</td>
 <td align="left">92%</td>
 </tr>
 <tr class="odd">
 <td align="left">70+</td>
-<td align="right">63</td>
+<td align="right">80</td>
+<td align="right">80</td>
+<td align="left">100%</td>
+<td align="right">80</td>
 <td align="left">100%</td>
 </tr>
 </tbody>
@@ -342,33 +395,33 @@ groups:</p>
 <tbody>
 <tr class="odd">
 <td align="right">7</td>
-<td align="right">13.4</td>
-<td align="right">9.8</td>
+<td align="right">12.7</td>
+<td align="right">8.3</td>
 </tr>
 <tr class="even">
 <td align="right">8</td>
-<td align="right">15.3</td>
-<td align="right">11.2</td>
+<td align="right">14.5</td>
+<td align="right">9.5</td>
 </tr>
 <tr class="odd">
 <td align="right">9</td>
-<td align="right">17.2</td>
-<td align="right">12.7</td>
+<td align="right">16.4</td>
+<td align="right">10.7</td>
 </tr>
 <tr class="even">
 <td align="right">10</td>
-<td align="right">19.2</td>
-<td align="right">14.1</td>
+<td align="right">18.2</td>
+<td align="right">11.8</td>
 </tr>
 <tr class="odd">
 <td align="right">11</td>
-<td align="right">21.1</td>
-<td align="right">15.5</td>
+<td align="right">20.0</td>
+<td align="right">13.0</td>
 </tr>
 <tr class="even">
 <td align="right">12</td>
-<td align="right">23.0</td>
-<td align="right">16.9</td>
+<td align="right">21.8</td>
+<td align="right">14.2</td>
 </tr>
 </tbody>
 </table>
@@ -410,27 +463,27 @@ groups:</p>
 <tbody>
 <tr class="odd">
 <td align="right">7</td>
-<td align="right">3094</td>
+<td align="right">2882</td>
 </tr>
 <tr class="even">
 <td align="right">8</td>
-<td align="right">3108</td>
+<td align="right">2902</td>
 </tr>
 <tr class="odd">
 <td align="right">9</td>
-<td align="right">3117</td>
+<td align="right">2915</td>
 </tr>
 <tr class="even">
 <td align="right">10</td>
-<td align="right">3123</td>
+<td align="right">2923</td>
 </tr>
 <tr class="odd">
 <td align="right">11</td>
-<td align="right">3127</td>
+<td align="right">2928</td>
 </tr>
 <tr class="even">
 <td align="right">12</td>
-<td align="right">3129</td>
+<td align="right">2932</td>
 </tr>
 </tbody>
 </table>
@@ -472,64 +525,92 @@ groups:</p>
 <td align="right">8</td>
 </tr>
 <tr class="even">
-<td align="left">3115</td>
+<td align="left">2</td>
 <td align="right">1</td>
 </tr>
 <tr class="odd">
-<td align="left">3117</td>
-<td align="right">2</td>
+<td align="left">2913</td>
+<td align="right">3</td>
 </tr>
 <tr class="even">
-<td align="left">3118</td>
+<td align="left">2916</td>
 <td align="right">2</td>
 </tr>
 <tr class="odd">
-<td align="left">3119</td>
+<td align="left">2917</td>
+<td align="right">3</td>
+</tr>
+<tr class="even">
+<td align="left">2918</td>
 <td align="right">4</td>
 </tr>
+<tr class="odd">
+<td align="left">2919</td>
+<td align="right">3</td>
+</tr>
 <tr class="even">
-<td align="left">3120</td>
-<td align="right">6</td>
+<td align="left">2920</td>
+<td align="right">3</td>
 </tr>
 <tr class="odd">
-<td align="left">3121</td>
-<td align="right">10</td>
-</tr>
-<tr class="even">
-<td align="left">3122</td>
+<td align="left">2921</td>
 <td align="right">2</td>
 </tr>
-<tr class="odd">
-<td align="left">3123</td>
-<td align="right">14</td>
-</tr>
 <tr class="even">
-<td align="left">3124</td>
-<td align="right">15</td>
-</tr>
-<tr class="odd">
-<td align="left">3125</td>
-<td align="right">6</td>
-</tr>
-<tr class="even">
-<td align="left">3126</td>
+<td align="left">2922</td>
 <td align="right">7</td>
 </tr>
 <tr class="odd">
-<td align="left">3127</td>
+<td align="left">2923</td>
+<td align="right">9</td>
+</tr>
+<tr class="even">
+<td align="left">2924</td>
 <td align="right">6</td>
 </tr>
-<tr class="even">
-<td align="left">3128</td>
+<tr class="odd">
+<td align="left">2925</td>
 <td align="right">10</td>
 </tr>
+<tr class="even">
+<td align="left">2926</td>
+<td align="right">7</td>
+</tr>
 <tr class="odd">
-<td align="left">3129</td>
-<td align="right">4</td>
+<td align="left">2927</td>
+<td align="right">7</td>
 </tr>
 <tr class="even">
-<td align="left">3130</td>
+<td align="left">2928</td>
+<td align="right">7</td>
+</tr>
+<tr class="odd">
+<td align="left">2929</td>
+<td align="right">7</td>
+</tr>
+<tr class="even">
+<td align="left">2930</td>
+<td align="right">4</td>
+</tr>
+<tr class="odd">
+<td align="left">2931</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">2932</td>
 <td align="right">3</td>
+</tr>
+<tr class="odd">
+<td align="left">2933</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">2935</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">2936</td>
+<td align="right">1</td>
 </tr>
 </tbody>
 </table>
@@ -537,7 +618,7 @@ groups:</p>
 <div class="section level2">
 <h2 id="final-comments">Final comments<a class="anchor" aria-label="anchor" href="#final-comments"></a>
 </h2>
-<p>These results show a high likelihood of more than 3,000 measles
+<p>These results show a high likelihood of nearly 3,000 measles
 infections in this community after an introduction, which comprises all
 unvaccinated individuals and a small number of vaccinated individuals
 also getting infected. This is consistent with the high transmissibility
