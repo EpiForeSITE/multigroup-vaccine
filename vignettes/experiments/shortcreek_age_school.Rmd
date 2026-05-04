@@ -39,9 +39,9 @@ library(socialmixr)
 The following census-designated cities / places are assumed to comprise the Short Creek community:
 
 ```{r city-data}
-hildale_path <- system.file("extdata", "hildale_ut_2023.csv", package = "multigroup.vaccine")
-colorado_city_path <- system.file("extdata", "colorado_city_az_2023.csv", package = "multigroup.vaccine")
-centennial_park_path <- system.file("extdata", "centennial_park_az_2023.csv", package = "multigroup.vaccine")
+hildale_path <- system.file("extdata", "hildale_ut_2024.csv", package = "multigroup.vaccine")
+colorado_city_path <- system.file("extdata", "colorado_city_az_2024.csv", package = "multigroup.vaccine")
+centennial_park_path <- system.file("extdata", "centennial_park_az_2024.csv", package = "multigroup.vaccine")
 ```
 
 ## Measles Model Setup
@@ -123,8 +123,10 @@ groupimm <- round(groupvax * groupveff)
 
 knitr::kable(data.frame(group = rownames(cm),
                         size = grouppops,
-                        vax = paste0(round(100 * groupvax / grouppops), "%"),
-                        immunity = paste0(round(100 * groupimm / grouppops), "%")),
+                        vax = round(groupvax),
+                        vaxpc = paste0(round(100 * groupvax / grouppops), "%"),
+                        immune = groupimm,
+                        immunepc= paste0(round(100 * groupimm / grouppops), "%")),
              row.names = FALSE, format = "markdown")
 ```
 
