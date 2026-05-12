@@ -76,17 +76,16 @@ contactMatrixPolymod <- function(agelims, agepops = NULL) {
     paste0(agelims[length(agelims)], "+")
   )
 
-  #data(polymod)
   # Suppress both warnings and messages from socialmixr
   # The contact_matrix function prints informational messages about missing data
   cm <- suppressMessages(
     suppressWarnings(
       socialmixr::contact_matrix(
         socialmixr::polymod,
-        age.limits = agelims,
+        age_limits = agelims,
         symmetric = TRUE,
-        missing.participant.age = "remove",
-        missing.contact.age = "remove"
+        missing_participant_age = "remove",
+        missing_contact_age = "remove"
       )
     )
   )
