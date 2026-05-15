@@ -43,14 +43,14 @@ corresponding populations will be aggregated into a single "90+" group.
 contactMatrixPolymod(agelims = c(0, 5, 18))
 #>          contact.age.group
 #> age.group    under5    5to17       18+
-#>    under5 2.2370031 1.504903  6.086132
-#>    5to17  0.5148409 9.846792  7.272662
-#>    18+    0.3754707 1.311486 10.828758
+#>    under5 2.2370031 1.496340  6.054578
+#>    5to17  0.5188513 9.846792  7.283504
+#>    18+    0.3775551 1.309858 10.828758
 #Specifying the age distribution will lead to an adjusted version:
 contactMatrixPolymod(agelims = c(0, 5, 18), agepops = c(500, 1300, 8200))
 #>          contact.age.group
 #> age.group    under5    5to17       18+
-#>    under5 2.2518104 1.347447  6.198479
-#>    5to17  0.5182488 8.816532  7.406912
-#>    18+    0.3779560 1.174266 11.028652
+#>    under5 2.2280800 1.343632  6.167205
+#>    5to17  0.5167817 8.841886  7.418992
+#>    18+    0.3760491 1.176182 11.030196
 ```
