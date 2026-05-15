@@ -76,17 +76,20 @@ contactMatrixPolymod <- function(agelims, agepops = NULL) {
     paste0(agelims[length(agelims)], "+")
   )
 
+  popdata <- read.csv(system.file("extdata",
+                                  "polymod_countries_2005.csv",
+                                  package = "multigroup.vaccine"))
+
+  survey_pop = data.frame(lower.age.limit = popdata[,1], population = rowSums(popdata[,-1])*1000)
+
   # Suppress both warnings and messages from socialmixr
-  # The contact_matrix function prints informational messages about missing data
+  # The contact_matrix function prints informational messages about matrix normalization
   cm <- suppressMessages(
     suppressWarnings(
-      socialmixr::contact_matrix(
-        socialmixr::polymod,
-        age_limits = agelims,
-        symmetric = TRUE,
-        missing_participant_age = "remove",
-        missing_contact_age = "remove"
-      )
+      socialmixr::contact_matrix(survey = socialmixr::polymod,
+                                 survey_pop = survey_pop,
+                                 age_limits = agelims,
+                                 symmetric = TRUE)
     )
   )
 
