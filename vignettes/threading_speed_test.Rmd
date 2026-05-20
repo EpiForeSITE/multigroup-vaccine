@@ -23,20 +23,20 @@ library(multigroup.vaccine)
 Large population:
 
 ```{r}
-popsize <- c(800000, 200000)
+popsize <- rep(100000, 10)
 ```
 
-Generic simulation settings - expect long simulations with R0 = 2 and no immunity
+Generic simulation settings - expect long simulations with R0 = 4 and no immunity
 ```{r}
-relcontact <- c(1, 1.7)
-incontact <- c(0.2, 0.5)
+relcontact <- rep(1, 10)
+incontact <- rep(0.2, 10)
 contactmatrix <- contactMatrixPropPref(popsize, relcontact, incontact)
-relsusc <- c(1, 1.05)
-reltransm <- c(1, 1.01)
+relsusc <- rep(1, 10)
+reltransm <- rep(1, 10)
 R0 <- 4
-initR <- c(0, 0)
-initI <- c(0, 1)
-initV <- c(0, 0)
+initR <- rep(0, 10)
+initI <- rep(1, 10)
+initV <- rep(0, 10)
 ```
 
 Final outbreak size (stochastic method)
@@ -44,23 +44,30 @@ Final outbreak size (stochastic method)
 Time of simulation with 1 thread:
 ```{r}
 tm1 <- Sys.time()
-fs <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
-                method = "stochastic", nsims = 100, nthreads = 1)
+fs1 <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
+                method = "stochastic", nsims = 100, nthreads = 1, seed = 1111)
 Sys.time() - tm1
 ```
 
 Time of simulation with 2 threads:
 ```{r}
 tm2 <- Sys.time()
-fs <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
-                method = "stochastic", nsims = 100, nthreads = 2)
+fs2 <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
+                 method = "stochastic", nsims = 100, nthreads = 2, seed = 1111)
 Sys.time() - tm2
 ```
 
 Time of simulation with 3 threads:
 ```{r}
 tm3 <- Sys.time()
-fs <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
-                method = "stochastic", nsims = 100, nthreads = 3)
+fs3 <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
+                method = "stochastic", nsims = 100, nthreads = 3, seed = 1111)
 Sys.time() - tm3
+```
+Time of simulation with 4 threads:
+```{r}
+tm4 <- Sys.time()
+fs4 <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
+                method = "stochastic", nsims = 100, nthreads = 4, seed = 1111)
+Sys.time() - tm4
 ```
