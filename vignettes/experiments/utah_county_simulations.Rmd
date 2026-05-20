@@ -89,7 +89,7 @@ utah_counties <- getAllCountiesData(
 
 # Calculate Immunity Levels & Calibrate R0
 R0_baseline <- 10
-R0_baseline_range <- seq(6, 16, by=1)
+R0_baseline_range <- seq(6, 12, by=1)
 reference_matrix <- contactMatrixPolymod(c(0, 1, 5, 11, 14, 18, 25, 45, 70))
 reference_eigenvalue <- eigen(reference_matrix)$values[1]
 
@@ -303,6 +303,20 @@ results_list <- vector("list", length(R0_baseline_range) * length(utah_counties)
 sim_list     <- vector("list", length(R0_baseline_range) * length(utah_counties))
 idx <- 1L
 
+simfun <- function(R0, county_name, nsims, nthreads){
+  c_short <- gsub(" County", "", county_name)
+  popsize <- utah_counties[[county_name]]$age_pops
+  initV <- round(county_immunity[[county_name]] * popsize)
+  initI <- rep(0, length(popsize)); initI[6] <- 1  # Intro in young adults
+  R0_eff <- R0 * county_R0_factors$R0_factor[county_R0_factors$county == c_short]
+  
+  # Run pure stochastic simulation
+  fs_stochastic <- finalsize(popsize, R0_eff, county_contact_matrices[[c_short]], 
+                             rep(1, length(popsize)), rep(1, length(popsize)), 
+                             rep(0, length(popsize)), initI, initV, 
+                             method = "stochastic", nsims = nsims, nthreads = nthreads)
+}
+
 for (R0_stochastic in R0_baseline_range) {
   for (county_name in names(utah_counties)) {
     c_short <- gsub(" County", "", county_name)
@@ -323,7 +337,7 @@ for (R0_stochastic in R0_baseline_range) {
     fs_stochastic <- finalsize(popsize, R0_eff, county_contact_matrices[[c_short]], 
                                rep(1, length(popsize)), rep(1, length(popsize)), 
                                rep(0, length(popsize)), initI, initV, 
-                               method = "stochastic", nsims = nsims_stochastic, nthreads = -1)
+                               method = "stochastic", nsims = nsims_stochastic, nthreads = 1)
     
     total_infected <- rowSums(fs_stochastic)
     

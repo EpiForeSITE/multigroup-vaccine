@@ -22,3 +22,5 @@
 ^cran-comments\.md$
 ^CRAN-SUBMISSION$
 ^benchmarks$
+^\.positai$
+^\.claude$
