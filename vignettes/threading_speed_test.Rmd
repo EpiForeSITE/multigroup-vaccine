@@ -1,0 +1,66 @@
+---
+title: "Threading Speed Test"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Threading Speed Test}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+For testing if multi-threading speeds up stochastic simulations
+
+```{r setup}
+library(multigroup.vaccine)
+```
+
+Large population:
+
+```{r}
+popsize <- c(800000, 200000)
+```
+
+Generic simulation settings - expect long simulations with R0 = 2 and no immunity
+```{r}
+relcontact <- c(1, 1.7)
+incontact <- c(0.2, 0.5)
+contactmatrix <- contactMatrixPropPref(popsize, relcontact, incontact)
+relsusc <- c(1, 1.05)
+reltransm <- c(1, 1.01)
+R0 <- 4
+initR <- c(0, 0)
+initI <- c(0, 1)
+initV <- c(0, 0)
+```
+
+Final outbreak size (stochastic method)
+
+Time of simulation with 1 thread:
+```{r}
+tm1 <- Sys.time()
+fs <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
+                method = "stochastic", nsims = 100, nthreads = 1)
+Sys.time() - tm1
+```
+
+Time of simulation with 2 threads:
+```{r}
+tm2 <- Sys.time()
+fs <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
+                method = "stochastic", nsims = 100, nthreads = 2)
+Sys.time() - tm2
+```
+
+Time of simulation with 3 threads:
+```{r}
+tm3 <- Sys.time()
+fs <- finalsize(popsize, R0, contactmatrix, relsusc, reltransm, initR, initI, initV,
+                method = "stochastic", nsims = 100, nthreads = 3)
+Sys.time() - tm3
+```
