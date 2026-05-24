@@ -1,0 +1,375 @@
+---
+title: "Measles Outbreak Simulations in Utah Counties"
+date: "May 2026"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Measles Outbreak Simulations in Utah Counties}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 11,
+  fig.height = 7,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+WARNING: The data and model used in this vignette are for demonstration purposes only and do not reflect real-world conditions accurately. The results are not intended to forecast or predict a measles outbreak size in any specific location.
+DATA: The vaccination data (county level) is not public and so is not included in the package.
+
+Executive Summary
+
+This vignette provides code for setting up and running stochastic measles outbreak simulations for
+every county in Utah. The simulation inputs include demographic mixing patterns and local vaccination coverage assumptions based on school vaccination data.
+
+## Data Initialization & Demographic Calibration
+
+This section processes county-level census data, school vaccination records, and age-structured contact matrices (Polymod). The baseline pathogen transmissibility (R0​) is calibrated to account for the unique age distribution of each county.
+
+```{r setup-libs, cache=FALSE}
+library(multigroup.vaccine)
+library(socialmixr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(plotly)
+library(scales)
+
+# Load raw data
+county_vax_data <- read.csv(file.path("../../data-raw/county_vax_data.csv"))
+unique_counties <- unique(county_vax_data$county)
+
+# Infer age structures based on population ratios
+age_groups_by_county <- list()
+for (county_name in unique_counties) {
+  county_data <- county_vax_data[county_vax_data$county == county_name, ]
+  el_pop <- county_data$pop[county_data$level == 1]
+  middle_pop <- county_data$pop[county_data$level == 2]
+  high_pop <- county_data$pop[county_data$level == 3]
+  
+  if (length(middle_pop) > 0 && length(high_pop) > 0 && high_pop > 0) {
+    middle_to_high_ratio <- middle_pop / high_pop
+    el_to_middle_ratio <- if(length(el_pop) > 0 && middle_pop > 0) el_pop / middle_pop else NA
+
+    if (middle_to_high_ratio >= 0.8 && middle_to_high_ratio <= 1.2) {
+      if (!is.na(el_to_middle_ratio) && el_to_middle_ratio < 1.3) {
+        age_groups_by_county[[county_name]] <- c(0, 1, 5, 10, 14, 18, 25, 45, 70)
+      } else {
+        age_groups_by_county[[county_name]] <- c(0, 1, 5, 12, 15, 18, 25, 45, 70)
+      }
+    } else if (middle_to_high_ratio <= 0.6) {
+      age_groups_by_county[[county_name]] <- c(0, 1, 5, 12, 14, 18, 25, 45, 70)
+    } else {
+      age_groups_by_county[[county_name]] <- c(0, 1, 5, 11, 14, 18, 25, 45, 70)
+    }
+  } else {
+    age_groups_by_county[[county_name]] <- c(0, 1, 5, 11, 14, 18, 25, 45, 70)
+  }
+}
+age_groups_by_county$Online <- NULL
+
+# Fetch Census Data
+utah_counties <- getAllCountiesData(
+  state_fips = getStateFIPS("Utah"),
+  year = 2024,
+  age_groups_by_county = age_groups_by_county,
+  csv_path = getCensusDataPath(),
+  verbose = FALSE
+)
+
+# Calculate Immunity Levels & Calibrate R0
+R0_baseline <- 10
+R0_baseline_range <- seq(6, 12, by=1)
+reference_matrix <- contactMatrixPolymod(c(0, 1, 5, 11, 14, 18, 25, 45, 70))
+reference_eigenvalue <- eigen(reference_matrix)$values[1]
+
+county_immunity <- list()
+county_contact_matrices <- list()
+county_R0_factors <- data.frame(county = character(), R0_factor = numeric(), R0_effective = numeric())
+
+for (county_name in names(utah_counties)) {
+  county_name_short <- gsub(" County", "", county_name)
+  county_data <- utah_counties[[county_name]]
+  vax_data <- county_vax_data[county_vax_data$county == county_name_short, ]
+  
+  el_vax_rate <- vax_data$vax[vax_data$level == 1] / vax_data$pop[vax_data$level == 1]
+  middle_vax_rate <- vax_data$vax[vax_data$level == 2] / vax_data$pop[vax_data$level == 2]
+  high_vax_rate <- vax_data$vax[vax_data$level == 3] / vax_data$pop[vax_data$level == 3]
+  pre_k_vax_rate <- el_vax_rate * 0.9  
+  
+  pre_k_immunity <- pre_k_vax_rate * 0.93
+  el_immunity <- el_vax_rate * 0.97
+  middle_immunity <- middle_vax_rate * 0.97
+  high_immunity <- high_vax_rate * 0.97
+
+  interpolate_immunity <- function(age, start_age, end_age, start_imm, end_imm) {
+    slope <- (end_imm - start_imm) / (end_age - start_age)
+    return(start_imm + slope * (age - start_age))
+  }
+  
+  imm_18_25 <- interpolate_immunity(21.5, 18, 70, high_immunity, 1.0)
+  imm_25_45 <- interpolate_immunity(35, 18, 70, high_immunity, 1.0)
+  imm_45_70 <- interpolate_immunity(57.5, 18, 70, high_immunity, 1.0)
+
+  county_immunity[[county_name]] <- c(0, pre_k_immunity, el_immunity, middle_immunity, high_immunity, imm_18_25, imm_25_45, imm_45_70, 1.0)
+  
+  # Contact Matrix & Eigenvalue adjustment
+  county_matrix <- contactMatrixPolymod(age_groups_by_county[[county_name_short]], county_data$age_pops)
+  county_contact_matrices[[county_name_short]] <- county_matrix
+  
+  R0_factor <- Re(eigen(county_matrix)$values[1]) / Re(reference_eigenvalue)
+  county_R0_factors <- rbind(county_R0_factors, data.frame(
+    county = county_name_short, R0_factor = R0_factor, R0_effective = R0_baseline * R0_factor
+  ))
+}
+```
+2. Stochastic Simulation
+
+We run 1000 independent simulations per county (assuming introduction by a young adult 18-25), for
+each assumed value of the reference R0.
+
+```{r stochastic-sims, cache=TRUE}
+nsims_stochastic <- 1000
+
+results_list <- vector("list", length(R0_baseline_range) * length(utah_counties))
+sim_list     <- vector("list", length(R0_baseline_range) * length(utah_counties))
+idx <- 1L
+
+simfun <- function(R0, county_name, nsims, nthreads, ...){
+  c_short <- gsub(" County", "", county_name)
+  popsize <- utah_counties[[county_name]]$age_pops
+  initV <- round(county_immunity[[county_name]] * popsize)
+  initI <- rep(0, length(popsize)); initI[6] <- 1  # Intro in young adults
+  R0_eff <- R0 * county_R0_factors$R0_factor[county_R0_factors$county == c_short]
+  
+  # Run pure stochastic simulation
+  finalsize(popsize, R0_eff, county_contact_matrices[[c_short]],
+            rep(1, length(popsize)), rep(1, length(popsize)),
+            rep(0, length(popsize)), initI, initV,
+            method = "stochastic", nsims = nsims, nthreads = nthreads, ...)
+}
+
+for (R0_stochastic in R0_baseline_range) {
+  for (county_name in names(utah_counties)) {
+    c_short <- gsub(" County", "", county_name)
+    
+    # Run pure stochastic simulation
+    fs_stochastic <- simfun(R0_stochastic, county_name, nsims_stochastic, nthreads = 1)
+    total_infected <- rowSums(fs_stochastic)
+    
+    # Store all sims
+    sim_list[[idx]] <- data.frame(
+      baseline_R0 = R0_stochastic,
+      county = c_short,
+      total_cases = total_infected
+    )
+    idx <- idx + 1L
+  }
+}
+
+sim_long <- bind_rows(sim_list)
+```
+
+## Full Outbreak Distribution
+
+All 1000 simulations per county are shown. A bimodal distribution — a spike closer to zero (chains that fizzle out) and a heavier right tail (sustained outbreaks) — is a hallmark of stochastic outbreak size distribution for populations above the herd immunity threshold.
+
+```{r}
+if(nrow(sim_long) > 0) {
+  # Order by median outbreak size at R0 = 10
+  order_all <- sim_long %>% filter(baseline_R0 == 10) %>% group_by(county) %>% 
+    summarise(med = median(total_cases)) %>% arrange(med) %>% pull(county)
+  all_sim_counties <- unique(sim_long$county)
+  order_all_full <- c(order_all, sort(setdiff(all_sim_counties, order_all)))
+
+  p_dots <- plot_ly()
+  for (r0_val in R0_baseline_range) {
+    df_sub <- sim_long %>%
+      filter(baseline_R0 == r0_val)
+
+    # Count exact matches within county
+    df_sub <- df_sub %>%
+    group_by(county, total_cases) %>%
+    mutate(n_equal = n()) %>%
+    ungroup()
+
+    # Count greater-than values within county
+    df_sub$n_greater <- sapply(
+      seq_len(nrow(df_sub)),
+      function(i) {
+        sum(df_sub$county == df_sub$county[i] & df_sub$total_cases > df_sub$total_cases[i])
+      })
+    df_sub$county_f <- factor(df_sub$county, levels = order_all_full)
+
+    p_dots <- p_dots %>% add_trace(data = df_sub, x = ~total_cases, y = ~county_f,
+                                   type = "scatter", mode = "markers",
+                                   marker = list(color = "#000000", size = 4, opacity = 0.25),
+    hovertext = ~paste0(county,
+                        "<br>= ", scales::comma(total_cases), " ",
+                        ifelse(total_cases == 1, "case", "cases"),
+                        ": ", n_equal, " ",
+                        ifelse(n_equal == 1, "simulation", "simulations"),
+                        "<br>> ", scales::comma(total_cases), " ",
+                        ifelse(total_cases == 1, "case", "cases"),
+                        ": ", n_greater, " ",
+                        ifelse(n_greater == 1, "simulation", "simulations")
+                        ),
+    hoverinfo = "text",
+    visible = (r0_val == 10),
+    name = paste0("R0 = ", r0_val)
+    )
+  }
+  steps_dots <- lapply(seq_along(R0_baseline_range), function(i) {
+    vis <- rep(FALSE, length(R0_baseline_range))
+    vis[i] <- TRUE
+    list(method = "restyle", args = list("visible", as.list(vis)),
+         label = as.character(R0_baseline_range[i]))
+  })
+
+  p_dots %>% layout(
+    title = paste0("Full Distribution of Outbreak Final Size: ",
+                   scales::comma(nsims_stochastic),
+                   " Simulations"),
+    xaxis = list(title = "Total Cases per Simulation (log scale)", type = "log"),
+    yaxis = list(title = ""),
+    sliders = list(list(active = 2, currentvalue = list(prefix = "Baseline R0 = "),
+                        steps = steps_dots)),
+    showlegend = FALSE, margin = list(l = 100)
+  )
+} else {
+  print("No simulation results.")
+}
+```
+
+## Export Simulation Outputs for External Risk Scoring
+
+This vignette now stops at simulation outputs and exports reusable datasets for downstream risk-score development in a separate notebook.
+
+```{r export-simulation-outputs, cache=FALSE}
+school_vax_summary <- county_vax_data %>%
+  filter(county != "Online") %>%
+  group_by(county) %>%
+  summarise(
+    total_enrolled = sum(pop),
+    total_vaccinated = sum(vax),
+    school_vax_rate = ifelse(total_enrolled > 0, total_vaccinated / total_enrolled, NA_real_),
+    .groups = "drop"
+  )
+
+# These county-level metrics are derived from the exact same immunity vectors used
+# to initialize the stochastic simulations, so the frontend can display them
+# directly without recomputing the simulation setup logic.
+county_static_metrics <- bind_rows(lapply(names(utah_counties), function(county_name) {
+  county_short <- gsub(" County", "", county_name)
+  popsize <- utah_counties[[county_name]]$age_pops
+  initV <- round(county_immunity[[county_name]] * popsize)
+  total_pop <- sum(popsize)
+  immune_population <- sum(initV)
+  susceptible_population <- total_pop - immune_population
+
+  data.frame(
+    county = county_short,
+    population = total_pop,
+    immune_population = immune_population,
+    susceptible_population = susceptible_population,
+    county_immunity_pct = ifelse(total_pop > 0, immune_population / total_pop, NA_real_),
+    county_susceptible_pct = ifelse(total_pop > 0, susceptible_population / total_pop, NA_real_),
+    stringsAsFactors = FALSE
+  )
+})) %>%
+  left_join(school_vax_summary, by = "county") %>%
+  left_join(
+    county_R0_factors %>% select(county, R0_factor),
+    by = "county"
+  )
+
+if (nrow(sim_long) > 0) {
+  simulation_stats_by_county <- sim_long %>%
+    group_by(baseline_R0, county) %>%
+    summarise(
+      nsims = n(),
+      mean_cases = mean(total_cases),
+      median_cases = median(total_cases),
+      p90_cases = as.numeric(quantile(total_cases, 0.90)),
+      p95_cases = as.numeric(quantile(total_cases, 0.95)),
+      max_cases = max(total_cases),
+      prob_large_outbreak = mean(is_large_outbreak),
+      prob_fizzle = mean(total_cases == 0),
+      .groups = "drop"
+    )
+} else {
+  simulation_stats_by_county <- data.frame(
+    baseline_R0 = numeric(),
+    county = character(),
+    nsims = numeric(),
+    mean_cases = numeric(),
+    median_cases = numeric(),
+    p90_cases = numeric(),
+    p95_cases = numeric(),
+    max_cases = numeric(),
+    prob_large_outbreak = numeric(),
+    prob_fizzle = numeric()
+  )
+}
+
+simulation_stats_statewide <- stochastic_results %>%
+  group_by(baseline_R0) %>%
+  summarise(
+    n_counties = n(),
+    n_vulnerable = sum(vax_repnum >= 1),
+    n_herd_immunity = sum(vax_repnum < 1),
+    mean_expected_cases = mean(expected_cases),
+    median_expected_cases = median(expected_cases),
+    mean_prob_large = mean(prob_large_outbreak),
+    .groups = "drop"
+  )
+
+export_dir <- file.path("outputs", "utah_county_risk")
+if (!dir.exists(export_dir)) dir.create(export_dir, recursive = TRUE)
+
+write.csv(stochastic_results,
+          file.path(export_dir, "stochastic_results_summary.csv"),
+          row.names = FALSE)
+write.csv(sim_long,
+          file.path(export_dir, "stochastic_results_all_runs.csv"),
+          row.names = FALSE)
+write.csv(simulation_stats_by_county,
+          file.path(export_dir, "simulation_stats_by_county.csv"),
+          row.names = FALSE)
+write.csv(simulation_stats_statewide,
+          file.path(export_dir, "simulation_stats_statewide.csv"),
+          row.names = FALSE)
+write.csv(county_static_metrics,
+          file.path(export_dir, "county_static_metrics.csv"),
+          row.names = FALSE)
+write.csv(vaxrepnum_sensitivity,
+          file.path(export_dir, "vaxrepnum_sensitivity.csv"),
+          row.names = FALSE)
+write.csv(threshold_counts,
+          file.path(export_dir, "threshold_counts.csv"),
+          row.names = FALSE)
+
+save(
+  stochastic_results,
+  sim_long,
+  simulation_stats_by_county,
+  simulation_stats_statewide,
+  county_static_metrics,
+  vaxrepnum_sensitivity,
+  threshold_counts,
+  county_R0_factors,
+  R0_baseline,
+  R0_baseline_range,
+  large_outbreak_threshold_frac,
+  large_outbreak_min_cases,
+  nsims_stochastic,
+  file = file.path(export_dir, "utah_county_simulation_bundle.RData")
+)
+
+cat("Saved simulation outputs to:", normalizePath(export_dir), "\n")
+```
