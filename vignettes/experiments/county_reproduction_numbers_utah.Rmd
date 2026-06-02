@@ -1,0 +1,259 @@
+---
+title: "Measles Reproduction Number Analysis for Utah Counties"
+date: "May 2026"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Measles Reproduction Number Analysis for Utah Counties}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 11,
+  fig.height = 7,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+WARNING: The data and model used in this vignette are for demonstration purposes only and do not reflect real-world conditions accurately. The results are not intended to forecast or predict a measles outbreak size in any specific location.
+DATA: The vaccination data (county level) is not public and so is not included in the package.
+
+Executive Summary
+
+This vignette provides code for analyzing measles reproduction numbers for every county in Utah. The inputs include demographic mixing patterns and local vaccination coverage assumptions based on school vaccination data.
+
+```{r setup-libs, cache=FALSE}
+library(multigroup.vaccine)
+library(socialmixr)
+```
+
+## Data Initialization
+
+First we read the county vaccination data, which contains the school-level enrollment statistics and vaccination statistics for each county, and the county census data, which contains single-age population statistics.
+
+```{r load-data, cache=FALSE}
+
+# Load raw data
+county_vax_data <- read.csv(file.path("../../data-raw/county_data_Utah_2025.csv"))
+#unique_counties <- unique(county_vax_data$county)
+county_pop_data <- getAllCountiesData(
+  state_fips = getStateFIPS("Utah"),
+  year = 2024,
+  csv_path = getCensusDataPath()
+)
+```
+
+## School-level age groups by county
+
+Next we convert the school levels (elementary, middle school / junior high school, and high school) from the vaccination data of each county into age levels. Different counties tend have different grades associated with the three levels. This process is discussed in more detail in the "School Age Group Analysis" vignette.
+
+```{r define-age-groups}
+grade_groups_by_county <- list()
+
+# Grade - level combinations to test
+elem_mid <- cbind(c(4, 4, 5, 5, 6, 6, 7, 7),
+                  c(5, 6, 4, 5, 3, 4, 2, 3))
+  
+for (county in unique(county_vax_data$county)) {
+
+    #get age 5-17 census population data for the county
+    schoolagepop <- county_pop_data[[paste0(county, " County")]]$data$TOT_POP[6:18]
+    sapfrac <- schoolagepop / sum(schoolagepop)
+    
+    cvd <- county_vax_data[county_vax_data$county == county, ]
+  
+    # Get population for each level
+    elem_popfrac <- cvd$popfrac[cvd$level == 1]
+    mid_popfrac <- cvd$popfrac[cvd$level == 2]
+    high_popfrac <- cvd$popfrac[cvd$level == 3]
+    
+    err <- rep(0, nrow(elem_mid))
+    for(i in 1:nrow(elem_mid)){
+      ielem <- 1:elem_mid[i,1]
+      imid <- (elem_mid[i,1] + 1):rowSums(elem_mid)[i]
+      ihigh <- (rowSums(elem_mid)[i] + 1):13
+      err[i] <- (sum(schoolagepop[ielem])*(elem_popfrac - sum(sapfrac[ielem])))^2 +
+                (sum(schoolagepop[imid])*(mid_popfrac - sum(sapfrac[imid])))^2 +
+                (sum(schoolagepop[ihigh])*(high_popfrac - sum(sapfrac[ihigh])))^2
+    }
+    bestrow <- which.min(err)
+    grade_groups_by_county[[county]] <- c(0, elem_mid[bestrow, 1],
+                                          rowSums(elem_mid)[bestrow])
+}
+```
+
+
+## Age and vaccination / immunity levels by county
+Next we define full age groupings and vaccination levels for each county. Age groupings are defined by a vector for the minimum age in years of each group, starting with 0. 
+
+For pre-school groups, we define an under-age-1 group and an age 1-to-4 group, assuming that age-0 individuals have received no MMR doses and age 1-to-4 received a single MMR dose at a proportion assumed for each county.
+
+For school-age groups, we use the `grade_groups_by_county` data from the previous section above, which defines the starting grade levels (0 for kindergarten) of the three levels. We add 5 to these numbers to represent our assumption that age 5 to 17 represents kindergarten through 12th grade. The school vaccination and immunity data are applied directly to these groups, assuming the given rate for two doses of MMR and for prior infection. 
+
+For adult groups, we split into 4-year age groups ranging from an age 18-21 group up to an age 66-69 age group, and finally a 70-and-older age group. For vaccination, we assume a linear interpolation from the high school vaccination percentage of that county up to 100%, where the 100% immunity in the 70+ age group derives from prior infection as children before a measles vaccine was available. 
+
+```{r age-group-data}
+
+age_groups_pre <- c(0, 1)
+age_groups_adult <- seq(18, 70, 4)
+
+min_age_adult <- min(age_groups_adult)
+age_range_adult <- diff(range(age_groups_adult))
+adult_midpoints <-
+  (age_groups_adult[-length(age_groups_adult)] + age_groups_adult[-1]) / 2
+
+interpolate_vac <- function(start_vac, end_vac) {
+    slope <- (end_vac - start_vac) / age_range_adult
+    return(start_vac + slope * (adult_midpoints - min_age_adult))
+}
+
+county_df <- data.frame(county = character(), min_age = numeric(), population = numeric(), MMR2 = numeric(), MMR1 = numeric(), priorinf = numeric())
+
+for (county_name in names(county_pop_data)) {
+  county_name_short <- gsub(" County", "", county_name)
+  county_data <- county_pop_data[[county_name]]
+  vax_data <- county_vax_data[county_vax_data$county == county_name_short, ]
+  min_age <- c(age_groups_pre,
+               5 + grade_groups_by_county[[county_name_short]],
+               age_groups_adult)
+
+  el_vax_rate <- vax_data$vaxrate[vax_data$level == 1]
+  mid_vax_rate <- vax_data$vaxrate[vax_data$level == 2]
+  high_vax_rate <- vax_data$vaxrate[vax_data$level == 3]
+  pre_k_vax_rate <- el_vax_rate * 0.9  
+  
+  el_prior_rate <- vax_data$priorrate[vax_data$level == 1]
+  mid_prior_rate <- vax_data$priorrate[vax_data$level == 2]
+  high_prior_rate <- vax_data$priorrate[vax_data$level == 3]
+  
+  adult_vax_rates <- interpolate_vac(high_vax_rate, 1)
+
+  MMR2 <- c(rep(0, length(age_groups_pre)), el_vax_rate, mid_vax_rate, high_vax_rate,
+            adult_vax_rates, 0)
+  MMR1 <- c(0, rep(pre_k_vax_rate, length(age_groups_pre)-1), rep(0, length(MMR2) - 2))
+  prior <- c(rep(0, length(age_groups_pre)), el_prior_rate, mid_prior_rate, high_prior_rate,
+             rep(0, length(adult_vax_rates)), 1)
+  
+  county_df <- rbind(county_df, 
+                     data.frame(county = rep(county_name_short, length(MMR2)),
+                                min_age = min_age,
+                                MMR2 = MMR2, MMR1 = MMR1, priorinf = prior))
+}
+```
+  
+##Contact matrix construction
+
+```{r}  
+county_contact_matrices <- list()
+county_group_pops <- rep(0, nrow(county_df))
+ind <- 1
+for (county_name in names(county_pop_data)) {
+  pop_data <- county_pop_data[[county_name]]
+  county_name_short <- gsub(" County", "", county_name)
+  df <- county_df[county_df$county == county_name_short, ]
+  pop_data_agg <- aggregateByAgeGroups(ages = pop_data$ages,
+                                       pops = pop_data$age_pops,
+                                       age_groups = df$min_age)
+                                         
+  county_matrix <- contactMatrixPolymod(df$min_age, pop_data_agg$pops)
+  county_contact_matrices[[county_name_short]] <- county_matrix
+  county_group_pops[ind:(ind + length(pop_data_agg$pops)-1)] <- pop_data_agg$pops
+  ind <- ind + length(pop_data_agg$pops)
+}
+county_df$population <- county_group_pops
+county_total_pop <- aggregate(list(total_pop = county_df$population), list(county = county_df$county), sum)
+```
+## County vaccination and immunity rankings
+
+```{r county_vax_rank}
+school_vax <- 
+  aggregate(list(schoolvax = county_vax_data$vaxrate * county_vax_data$popfrac),
+            list(county = county_vax_data$county), sum)
+school_vax$schoolvax_rank <- rank(school_vax$schoolvax)
+
+imm <- (county_df$MMR2 * 0.97 + county_df$MMR1 * 0.93 + county_df$priorinf) *
+  county_df$population
+
+total_pop <- aggregate(list(totalpop = county_df$population),
+                       list(county = county_df$county), sum)
+pop_immunity <- 
+  aggregate(list(popimm = imm),
+            list(county = county_df$county), sum)
+
+pop_immunity$popimm <- pop_immunity$popimm / total_pop$totalpop
+pop_immunity$popimm_rank <- rank(pop_immunity$popimm)
+```
+## Local R0 by county
+
+```{r}
+county_R0_factors <- data.frame(county = character(), R0_factor = numeric(), R0_effective = numeric())
+R0_baseline <- 8
+R0_baseline_range <- seq(6, 12, by=1)
+
+grade_groups <- unique(grade_groups_by_county)
+
+reference_eigenvalues <- rep(0, length(grade_groups))
+for(i in seq_along(grade_groups)){
+  reference_matrix <- contactMatrixPolymod(c(age_groups_pre,
+                                             5 + grade_groups[[i]],
+                                             age_groups_adult))
+  reference_eigenvalues[i] <- eigen(reference_matrix)$values[1]
+}
+
+for (county_name in names(county_contact_matrices)) {
+  county_matrix <- county_contact_matrices[[county_name]]
+  grade_group <- grade_groups_by_county[[county_name]]
+  reference_eigenvalue <- 
+    reference_eigenvalues[[which(sapply(grade_groups, identical, grade_group))]]
+  R0_factor <- Re(eigen(county_matrix)$values[1]) / Re(reference_eigenvalue)
+  county_R0_factors <- rbind(county_R0_factors, data.frame(
+    county = county_name, R0_factor = R0_factor))
+}
+
+county_R0_factors$R0_rank <- rank(-county_R0_factors$R0_factor)
+```
+
+## Rv by county
+
+```{r county-Rv}
+get_Rv <- function(R0, popsize, contactMatrix, initImmune){
+  vaxrepnum(1, 
+            popsize,
+            transmissionRates(R0, 1, contactMatrix),
+            rep(0, length(popsize)),
+            initImmune,
+            1)
+}
+
+county_Rv <- rep(0, length(county_contact_matrices))
+county_name <- names(county_contact_matrices)
+for (i in seq_along(county_Rv)){
+  county_matrix <- county_contact_matrices[[county_name[i]]]
+  
+  df <- county_df[county_df$county == county_name[i],]
+  R0_local <- R0_baseline * 
+    county_R0_factors$R0_factor[county_R0_factors$county == county_name[i]] 
+  Rv <- get_Rv(R0_local,
+               df$population,
+               county_matrix,
+               (df$MMR2 * 0.97 + 
+                  df$MMR1 * 0.93 + 
+                  df$priorinf) * df$population)
+  county_Rv[i] <- Rv
+}
+county_Rvs <- data.frame(county = county_name, Rv = county_Rv)
+county_Rvs$Rv_rank <- rank(-county_Rvs$Rv)
+```
+
+Create a table of county ranks
+
+```{r county-rank-summary}
+value_rank_summary <- merge(county_total_pop, merge(school_vax, merge(pop_immunity, county_Rvs)))
+
+rank_summary <- value_rank_summary[,c(-3, -5, -7)]
+```
+
