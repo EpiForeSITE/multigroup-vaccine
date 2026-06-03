@@ -1,6 +1,6 @@
 ---
 title: "Measles Reproduction Number Analysis for Utah Counties"
-date: "May 2026"
+date: "June 2026"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Measles Reproduction Number Analysis for Utah Counties}
@@ -187,22 +187,38 @@ pop_immunity <-
 pop_immunity$popimm <- pop_immunity$popimm / total_pop$totalpop
 pop_immunity$popimm_rank <- rank(pop_immunity$popimm)
 ```
-## Local R0 by county
+## Local $R_0$ by county
+
+The basic reproduction number $R_0$ can vary by county, because $R_0$ is determined by both the transmissibility of measles per at-risk contact and the rate at which those contacts occur. While we expect the per-contact transmissibility of measles to be an inherent property of the virus that does not vary, the contact rate could vary by county, because a) the contact rate of different age groups are very different according to contact survey data, and b) different counties can have very different distributions of ages in their population. Counties that have a higher proportion of high-contact age groups (e.g., school-age children) would therefore have higher $R_0$.
+
+To quantify this, we calculate $R_0$ adjustment factors for each county, by which a baseline assumption for the $R_0$ of measles is multiplied to produce a local $R_0$ for that county. We represent the baseline $R_0$ using a contact matrix for a population with an age distribution matching the overall national U.S. age distribution. The local county $R_0$ will then be the national $R+0$ multiplied by the national $R_0$ adjustment factor, which is the ratio of the dominant eigenvalues of each contact matrix. 
+
+First we read in the U.S. population age data and calculate the reference contact matrix eigenvalues for different age groupings used in the counties.
 
 ```{r}
-county_R0_factors <- data.frame(county = character(), R0_factor = numeric(), R0_effective = numeric())
-R0_baseline <- 8
-R0_baseline_range <- seq(6, 12, by=1)
+nationalCensusDataPath <- system.file("extdata", "nc-est2025-agesex-res.csv", package = "multigroup.vaccine")
+
+nationalCensusData <- read.csv(nationalCensusDataPath)
+ncdRows <- which(nationalCensusData$SEX == 0 & nationalCensusData$AGE < 200)
+ages <- nationalCensusData$AGE[ncdRows]
+pops <- nationalCensusData$POPESTIMATE2025[ncdRows]
 
 grade_groups <- unique(grade_groups_by_county)
 
 reference_eigenvalues <- rep(0, length(grade_groups))
 for(i in seq_along(grade_groups)){
-  reference_matrix <- contactMatrixPolymod(c(age_groups_pre,
-                                             5 + grade_groups[[i]],
-                                             age_groups_adult))
+  age_groups <- c(age_groups_pre, 5 + grade_groups[[i]], age_groups_adult)
+  age_pops <- aggregateByAgeGroups(ages, pops, age_groups)$pops
+  reference_matrix <- contactMatrixPolymod(age_groups, age_pops)
   reference_eigenvalues[i] <- eigen(reference_matrix)$values[1]
 }
+
+```
+
+Now we calculate the local county $R_0$ factors
+
+```{r}
+county_R0_factors <- data.frame(county = character(), R0_factor = numeric())
 
 for (county_name in names(county_contact_matrices)) {
   county_matrix <- county_contact_matrices[[county_name]]
@@ -229,6 +245,8 @@ get_Rv <- function(R0, popsize, contactMatrix, initImmune){
             1)
 }
 
+R0_baseline <- 8
+
 county_Rv <- rep(0, length(county_contact_matrices))
 county_name <- names(county_contact_matrices)
 for (i in seq_along(county_Rv)){
@@ -253,7 +271,7 @@ Create a table of county ranks
 
 ```{r county-rank-summary}
 value_rank_summary <- merge(county_total_pop, merge(school_vax, merge(pop_immunity, county_Rvs)))
-
+vrs_ordered <- value_rank_summary[order(value_rank_summary$Rv_rank), ]
 rank_summary <- value_rank_summary[,c(-3, -5, -7)]
 ```
 
