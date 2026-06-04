@@ -130,7 +130,7 @@ getCensusData <- function(state_fips,
     }
     
   } else {
-    # Download without caching (original behavior)
+    # Download without caching
     base_url <- "https://www2.census.gov/programs-surveys/popest/datasets/2020-2024/counties/asrh/"
     census_url <- paste0(base_url, file_name)
     
@@ -193,6 +193,157 @@ getCensusData <- function(state_fips,
   result$total_pop <- sum(county_data$TOT_POP)
 
   return(result)
+}
+
+#' Get Census Data for All Counties in a State
+#'
+#' Downloads and processes U.S. Census Bureau population estimates for all counties
+#' in a specified state, organized by age groups. Returns a list where each element
+#' contains the data for one county.
+#'
+#' @param state_fips Two-digit FIPS code for the state (e.g., "49" for Utah)
+#' @param year Census estimate year: 2020-2024 for July 1 estimates, or 2020.1 for April 1, 2020 base
+#' @param age_groups Vector of age limits for grouping (e.g., c(0, 5, 18, 65)).
+#'   Default NULL returns single-year ages 0-85+. Ignored if \code{age_groups_by_county} is provided.
+#' @param age_groups_by_county Optional named list where each element is a vector of age limits
+#'   for a specific county. Names should match county names (with or without " County" suffix).
+#'   When provided, county-specific age groups will be used, overriding the \code{age_groups} parameter.
+#'   Example: \code{list("Salt Lake" = c(0, 5, 18, 65), "Utah" = c(0, 5, 11, 18, 65))}
+#' @param by_sex Logical, if TRUE returns separate male/female groups
+#' @param csv_path Optional path to a previously downloaded census CSV file. If provided,
+#'   data will be read from this file instead of downloading. Use \code{cache_dir} for
+#'   automatic caching.
+#' @param cache_dir Optional directory path for caching downloaded census files. If provided,
+#'   the function will check for an existing cached file and use it, or download and save
+#'   a new one. Default is NULL (no caching). Use "." for current directory or specify
+#'   a custom path like "~/census_cache"
+#' @param verbose Logical, if TRUE prints messages about data loading and processing.
+#'   Default is FALSE.
+#' @return A named list where each element corresponds to one county. Each element is a list
+#'   containing the same structure as returned by \code{getCensusData()}:
+#'   \item{county}{County name}
+#'   \item{state}{State name}
+#'   \item{year}{Census year}
+#'   \item{total_pop}{Total population}
+#'   \item{age_pops}{Vector of populations by age group}
+#'   \item{age_labels}{Labels for each age group}
+#'   \item{sex_labels}{If by_sex=TRUE, labels indicating sex}
+#'   \item{data}{Full filtered data frame}
+#' @examples
+#' # Use the included example data for Utah
+#' \donttest{
+#' utah_all <- getAllCountiesData(
+#'   state_fips = "49",
+#'   year = 2024,
+#'   csv_path = getCensusDataPath()
+#' )
+#' 
+#' # Access specific counties
+#' utah_all[["Salt Lake County, Utah"]]
+#' utah_all[["Utah County, Utah"]]
+#' 
+#' # Get with age groups
+#' utah_grouped <- getAllCountiesData(
+#'   state_fips = "49",
+#'   year = 2024,
+#'   age_groups = c(0, 18, 65),
+#'   csv_path = getCensusDataPath()
+#' )
+#' 
+#' # Get with county-specific age groups
+#' county_ages <- list(
+#'   "Salt Lake" = c(0, 5, 18, 65),
+#'   "Utah" = c(0, 5, 11, 18, 65)
+#' )
+#' utah_custom <- getAllCountiesData(
+#'   state_fips = "49",
+#'   year = 2024,
+#'   age_groups_by_county = county_ages,
+#'   csv_path = getCensusDataPath()
+#' )
+#' 
+#' # Download from web (requires internet)
+#' utah_web <- getAllCountiesData(
+#'   state_fips = "49",
+#'   year = 2024
+#' )
+#' }
+#' @export
+getAllCountiesData <- function(state_fips,
+                               year = 2024,
+                               age_groups = NULL,
+                               age_groups_by_county = NULL,
+                               by_sex = FALSE,
+                               csv_path = NULL,
+                               cache_dir = NULL,
+                               verbose = FALSE) {
+  # Get list of all counties in the state
+  if (verbose) message("Fetching list of counties...")
+  counties <- listCounties(state_fips = state_fips, 
+                          year = year, 
+                          csv_path = csv_path,
+                          cache_dir = cache_dir,
+                          verbose = verbose)
+  
+  if (verbose) message(sprintf("Found %d counties. Processing...", length(counties)))
+  
+  # Initialize result list
+  result_list <- list()
+  
+  # Loop through each county and get its data
+  for (i in seq_along(counties)) {
+    county_name <- counties[i]
+    
+    if (verbose) message(sprintf("Processing %d/%d: %s", i, length(counties), county_name))
+    
+    # Determine which age groups to use for this county
+    county_age_groups <- age_groups  # Default
+    
+    if (!is.null(age_groups_by_county)) {
+      # Try to match county name in the age_groups_by_county list
+      # Try exact match first
+      if (county_name %in% names(age_groups_by_county)) {
+        county_age_groups <- age_groups_by_county[[county_name]]
+        if (verbose) message(sprintf("  Using custom age groups for %s", county_name))
+      } else {
+        # Try matching without " County" suffix
+        county_base <- gsub(" County.*$", "", county_name, ignore.case = TRUE)
+        if (county_base %in% names(age_groups_by_county)) {
+          county_age_groups <- age_groups_by_county[[county_base]]
+          if (verbose) message(sprintf("  Using custom age groups for %s (matched as '%s')", county_name, county_base))
+        } else {
+          # Try matching the other way - add " County" to list names
+          county_with_suffix <- paste0(county_name, " County")
+          if (county_with_suffix %in% names(age_groups_by_county)) {
+            county_age_groups <- age_groups_by_county[[county_with_suffix]]
+            if (verbose) message(sprintf("  Using custom age groups for %s", county_name))
+          } else if (verbose) {
+            message(sprintf("  No custom age groups found for %s, using default", county_name))
+          }
+        }
+      }
+    }
+    
+    tryCatch({
+      county_data <- getCensusData(
+        state_fips = state_fips,
+        county_name = county_name,
+        year = year,
+        age_groups = county_age_groups,
+        by_sex = by_sex,
+        csv_path = csv_path,
+        cache_dir = cache_dir,
+        verbose = FALSE  # Suppress individual county messages to reduce clutter
+      )
+      result_list[[county_data$county]] <- county_data
+    }, error = function(e) {
+      warning(sprintf("Failed to process county '%s': %s", county_name, e$message))
+    })
+  }
+  
+  if (verbose) message(sprintf("Successfully processed %d counties", length(result_list)))
+  
+  return(result_list)
 }
 
 #' Process census data without sex disaggregation
