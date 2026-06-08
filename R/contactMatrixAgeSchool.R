@@ -39,8 +39,11 @@ contactMatrixAgeSchool <- function(agelims, agepops, schoolagegroups, schoolpops
       cmps[nrow(cmps) - i + 1, npre + inds] <- cmp[nrow(cmp) - i + 1, s] * schoolpops[inds] / agepops[s]
       cmps[npre + inds, nrow(cmps)-i+1] <- cmp[s, nrow(cmp)-i+1]
     }
-    cmps[npre + inds, npre + inds] <- contactMatrixPropPref(schoolpops[inds], rep(cmp[s, s], nums), rep(schportion, nums))
-
+    if(nums > 1){
+      cmps[npre + inds, npre + inds] <- contactMatrixPropPref(schoolpops[inds], rep(cmp[s, s], nums), rep(schportion, nums))
+    }else{
+      cmps[npre + inds, npre + inds] <- cmp[s, s]
+    }
     if(length(sag) > 1){
       for(ss in sag[sag != s]){
         for(j in which(schoolagegroups == ss)){
