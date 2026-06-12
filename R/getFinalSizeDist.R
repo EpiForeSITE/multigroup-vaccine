@@ -18,8 +18,8 @@ getFinalSizeDist <- function(n, transmrates, recoveryrate, popsize, initR, initI
   init <- c(initS, initI)
   Rtally <- matrix(0, n, g)
   for (r in 1:n) {
-    fs <- sir_finalsize2_cpp(init, betaoverNj, recoveryrate)
-    Rtally[r, ] <- initS - fs[1:g] + initI
+    fs <- sir_finalsize_cpp(init, betaoverNj, recoveryrate)
+    Rtally[r, ] <- initS - fs[1:g] + initI + initR
   }
   Rtally
 }
