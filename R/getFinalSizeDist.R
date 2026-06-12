@@ -13,15 +13,13 @@
 #' @export
 getFinalSizeDist <- function(n, transmrates, recoveryrate, popsize, initR, initI, initV) {
   g <- length(popsize) # number of groups
-  e <- g * 2           # number of distinct events
   betaoverNj <- c(t(t(transmrates) / popsize))
   initS <- popsize - initR - initV
-  init <- c(initS, initI, initR)
-  names(init) <- c(paste0("S", seq_len(g)), paste0("I", seq_len(g)), paste0("R", seq_len(g)))
+  init <- c(initS, initI)
   Rtally <- matrix(0, n, g)
   for (r in 1:n) {
-    fs <- sir_finalsize_cpp(init, betaoverNj, recoveryrate)
-    Rtally[r, ] <- fs[(2*g+1):(3*g)]
+    fs <- sir_finalsize2_cpp(init, betaoverNj, recoveryrate)
+    Rtally[r, ] <- initS - fs[1:g] + initI
   }
   Rtally
 }
