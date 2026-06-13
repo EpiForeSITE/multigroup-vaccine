@@ -7,7 +7,7 @@
 run_my_app(...)
 }
 \arguments{
-\item{...}{Further arguments passed to \code{\link[shiny:shinyApp]{shiny::shinyAppDir()}}.}
+\item{...}{Further arguments passed to \code{\link[shiny:shinyAppDir]{shiny::shinyAppDir()}}.}
 }
 \value{
 Starts the execution of the app, printing the port

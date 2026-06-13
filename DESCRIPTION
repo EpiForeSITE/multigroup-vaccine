@@ -22,7 +22,6 @@ Description: Model infectious disease dynamics in populations
     <doi:10.1093/ofid/ofaf695.217>.
 License: MIT + file LICENSE
 Encoding: UTF-8
-RoxygenNote: 7.3.3
 LinkingTo: Rcpp
 Imports:
     deSolve,
@@ -43,3 +42,4 @@ Roxygen: list(markdown = TRUE)
 URL: https://epiforesite.github.io/multigroup-vaccine/
 Depends: 
     R (>= 2.10)
+Config/roxygen2/version: 8.0.0
