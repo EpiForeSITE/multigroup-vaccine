@@ -1,7 +1,7 @@
 Package: multigroup.vaccine
 Type: Package
 Title: Analyze Outbreak Models of Multi-Group Populations with Vaccination
-Version: 0.1.1
+Version: 0.2.0
 Authors@R:
     c(person("Damon", "Toth", , "damon.toth@hsc.utah.edu", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0001-7393-4814")),
@@ -28,6 +28,7 @@ Imports:
     graphics,
     shiny,
     stats,
+    parallel,
     bslib (>= 0.9.0),
     htmltools,
     socialmixr,

@@ -1,0 +1,122 @@
+---
+title: "School Age Group Analysis"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{School Age Group Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 11,
+  fig.height = 7
+)
+```
+
+```{r setup}
+library(multigroup.vaccine)
+```
+
+# Age group analysis for school enrollment data from different counties in Utah
+
+We wish to build a measles transmission model that is structured by age, but our measles vaccination data is aggregated by **school level** (elementary schools, middle or jr. high schools, and high schools). Our data include the vaccination rate for each school level in each county, as well as the fraction of students in the county enrolled at each school level. The relative number of students enrolled in elementary vs. middle vs. high schools varies widely by county, which means that the grade range (and thus age range) of the school levels are different in different counties.
+
+**Important methodological note on grade structure assumptions:**
+
+School grade structures in Utah are determined at the **district level**, not county level. Within a single county, different districts may use different configurations (e.g., K-5/6-8/9-12, K-6/7-9/10-12, etc.). However, our vaccination data is aggregated at the **county level**. The data also include schools that don't
+follow the standard structure within their district for various reasons (private / charter schools, etc.).
+
+For modeling purposes, we make the following **simplifying assumptions**:
+
+1. **County-level aggregation is acceptable**: Since our vaccination and population data are county-aggregated, we treat each county as having a *dominant grade structure*
+2. **Population ratios reveal dominant patterns**: We use the relative sizes of elementary/middle/high school enrollment, compared to the relative sizes of census age groups in the county, to infer the most common grade configuration in that county
+3. **Age groups approximate school levels**: Our age groups are designed to roughly align with school levels, acknowledging that exact grade-to-age mapping can vary. We assume kindergarten to 12th grade corresponds to ages 5 to 17 at the beginning of the school year.
+
+### Heuristics
+
+In this approach, we will use the ratio of the school-level enrollment data, in relation to the ratio of different age groupings from census data, to determine the optimal age groupings for each county. Specifically, the goal is to minimize the expected number of students who are classified to an age group incorrectly.  
+
+**Limitations of this heuristic:**
+- Assumes uniform grade structure across multiple school districts occurring in some large counties
+- Assumes charter schools, private schools, and other alternative schools follow the dominant structure of the school system in their county
+- Students enrolled in *online* schools appear in the census data but not in the county school enrollment data, so may not be captured accurately in the population ratios
+- Some students' county of residence according to the census may differ from the county of the school they attend
+
+First we read the county vaccination data, which contains the school-level enrollment statistics, and the county census data, which contains single-age population statistics.
+
+```{r read-data}
+county_vax_data <- read.csv(file.path("../../data-raw/county_data_Utah_2025.csv"))
+
+county_pop_data <- getAllCountiesData(
+  state_fips = getStateFIPS("Utah"),
+  year = 2024,
+  csv_path = getCensusDataPath()
+)
+```
+
+For each county, we check 8 different grade level breakdown possibilities: all the combinations in which middle school starts in 4th grade through 7th grade and in which high school starts in 9th or 10th grade.
+
+For each of those possible combinations we, estimate the classification error: the difference in the enrollment fraction and the census age fraction (with ages 5 to 17 corresponding to grades K to 12) times the census population, and then choose the combination that minimizes the sum of squared errors.
+
+```{r define-age-groups}
+grade_groups_by_county <- list()
+
+# Grade - level combinations to test
+elem_mid <- cbind(c(4, 4, 5, 5, 6, 6, 7, 7),
+                  c(5, 6, 4, 5, 3, 4, 2, 3))
+  
+for (county in unique(county_vax_data$county)) {
+
+    #get age 5-17 census population data for the county
+    schoolagepop <- county_pop_data[[paste0(county, " County")]]$data$TOT_POP[6:18]
+    sapfrac <- schoolagepop / sum(schoolagepop)
+    
+    cvd <- county_vax_data[county_vax_data$county == county, ]
+  
+    # Get population for each level
+    elem_popfrac <- cvd$popfrac[cvd$level == 1]
+    mid_popfrac <- cvd$popfrac[cvd$level == 2]
+    high_popfrac <- cvd$popfrac[cvd$level == 3]
+    
+    err <- rep(0, nrow(elem_mid))
+    for(i in 1:nrow(elem_mid)){
+      ielem <- 1:elem_mid[i,1]
+      imid <- (elem_mid[i,1] + 1):rowSums(elem_mid)[i]
+      ihigh <- (rowSums(elem_mid)[i] + 1):13
+      err[i] <- (sum(schoolagepop[ielem])*(elem_popfrac - sum(sapfrac[ielem])))^2 +
+                (sum(schoolagepop[imid])*(mid_popfrac - sum(sapfrac[imid])))^2 +
+                (sum(schoolagepop[ihigh])*(high_popfrac - sum(sapfrac[ihigh])))^2
+    }
+    bestrow <- which.min(err)
+    grade_groups_by_county[[county]] <- c(0, elem_mid[bestrow, 1],
+                                          rowSums(elem_mid)[bestrow])
+}
+```
+
+Now we tally and display the results for each county:
+
+```{r tally-age-structures}
+# Categorize each county by its age group structure
+# Extract the school-age portions (indices 3-5) to identify the structure type
+structure_df <- data.frame(
+  county = character(),
+  structure_type = character(),
+  stringsAsFactors = FALSE
+)
+
+for (county_name in names(grade_groups_by_county)) {
+  grades <- grade_groups_by_county[[county_name]]
+
+  structure_type <- paste0("K-", grades[2] - 1, " / ", grades[2], "-", grades[3] - 1,
+                           " / ", grades[3], "-12")
+  
+  structure_df <- rbind(structure_df, 
+                        data.frame(county = gsub(" County", "", county_name),
+                                   structure_type = structure_type))
+}
+
+knitr::kable(structure_df, format = "markdown")
+```

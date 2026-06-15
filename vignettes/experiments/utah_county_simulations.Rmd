@@ -1,0 +1,599 @@
+---
+title: "Measles Risk Assessment: Vulnerability & Consequence in Utah Counties"
+date: "March 2026"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Measles Risk Assessment}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 11,
+  fig.height = 7,
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+WARNING: The data and model used in this vignette are for demonstration purposes only and do not reflect real-world conditions accurately. The results are not intended to forecast or predict a measles outbreak size in any specific location.
+DATA: The vaccination data (county level) is not public and so is not included in the package.
+
+Executive Summary
+
+This assessment evaluates the risk of a measles outbreak across Utah counties. Traditional risk assessments rely strictly on raw school vaccination rates. However, this approach ignores a critical factor: age-structured contact patterns.
+
+Using a stochastic epidemiological model, this analysis combines demographic mixing patterns with local vaccination coverage to estimate two specific metrics for every county:
+
+    Vulnerability (Rv​): The vaccination reproduction number. If Rv​≥1, the county is vulnerable to sustained transmission. If Rv​<1, the county has achieved herd immunity.
+
+    Consequence: If an outbreak is introduced, what is the probability it grows into a major event (>100 cases), and what is the expected scale of the outbreak in absolute numbers?
+
+1. Data Initialization & Demographic Calibration
+
+Note: This section processes county-level census data, school vaccination records, and age-structured contact matrices (Polymod). The baseline pathogen transmissibility (R0​) is calibrated to account for the unique age distribution of each county.
+
+```{r setup-libs, cache=FALSE}
+library(multigroup.vaccine)
+library(socialmixr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(plotly)
+library(scales)
+
+# Load raw data
+county_vax_data <- read.csv(file.path("../../data-raw/county_vax_data.csv"))
+unique_counties <- unique(county_vax_data$county)
+
+# Infer age structures based on population ratios
+age_groups_by_county <- list()
+for (county_name in unique_counties) {
+  county_data <- county_vax_data[county_vax_data$county == county_name, ]
+  el_pop <- county_data$pop[county_data$level == 1]
+  middle_pop <- county_data$pop[county_data$level == 2]
+  high_pop <- county_data$pop[county_data$level == 3]
+  
+  if (length(middle_pop) > 0 && length(high_pop) > 0 && high_pop > 0) {
+    middle_to_high_ratio <- middle_pop / high_pop
+    el_to_middle_ratio <- if(length(el_pop) > 0 && middle_pop > 0) el_pop / middle_pop else NA
+
+    if (middle_to_high_ratio >= 0.8 && middle_to_high_ratio <= 1.2) {
+      if (!is.na(el_to_middle_ratio) && el_to_middle_ratio < 1.3) {
+        age_groups_by_county[[county_name]] <- c(0, 1, 5, 10, 14, 18, 25, 45, 70)
+      } else {
+        age_groups_by_county[[county_name]] <- c(0, 1, 5, 12, 15, 18, 25, 45, 70)
+      }
+    } else if (middle_to_high_ratio <= 0.6) {
+      age_groups_by_county[[county_name]] <- c(0, 1, 5, 12, 14, 18, 25, 45, 70)
+    } else {
+      age_groups_by_county[[county_name]] <- c(0, 1, 5, 11, 14, 18, 25, 45, 70)
+    }
+  } else {
+    age_groups_by_county[[county_name]] <- c(0, 1, 5, 11, 14, 18, 25, 45, 70)
+  }
+}
+age_groups_by_county$Online <- NULL
+
+# Fetch Census Data
+utah_counties <- getAllCountiesData(
+  state_fips = getStateFIPS("Utah"),
+  year = 2024,
+  age_groups_by_county = age_groups_by_county,
+  csv_path = getCensusDataPath(),
+  verbose = FALSE
+)
+
+# Calculate Immunity Levels & Calibrate R0
+R0_baseline <- 10
+R0_baseline_range <- seq(6, 12, by=1)
+reference_matrix <- contactMatrixPolymod(c(0, 1, 5, 11, 14, 18, 25, 45, 70))
+reference_eigenvalue <- eigen(reference_matrix)$values[1]
+
+county_immunity <- list()
+county_contact_matrices <- list()
+county_R0_factors <- data.frame(county = character(), R0_factor = numeric(), R0_effective = numeric())
+
+for (county_name in names(utah_counties)) {
+  county_name_short <- gsub(" County", "", county_name)
+  county_data <- utah_counties[[county_name]]
+  vax_data <- county_vax_data[county_vax_data$county == county_name_short, ]
+  
+  el_vax_rate <- vax_data$vax[vax_data$level == 1] / vax_data$pop[vax_data$level == 1]
+  middle_vax_rate <- vax_data$vax[vax_data$level == 2] / vax_data$pop[vax_data$level == 2]
+  high_vax_rate <- vax_data$vax[vax_data$level == 3] / vax_data$pop[vax_data$level == 3]
+  pre_k_vax_rate <- el_vax_rate * 0.9  
+  
+  pre_k_immunity <- pre_k_vax_rate * 0.93
+  el_immunity <- el_vax_rate * 0.97
+  middle_immunity <- middle_vax_rate * 0.97
+  high_immunity <- high_vax_rate * 0.97
+
+  interpolate_immunity <- function(age, start_age, end_age, start_imm, end_imm) {
+    slope <- (end_imm - start_imm) / (end_age - start_age)
+    return(start_imm + slope * (age - start_age))
+  }
+  
+  imm_18_25 <- interpolate_immunity(21.5, 18, 70, high_immunity, 1.0)
+  imm_25_45 <- interpolate_immunity(35, 18, 70, high_immunity, 1.0)
+  imm_45_70 <- interpolate_immunity(57.5, 18, 70, high_immunity, 1.0)
+
+  county_immunity[[county_name]] <- c(0, pre_k_immunity, el_immunity, middle_immunity, high_immunity, imm_18_25, imm_25_45, imm_45_70, 1.0)
+  
+  # Contact Matrix & Eigenvalue adjustment
+  county_matrix <- contactMatrixPolymod(age_groups_by_county[[county_name_short]], county_data$age_pops)
+  county_contact_matrices[[county_name_short]] <- county_matrix
+  
+  R0_factor <- Re(eigen(county_matrix)$values[1]) / Re(reference_eigenvalue)
+  county_R0_factors <- rbind(county_R0_factors, data.frame(
+    county = county_name_short, R0_factor = R0_factor, R0_effective = R0_baseline * R0_factor
+  ))
+}
+```
+
+2. The Age-Structured Reality (Rv​)
+
+A key question for public health allocation is whether incorporating age-structured contact patterns provides meaningfully different risk rankings compared to simply ranking counties by their raw school vaccination rates.
+
+If the rankings diverge, it indicates that looking at vaccination rates alone causes us to underestimate the risk in certain counties due to their specific demographic mixing.
+
+```{r rv-rankings, cache=TRUE}
+# Compute overall school vaccination rate per county
+school_vax_summary <- county_vax_data %>%
+  filter(county != "Online") %>%
+  group_by(county) %>%
+  summarise(
+    total_enrolled = sum(pop),
+    school_vax_rate = sum(vax) / sum(pop),
+    .groups = "drop"
+  )
+
+# Calculate Rv and rankings for each baseline R0
+comparison_all <- data.frame()
+for (R0_test in R0_baseline_range) {
+  comparison_df <- merge(school_vax_summary, county_R0_factors, by = "county")
+  comparison_df$vax_repnum <- sapply(comparison_df$county, function(c_name) {
+    c_full <- paste0(c_name, " County")
+    popsize <- utah_counties[[c_full]]$age_pops
+    initV <- round(county_immunity[[c_full]] * popsize)
+    R0_eff <- R0_test * county_R0_factors$R0_factor[county_R0_factors$county == c_name]
+    trmat <- transmissionRates(R0_eff, 1, county_contact_matrices[[c_name]])
+    Re(vaxrepnum(1, popsize, trmat, rep(0, length(popsize)), initV, 1))
+  })
+  comparison_df$rank_vax_rate <- rank(comparison_df$school_vax_rate)
+  comparison_df$rank_Rv <- rank(-comparison_df$vax_repnum)
+  comparison_df$rank_diff <- comparison_df$rank_vax_rate - comparison_df$rank_Rv
+  comparison_df$baseline_R0 <- R0_test
+  comparison_all <- rbind(comparison_all, comparison_df)
+}
+
+# Interactive rank difference chart with R0 slider
+rank_order <- comparison_all %>% filter(baseline_R0 == 10) %>% arrange(rank_diff) %>% pull(county)
+
+p_rank <- plot_ly()
+for (r0_val in R0_baseline_range) {
+  df_sub <- comparison_all %>% filter(baseline_R0 == r0_val)
+  df_sub$county_f <- factor(df_sub$county, levels = rank_order)
+  df_sub <- df_sub %>% arrange(county_f)
+
+  p_rank <- p_rank %>% add_trace(
+    data = df_sub, x = ~rank_diff, y = ~county_f, type = "bar", orientation = "h",
+    marker = list(color = ifelse(df_sub$rank_diff > 0, "#d62728", "#2ca02c")),
+    hovertext = ~paste0(county, "<br>Rank Diff: ", rank_diff, "<br>Rv: ", round(vax_repnum, 2)),
+    hoverinfo = "text",
+    visible = (r0_val == 10),
+    name = paste0("R0 = ", r0_val)
+  )
+}
+
+steps_rank <- lapply(seq_along(R0_baseline_range), function(i) {
+  vis <- rep(FALSE, length(R0_baseline_range))
+  vis[i] <- TRUE
+  list(method = "restyle", args = list("visible", as.list(vis)), label = as.character(R0_baseline_range[i]))
+})
+
+p_rank %>% layout(
+  title = "Risk Identification: The Model vs. Raw Vaccination Rates",
+  xaxis = list(title = "Rank Difference (Vax Rate Rank \u2212 Model Rv Rank)"),
+  yaxis = list(title = ""),
+  sliders = list(list(active = 2, currentvalue = list(prefix = "Baseline R0 = "), steps = steps_rank)),
+  showlegend = FALSE, margin = list(l = 100)
+)
+```
+
+3. Threshold Testing Across Transmissibility Scenarios
+
+Pathogen contagiousness can vary. As the baseline R0​ of a strain increases, more counties cross the critical threshold of Rv​≥1, shifting from herd immunity to being actively vulnerable to outbreaks.
+
+```{r rv-sensitivity, cache=TRUE}
+vaxrepnum_sensitivity <- data.frame()
+
+for (R0_test in R0_baseline_range) {
+  for (county_name in names(utah_counties)) {
+    c_short <- gsub(" County", "", county_name)
+    popsize <- utah_counties[[county_name]]$age_pops
+    initV <- round(county_immunity[[county_name]] * popsize)
+    R0_eff <- R0_test * county_R0_factors$R0_factor[county_R0_factors$county == c_short]
+    trmat <- transmissionRates(R0_eff, 1, county_contact_matrices[[c_short]])
+    vax_Rn <- Re(vaxrepnum(1, popsize, trmat, rep(0, length(popsize)), initV, 1))
+    
+    vaxrepnum_sensitivity <- rbind(vaxrepnum_sensitivity, data.frame(
+      baseline_R0 = R0_test, county = c_short, vax_repnum = vax_Rn
+    ))
+  }
+}
+
+threshold_counts <- vaxrepnum_sensitivity %>%
+  group_by(baseline_R0) %>%
+  summarise(n_herd_immunity = sum(vax_repnum < 1), n_vulnerable = sum(vax_repnum >= 1), .groups = "drop") %>%
+  pivot_longer(cols = c(n_herd_immunity, n_vulnerable), names_to = "status", values_to = "n_counties") %>%
+  mutate(status = ifelse(status == "n_herd_immunity", "Herd Immunity Maintained", "Vulnerable to Outbreaks"))
+
+ggplot(threshold_counts, aes(x = baseline_R0, y = n_counties, fill = status)) +
+  geom_area(alpha = 0.8) +
+  geom_vline(xintercept = 10, linetype = "dashed", color = "white", size=1) +
+  scale_fill_manual(values = c("Herd Immunity Maintained" = "#2ca02c", "Vulnerable to Outbreaks" = "#d62728")) +
+  scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0)) +
+  labs(title = "Statewide Vulnerability Under Varying Pathogen Contagiousness",
+       x = "Assumed Baseline R0", y = "Number of Counties", fill = "County Status") +
+  theme_minimal()
+```
+
+Interactive County Vulnerability (Rv​)
+
+Use the slider below to adjust the baseline pathogen contagiousness (R0​) and observe which specific counties cross the Rv​=1 herd immunity threshold.
+
+```{r}
+county_pops <- data.frame(county = gsub(" County", "", names(utah_counties)),
+                          population = sapply(utah_counties, function(x) sum(x$age_pops)))
+rv_plotly_data <- merge(vaxrepnum_sensitivity, county_pops, by = "county") %>%
+  arrange(baseline_R0, vax_repnum)
+
+rv_order <- rv_plotly_data %>% filter(baseline_R0 == 10) %>% arrange(vax_repnum) %>% pull(county)
+rv_plotly_data$county_f <- factor(rv_plotly_data$county, levels = rv_order)
+
+p <- plot_ly()
+for (r0_val in sort(unique(rv_plotly_data$baseline_R0))) {
+  df_sub <- rv_plotly_data %>% filter(baseline_R0 == r0_val)
+  p <- p %>% add_trace(
+    data = df_sub, x = ~vax_repnum, y = ~county_f, type = "bar", orientation = "h",
+    marker = list(color = ifelse(df_sub$vax_repnum >= 1, "#d62728", "#2ca02c")),
+    text = ~scales::comma(population),
+    textposition = "outside",
+    hovertext = ~paste0(county, "<br>Rv: ", round(vax_repnum, 2), "<br>Pop: ", scales::comma(population)),
+    hoverinfo = "text", visible = (r0_val == 10), name = paste0("R0 = ", r0_val)
+  )
+}
+
+steps <- lapply(seq_along(unique(rv_plotly_data$baseline_R0)), function(i) {
+  vis <- rep(FALSE, length(unique(rv_plotly_data$baseline_R0)))
+  vis[i] <- TRUE
+  list(method = "restyle", args = list("visible", as.list(vis)), label = as.character(unique(rv_plotly_data$baseline_R0)[i]))
+})
+
+p %>% layout(
+  title = "Vaccination Reproduction Number (Rv) by County",
+  xaxis = list(title = "Vaccination Reproduction Number (Rv)"),
+  yaxis = list(title = ""),
+  shapes = list(list(type = "line", x0 = 1, x1 = 1, y0 = -0.5, y1 = length(unique(rv_plotly_data$county)) - 0.5, line = list(color = "black", dash = "dash"))),
+  sliders = list(list(active = 2, currentvalue = list(prefix = "Baseline R0 = "), steps = steps)),
+  showlegend = FALSE, margin = list(l = 100)
+)
+```
+
+4. Outbreak Consequence (Pure Stochastic Simulation)
+
+If an infection is introduced, Rv​ tells us if it can spread, but pure stochastic simulations tell us how bad it might get.
+
+For this analysis, we run 1000 independent simulations per county (assuming introduction by a young adult 18-25). This is a practical increase from the earlier 250-run setup and substantially reduces Monte Carlo noise in the probability and tail summaries used downstream.
+
+    Large Outbreak Threshold: We define a large outbreak as total infections exceeding the larger of 1% of the county's susceptible population or 20 cases. This prevents tiny counties from being classified as "large outbreak" after only one or two cases.
+
+    Herd Immunity Logic: If a county's Rv​<1, the modeled probability of a large outbreak is forced to 0, as transmission chains will naturally extinguish.
+
+```{r stochastic-sims, cache=TRUE}
+nsims_stochastic <- 1000
+large_outbreak_threshold_frac <- 0.01
+large_outbreak_min_cases <- 20
+
+results_list <- vector("list", length(R0_baseline_range) * length(utah_counties))
+sim_list     <- vector("list", length(R0_baseline_range) * length(utah_counties))
+idx <- 1L
+
+simfun <- function(R0, county_name, nsims, nthreads){
+  c_short <- gsub(" County", "", county_name)
+  popsize <- utah_counties[[county_name]]$age_pops
+  initV <- round(county_immunity[[county_name]] * popsize)
+  initI <- rep(0, length(popsize)); initI[6] <- 1  # Intro in young adults
+  R0_eff <- R0 * county_R0_factors$R0_factor[county_R0_factors$county == c_short]
+  
+  # Run pure stochastic simulation
+  fs_stochastic <- finalsize(popsize, R0_eff, county_contact_matrices[[c_short]], 
+                             rep(1, length(popsize)), rep(1, length(popsize)), 
+                             rep(0, length(popsize)), initI, initV, 
+                             method = "stochastic", nsims = nsims, nthreads = nthreads)
+}
+
+for (R0_stochastic in R0_baseline_range) {
+  for (county_name in names(utah_counties)) {
+    c_short <- gsub(" County", "", county_name)
+    popsize <- utah_counties[[county_name]]$age_pops
+    initV <- round(county_immunity[[county_name]] * popsize)
+    susceptible_population <- sum(popsize) - sum(initV)
+    large_outbreak_threshold_cases <- max(
+      susceptible_population * large_outbreak_threshold_frac,
+      large_outbreak_min_cases
+    )
+    initI <- rep(0, length(popsize)); initI[6] <- 1  # Intro in young adults
+    
+    R0_eff <- R0_stochastic * county_R0_factors$R0_factor[county_R0_factors$county == c_short]
+    trmat <- transmissionRates(R0_eff, 1, county_contact_matrices[[c_short]])
+    vax_Rn <- Re(vaxrepnum(1, popsize, trmat, rep(0, length(popsize)), initV, 1))
+    
+    # Run pure stochastic simulation
+    fs_stochastic <- finalsize(popsize, R0_eff, county_contact_matrices[[c_short]], 
+                               rep(1, length(popsize)), rep(1, length(popsize)), 
+                               rep(0, length(popsize)), initI, initV, 
+                               method = "stochastic", nsims = nsims_stochastic, nthreads = 1)
+    
+    total_infected <- rowSums(fs_stochastic)
+    
+    # Logic Gate: If Rv < 1, probability of large escape is effectively 0
+    prob_large <- ifelse(vax_Rn < 1, 0, mean(total_infected > large_outbreak_threshold_cases))
+    
+    results_list[[idx]] <- data.frame(
+      baseline_R0 = R0_stochastic,
+      county = c_short,
+      population = sum(popsize),
+      susceptible_population = susceptible_population,
+      large_outbreak_threshold_cases = large_outbreak_threshold_cases,
+      vax_repnum = vax_Rn,
+      expected_cases = mean(total_infected),
+      prob_large_outbreak = prob_large
+    )
+    
+    # Store all sims for Rv >= 1 counties (bimodal distribution visible)
+    if (vax_Rn >= 1) {
+      sim_list[[idx]] <- data.frame(
+        baseline_R0 = R0_stochastic,
+        county = c_short,
+        total_cases = total_infected,
+        susceptible_population = susceptible_population,
+        large_outbreak_threshold_cases = large_outbreak_threshold_cases,
+        is_large_outbreak = total_infected > large_outbreak_threshold_cases
+      )
+    }
+    
+    idx <- idx + 1L
+  }
+}
+
+stochastic_results <- bind_rows(results_list)
+sim_long           <- bind_rows(sim_list)
+```
+
+Probability of a Large Outbreak
+
+This chart shows the probability that an introduction exceeds the larger of 1% of susceptible population or 20 cases. Counties missing from this list possess a protective Rv​<1 (herd immunity). Use the slider to adjust the baseline R0​.
+
+```{r}
+# Counties that have prob > 0 at any R0 level
+all_prob_counties <- stochastic_results %>%
+  filter(prob_large_outbreak > 0) %>% pull(county) %>% unique()
+prob_order <- stochastic_results %>%
+  filter(baseline_R0 == 10, county %in% all_prob_counties) %>%
+  arrange(prob_large_outbreak) %>% pull(county)
+
+p_prob <- plot_ly()
+for (r0_val in R0_baseline_range) {
+  df_sub <- stochastic_results %>%
+    filter(baseline_R0 == r0_val, county %in% all_prob_counties)
+  df_sub$county_f <- factor(df_sub$county, levels = prob_order)
+
+  p_prob <- p_prob %>% add_trace(
+    data = df_sub, x = ~prob_large_outbreak * 100, y = ~county_f,
+    type = "bar", orientation = "h",
+    marker = list(color = "#8b08b0"),
+    text = ~paste0(round(prob_large_outbreak * 100, 1), "%"),
+    textposition = "outside",
+    hovertext = ~paste0(county, "<br>Prob: ", round(prob_large_outbreak * 100, 1), "%"),
+    hoverinfo = "text",
+    visible = (r0_val == 10),
+    name = paste0("R0 = ", r0_val)
+  )
+}
+
+steps_prob <- lapply(seq_along(R0_baseline_range), function(i) {
+  vis <- rep(FALSE, length(R0_baseline_range))
+  vis[i] <- TRUE
+  list(method = "restyle", args = list("visible", as.list(vis)), label = as.character(R0_baseline_range[i]))
+})
+
+p_prob %>% layout(
+  title = "Probability of Outbreak Exceeding max(1% of Susceptibles, 20 Cases)",
+  xaxis = list(title = "Probability (%)", range = c(0, 105)),
+  yaxis = list(title = ""),
+  sliders = list(list(active = 2, currentvalue = list(prefix = "Baseline R0 = "), steps = steps_prob)),
+  showlegend = FALSE, margin = list(l = 100)
+)
+```
+
+Full Outbreak Distribution
+
+All 1000 simulations per county are shown (for counties with Rv​≥1). The bimodal distribution — a spike at zero (chains that fizzle out) and a heavier right tail (sustained outbreaks) — is a hallmark of stochastic transmission near the herd immunity threshold.
+
+```{r}
+if(nrow(sim_long) > 0) {
+  # Order by median outbreak size at R0 = 10
+  order_all <- sim_long %>%
+    filter(baseline_R0 == 10) %>%
+    group_by(county) %>% summarise(med = median(total_cases)) %>% arrange(med) %>% pull(county)
+  all_sim_counties <- unique(sim_long$county)
+  order_all_full <- c(order_all, sort(setdiff(all_sim_counties, order_all)))
+
+  p_dots <- plot_ly()
+  for (r0_val in R0_baseline_range) {
+    df_sub <- sim_long %>% filter(baseline_R0 == r0_val)
+    df_sub$county_f <- factor(df_sub$county, levels = order_all_full)
+    # Color: red = large outbreak (> max(1% of susceptible population, 20 cases)), grey = fizzled
+    dot_colors <- ifelse(df_sub$is_large_outbreak, "#d62728", "#aaaaaa")
+
+    p_dots <- p_dots %>% add_trace(
+      data = df_sub, x = ~total_cases, y = ~county_f, type = "scatter", mode = "markers",
+      marker = list(color = dot_colors, size = 4, opacity = 0.25),
+      hovertext = ~paste0(county, "<br>Cases: ", scales::comma(total_cases),
+                          "<br>", ifelse(is_large_outbreak, "Large outbreak", "Fizzled")),
+      hoverinfo = "text",
+      visible = (r0_val == 10),
+      name = paste0("R0 = ", r0_val)
+    )
+  }
+
+  steps_dots <- lapply(seq_along(R0_baseline_range), function(i) {
+    vis <- rep(FALSE, length(R0_baseline_range))
+    vis[i] <- TRUE
+    list(method = "restyle", args = list("visible", as.list(vis)), label = as.character(R0_baseline_range[i]))
+  })
+
+  p_dots %>% layout(
+    title = "Full Simulation Distribution of Outbreak Size",
+    xaxis = list(title = "Total Cases per Simulation (log scale)", type = "log"),
+    yaxis = list(title = ""),
+    sliders = list(list(active = 2, currentvalue = list(prefix = "Baseline R0 = "), steps = steps_dots)),
+    showlegend = FALSE, margin = list(l = 100)
+  )
+} else {
+  print("No vulnerable counties (Rv >= 1) under current parameters.")
+}
+```
+
+## 5. Export Simulation Outputs for External Risk Scoring
+
+This vignette now stops at simulation outputs and exports reusable datasets for downstream risk-score development in a separate notebook.
+
+```{r export-simulation-outputs, cache=FALSE}
+school_vax_summary <- county_vax_data %>%
+  filter(county != "Online") %>%
+  group_by(county) %>%
+  summarise(
+    total_enrolled = sum(pop),
+    total_vaccinated = sum(vax),
+    school_vax_rate = ifelse(total_enrolled > 0, total_vaccinated / total_enrolled, NA_real_),
+    .groups = "drop"
+  )
+
+# These county-level metrics are derived from the exact same immunity vectors used
+# to initialize the stochastic simulations, so the frontend can display them
+# directly without recomputing the simulation setup logic.
+county_static_metrics <- bind_rows(lapply(names(utah_counties), function(county_name) {
+  county_short <- gsub(" County", "", county_name)
+  popsize <- utah_counties[[county_name]]$age_pops
+  initV <- round(county_immunity[[county_name]] * popsize)
+  total_pop <- sum(popsize)
+  immune_population <- sum(initV)
+  susceptible_population <- total_pop - immune_population
+
+  data.frame(
+    county = county_short,
+    population = total_pop,
+    immune_population = immune_population,
+    susceptible_population = susceptible_population,
+    county_immunity_pct = ifelse(total_pop > 0, immune_population / total_pop, NA_real_),
+    county_susceptible_pct = ifelse(total_pop > 0, susceptible_population / total_pop, NA_real_),
+    stringsAsFactors = FALSE
+  )
+})) %>%
+  left_join(school_vax_summary, by = "county") %>%
+  left_join(
+    county_R0_factors %>% select(county, R0_factor),
+    by = "county"
+  )
+
+if (nrow(sim_long) > 0) {
+  simulation_stats_by_county <- sim_long %>%
+    group_by(baseline_R0, county) %>%
+    summarise(
+      nsims = n(),
+      mean_cases = mean(total_cases),
+      median_cases = median(total_cases),
+      p90_cases = as.numeric(quantile(total_cases, 0.90)),
+      p95_cases = as.numeric(quantile(total_cases, 0.95)),
+      max_cases = max(total_cases),
+      prob_large_outbreak = mean(is_large_outbreak),
+      prob_fizzle = mean(total_cases == 0),
+      .groups = "drop"
+    )
+} else {
+  simulation_stats_by_county <- data.frame(
+    baseline_R0 = numeric(),
+    county = character(),
+    nsims = numeric(),
+    mean_cases = numeric(),
+    median_cases = numeric(),
+    p90_cases = numeric(),
+    p95_cases = numeric(),
+    max_cases = numeric(),
+    prob_large_outbreak = numeric(),
+    prob_fizzle = numeric()
+  )
+}
+
+simulation_stats_statewide <- stochastic_results %>%
+  group_by(baseline_R0) %>%
+  summarise(
+    n_counties = n(),
+    n_vulnerable = sum(vax_repnum >= 1),
+    n_herd_immunity = sum(vax_repnum < 1),
+    mean_expected_cases = mean(expected_cases),
+    median_expected_cases = median(expected_cases),
+    mean_prob_large = mean(prob_large_outbreak),
+    .groups = "drop"
+  )
+
+export_dir <- file.path("outputs", "utah_county_risk")
+if (!dir.exists(export_dir)) dir.create(export_dir, recursive = TRUE)
+
+write.csv(stochastic_results,
+          file.path(export_dir, "stochastic_results_summary.csv"),
+          row.names = FALSE)
+write.csv(sim_long,
+          file.path(export_dir, "stochastic_results_all_runs.csv"),
+          row.names = FALSE)
+write.csv(simulation_stats_by_county,
+          file.path(export_dir, "simulation_stats_by_county.csv"),
+          row.names = FALSE)
+write.csv(simulation_stats_statewide,
+          file.path(export_dir, "simulation_stats_statewide.csv"),
+          row.names = FALSE)
+write.csv(county_static_metrics,
+          file.path(export_dir, "county_static_metrics.csv"),
+          row.names = FALSE)
+write.csv(vaxrepnum_sensitivity,
+          file.path(export_dir, "vaxrepnum_sensitivity.csv"),
+          row.names = FALSE)
+write.csv(threshold_counts,
+          file.path(export_dir, "threshold_counts.csv"),
+          row.names = FALSE)
+
+save(
+  stochastic_results,
+  sim_long,
+  simulation_stats_by_county,
+  simulation_stats_statewide,
+  county_static_metrics,
+  vaxrepnum_sensitivity,
+  threshold_counts,
+  county_R0_factors,
+  R0_baseline,
+  R0_baseline_range,
+  large_outbreak_threshold_frac,
+  large_outbreak_min_cases,
+  nsims_stochastic,
+  file = file.path(export_dir, "utah_county_simulation_bundle.RData")
+)
+
+cat("Saved simulation outputs to:", normalizePath(export_dir), "\n")
+```
