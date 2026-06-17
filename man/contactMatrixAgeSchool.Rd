@@ -21,7 +21,7 @@ contactMatrixAgeSchool(
 
 \item{schoolpops}{population size of each school}
 
-\item{schportion}{portion of within-age-group contacts that are exclusively within school}
+\item{schportion}{portion of within-age-group contacts that are exclusively within each school}
 }
 \value{
 a square matrix with the contact rate of each group (row) with members of each

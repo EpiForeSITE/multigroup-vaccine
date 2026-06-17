@@ -3,7 +3,7 @@
 #' @param agepops population size of each age group
 #' @param schoolagegroups index of the age group covered by each school
 #' @param schoolpops population size of each school
-#' @param schportion portion of within-age-group contacts that are exclusively within school
+#' @param schportion portion of within-age-group contacts that are exclusively within each school
 #' @returns a square matrix with the contact rate of each group (row) with members of each
 #' other group (column)
 #' @examples
@@ -11,6 +11,13 @@
 #' schoolagegroups = c(2, 2), schoolpops = c(600, 700), schportion = 0.7)
 #' @export
 contactMatrixAgeSchool <- function(agelims, agepops, schoolagegroups, schoolpops, schportion) {
+  if(length(schportion) == length(schoolpops)){
+    eps <- schportion
+  }else if(length(schportion) == 1){
+    eps <- rep(schportion, length(schoolpops))
+  }else{
+    stop("Argument schportion must be a single value or a vector the same length as schoolpops")
+  }
   cmp <- contactMatrixPolymod(agelims, agepops)
   ngrps <- length(agepops) + length(schoolpops) - length(unique(schoolagegroups))
   cmps <- matrix(0, ngrps, ngrps)
@@ -40,7 +47,7 @@ contactMatrixAgeSchool <- function(agelims, agepops, schoolagegroups, schoolpops
       cmps[npre + inds, nrow(cmps)-i+1] <- cmp[s, nrow(cmp)-i+1]
     }
     if(nums > 1){
-      cmps[npre + inds, npre + inds] <- contactMatrixPropPref(schoolpops[inds], rep(cmp[s, s], nums), rep(schportion, nums))
+      cmps[npre + inds, npre + inds] <- contactMatrixPropPref(schoolpops[inds], rep(cmp[s, s], nums), eps[inds])
     }else{
       cmps[npre + inds, npre + inds] <- cmp[s, s]
     }
