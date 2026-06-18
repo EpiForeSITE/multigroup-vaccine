@@ -6,9 +6,9 @@ test_that("getFinalSizeDist returns correct dimensions", {
   initI <- c(1, 0)
   initV <- c(10, 10)
   n <- 50
-  
+
   result <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
-  
+
   # Should return n x g matrix
   expect_equal(nrow(result), n)
   expect_equal(ncol(result), length(popsize))
@@ -23,9 +23,9 @@ test_that("getFinalSizeDist final sizes are bounded by population", {
   initI <- c(10, 5)
   initV <- c(50, 25)
   n <- 100
-  
+
   result <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
-  
+
   # Every simulation should have final size within bounds
   for (i in 1:n) {
     # Cannot exceed population
@@ -43,13 +43,13 @@ test_that("getFinalSizeDist is reproducible with set seed", {
   initI <- c(5, 2)
   initV <- c(50, 30)
   n <- 50
-  
+
   set.seed(12345)
   result1 <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
-  
+
   set.seed(12345)
   result2 <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
-  
+
   # Should be identical with same seed
   expect_equal(result1, result2)
 })
@@ -62,10 +62,10 @@ test_that("getFinalSizeDist shows stochastic variation", {
   initI <- c(5, 2)
   initV <- c(50, 30)
   n <- 100
-  
+
   set.seed(98765)
   result <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
-  
+
   # Should have variation across simulations (not all identical)
   # Check that standard deviation is positive for at least one group
   expect_true(sd(result[, 1]) > 0 || sd(result[, 2]) > 0)
@@ -79,9 +79,9 @@ test_that("getFinalSizeDist handles single group", {
   initI <- 10
   initV <- 100
   n <- 50
-  
+
   result <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
-  
+
   expect_equal(nrow(result), n)
   expect_equal(ncol(result), 1)
   expect_true(all(result >= initI + initR))
@@ -97,10 +97,10 @@ test_that("getFinalSizeDist with R0 < 1 has small outbreaks", {
   initI <- 10
   initV <- 0
   n <- 100
-  
+
   set.seed(11111)
   result <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
-  
+
   # Average outbreak should be small (< 5% of population)
   mean_final_size <- mean(result)
   expect_true(mean_final_size < 0.05 * popsize)
@@ -115,10 +115,10 @@ test_that("getFinalSizeDist with high R0 has large outbreaks", {
   initI <- 10
   initV <- 0
   n <- 100
-  
+
   set.seed(22222)
   result <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
-  
+
   # Average outbreak should be substantial (> 50% of population)
   mean_final_size <- mean(result)
   expect_true(mean_final_size > 0.5 * popsize)
@@ -131,15 +131,15 @@ test_that("getFinalSizeDist vaccination reduces average final size", {
   initR <- 0
   initI <- 10
   n <- 100
-  
+
   # No vaccination
   set.seed(33333)
   result_no_vax <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV = 0)
-  
+
   # With 30% vaccination
   set.seed(33333)
   result_with_vax <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV = 3000)
-  
+
   # Vaccination should reduce mean final size
   expect_true(mean(result_with_vax) < mean(result_no_vax))
 })
@@ -153,9 +153,9 @@ test_that("getFinalSizeDist handles asymmetric transmission", {
   initI <- c(5, 1)
   initV <- c(80, 20)
   n <- 50
-  
+
   result <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
-  
+
   expect_equal(nrow(result), n)
   expect_equal(ncol(result), 2)
   expect_true(all(result[, 1] >= initI[1] + initR[1]))
@@ -173,10 +173,10 @@ test_that("getFinalSizeDist with all susceptibles vaccinated gives minimal outbr
   # Vaccinate almost everyone except initial infected
   initV <- 990
   n <- 50
-  
+
   set.seed(44444)
   result <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
-  
+
   # All simulations should have minimal outbreak (only initial infected)
   expect_true(all(result <= initI + initR + 10))
 })
@@ -191,12 +191,12 @@ test_that("getFinalSizeDist works with three groups", {
   initI <- c(10, 5, 2)
   initV <- c(50, 30, 20)
   n <- 50
-  
+
   result <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
-  
+
   expect_equal(nrow(result), n)
   expect_equal(ncol(result), 3)
-  
+
   # Check all simulations respect bounds
   for (i in 1:n) {
     expect_true(all(result[i, ] >= initI + initR))
@@ -213,9 +213,9 @@ test_that("getFinalSizeDist handles large initial recovered", {
   initI <- c(10, 10)
   initV <- c(0, 0)
   n <- 50
-  
+
   result <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
-  
+
   # All simulations should include initial recovered
   expect_true(all(result[, 1] >= initR[1] + initI[1]))
   expect_true(all(result[, 2] >= initR[2] + initI[2]))
@@ -232,10 +232,10 @@ test_that("getFinalSizeDist handles equal group sizes symmetrically", {
   initI <- c(5, 5)
   initV <- c(50, 50)
   n <- 200
-  
+
   set.seed(66666)
   result <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
-  
+
   # With symmetric setup, means should be similar
   mean1 <- mean(result[, 1])
   mean2 <- mean(result[, 2])
@@ -251,9 +251,9 @@ test_that("getFinalSizeDist handles zero susceptibles correctly", {
   initI <- c(0, 0)
   initV <- c(50, 40)
   n <- 20
-  
+
   result <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
-  
+
   # With no susceptibles and no infected, final size is just initial recovered
   # All simulations should be identical
   expect_true(all(result[, 1] == initR[1]))
@@ -269,10 +269,10 @@ test_that("getFinalSizeDist handles different initial infections per group", {
   initI <- c(100, 1)
   initV <- c(100, 100)
   n <- 100
-  
+
   set.seed(77777)
   result <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
-  
+
   # First group should have larger average final size
   expect_true(mean(result[, 1]) > mean(result[, 2]))
 })
@@ -285,9 +285,9 @@ test_that("getFinalSizeDist final size includes initial recovered", {
   initI <- c(5, 5)
   initV <- c(50, 50)
   n <- 50
-  
+
   result <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
-  
+
   # Every simulation must include all initial recovered
   expect_true(all(result[, 1] >= initR[1]))
   expect_true(all(result[, 2] >= initR[2]))
@@ -301,13 +301,13 @@ test_that("getFinalSizeDist works with four groups", {
   initI <- c(5, 5, 5, 5)
   initV <- c(25, 25, 25, 25)
   n <- 50
-  
+
   set.seed(12345)
   result <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
-  
+
   expect_equal(nrow(result), n)
   expect_equal(ncol(result), 4)
-  
+
   for (i in 1:n) {
     expect_true(all(result[i, ] >= initI + initR))
     expect_true(all(result[i, ] <= popsize))
@@ -323,10 +323,10 @@ test_that("getFinalSizeDist with isolated groups", {
   initI <- c(10, 0)  # Only group 1 starts infected
   initV <- c(0, 0)
   n <- 100
-  
+
   set.seed(99999)
   result <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
-  
+
   # Group 2 should never get infected (remains at initR + initI = 0)
   expect_true(all(result[, 2] == initR[2] + initI[2]))
   # Group 1 should have outbreaks
@@ -341,10 +341,10 @@ test_that("getFinalSizeDist handles small number of simulations", {
   initI <- c(5, 2)
   initV <- c(50, 30)
   n <- 5  # Very small sample
-  
+
   set.seed(10101)
   result <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
-  
+
   expect_equal(nrow(result), 5)
   expect_equal(ncol(result), 2)
 })
@@ -357,10 +357,10 @@ test_that("getFinalSizeDist handles large number of simulations", {
   initI <- c(5, 5)
   initV <- c(20, 20)
   n <- 1000  # Large sample
-  
+
   set.seed(10102)
   result <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
-  
+
   expect_equal(nrow(result), 1000)
   expect_equal(ncol(result), 2)
 })
@@ -373,16 +373,35 @@ test_that("getFinalSizeDist respects population constraints in all simulations",
   initI <- c(5, 10)
   initV <- c(15, 30)
   n <- 100
-  
+
   # S + I + R + V should equal popsize at start
   initS <- popsize - initR - initI - initV
   expect_equal(initS, c(70, 140))
-  
+
   set.seed(10103)
   result <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
-  
+
   # Check every single simulation
   for (i in 1:n) {
     expect_true(all(result[i, ] <= popsize))
+  }
+})
+
+test_that("getFinalSizeDist handles different initI for each simulation", {
+  transmrates <- matrix(0.5, 2, 2)
+  recoveryrate <- 0.2
+  popsize <- c(100, 200)
+  initR <- c(10, 20)
+  initI <- rbind(c(1, 0), c(0, 1), c(1, 1), c(2, 3), c(10, 2), c(70, 140))
+  initV <- c(15, 30)
+  n <- 6
+
+  set.seed(10103)
+  result <- getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
+
+  # Check every single simulation
+  for (i in 1:n) {
+    expect_true(all(result[i, ] <= popsize))
+    expect_true(all(result[i, ] >= initI[i, ] + initR))
   }
 })

@@ -15,11 +15,11 @@ getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
 
 \item{popsize}{the population size of each group}
 
-\item{initR}{initial number of each group already infected and removed (included in size result)}
+\item{initR}{initial number of each group already infected and removed for each simulation (included in final size result); if a matrix, row i is used for simulation i}
 
-\item{initI}{initial number of each group infectious}
+\item{initI}{initial number of each group infectious for each simulation; if a matrix, row i is used for simulation i}
 
-\item{initV}{initial number of each group vaccinated}
+\item{initV}{initial number of each group immune due to vaccination or prior-outbreak infection for each simulation (not included in final size result); if a matrix, row i is used for simulation i}
 }
 \value{
 a matrix with the final number infected from each group (column) in each simulation (row)
