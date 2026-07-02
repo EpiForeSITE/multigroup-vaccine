@@ -6,7 +6,7 @@
 \usage{
 getAllCountiesData(
   state_fips,
-  year = 2024,
+  year = 2025,
   age_groups = NULL,
   age_groups_by_county = NULL,
   by_sex = FALSE,
@@ -18,7 +18,7 @@ getAllCountiesData(
 \arguments{
 \item{state_fips}{Two-digit FIPS code for the state (e.g., "49" for Utah)}
 
-\item{year}{Census estimate year: 2020-2024 for July 1 estimates, or 2020.1 for April 1, 2020 base}
+\item{year}{Census estimate year: 2020-2025 for July 1 estimates, or 2020.1 for April 1, 2020 base}
 
 \item{age_groups}{Vector of age limits for grouping (e.g., c(0, 5, 18, 65)).
 Default NULL returns single-year ages 0-85+. Ignored if \code{age_groups_by_county} is provided.}
@@ -64,7 +64,7 @@ contains the data for one county.
 \donttest{
 utah_all <- getAllCountiesData(
   state_fips = "49",
-  year = 2024,
+  year = 2025,
   csv_path = getCensusDataPath()
 )
 
@@ -75,7 +75,7 @@ utah_all[["Utah County, Utah"]]
 # Get with age groups
 utah_grouped <- getAllCountiesData(
   state_fips = "49",
-  year = 2024,
+  year = 2025,
   age_groups = c(0, 18, 65),
   csv_path = getCensusDataPath()
 )
@@ -87,7 +87,7 @@ county_ages <- list(
 )
 utah_custom <- getAllCountiesData(
   state_fips = "49",
-  year = 2024,
+  year = 2025,
   age_groups_by_county = county_ages,
   csv_path = getCensusDataPath()
 )
@@ -95,7 +95,7 @@ utah_custom <- getAllCountiesData(
 # Download from web (requires internet)
 utah_web <- getAllCountiesData(
   state_fips = "49",
-  year = 2024
+  year = 2025
 )
 }
 }
