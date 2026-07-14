@@ -108,7 +108,7 @@ cat("County:", washington_data$county, "\n")
 cat("Year:", washington_data$year, "\n")
 #> Year: 2024
 cat("Total population:", format(washington_data$total_pop, big.mark = ","), "\n\n")
-#> Total population: 207,943
+#> Total population: 208,431
 
 cat("Age distribution:\n")
 #> Age distribution:
@@ -119,13 +119,13 @@ for (i in seq_along(washington_data$age_labels)) {
               format(washington_data$age_pops[i], big.mark = ","),
               pct))
 }
-#>   0to4: 11,950 (5.7%)
-#>   5to11: 18,808 (9.0%)
-#>   12to17: 18,446 (8.9%)
-#>   18to24: 19,948 (9.6%)
-#>   25to44: 49,399 (23.8%)
-#>   45to64: 42,661 (20.5%)
-#>   65plus: 46,731 (22.5%)
+#>   0to4: 12,186 (5.8%)
+#>   5to11: 19,427 (9.3%)
+#>   12to17: 19,280 (9.3%)
+#>   18to24: 21,579 (10.4%)
+#>   25to44: 48,551 (23.3%)
+#>   45to64: 40,767 (19.6%)
+#>   65plus: 46,641 (22.4%)
 ```
 
 ## Step 4: Visualizing Age Distribution

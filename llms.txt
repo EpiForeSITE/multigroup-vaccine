@@ -200,6 +200,8 @@ and Outbreak Analytics (Cooperative agreement CDC-RFA-FT-23-0069).
   : Calculate final outbreak size or distribution of a multigroup
   transmission model for a given basic reproduction number,
   contact/transmission assumptions, and initial conditions
+- [`getAllCountiesData()`](https://epiforesite.github.io/multigroup-vaccine/reference/getAllCountiesData.md)
+  : Get Census Data for All Counties in a State
 - [`getCensusData()`](https://epiforesite.github.io/multigroup-vaccine/reference/getCensusData.md)
   : Get Census Population Data by Age and County
 - [`getCensusDataPath()`](https://epiforesite.github.io/multigroup-vaccine/reference/getCensusDataPath.md)
@@ -263,3 +265,5 @@ and Outbreak Analytics (Cooperative agreement CDC-RFA-FT-23-0069).
   R0](https://epiforesite.github.io/multigroup-vaccine/articles/experiments/age_dist_R0.md):
 - [Short Creek model with age and school
   structure](https://epiforesite.github.io/multigroup-vaccine/articles/experiments/shortcreek_age_school.md):
+- [Measles Outbreak Simulator for
+  Utah](https://epiforesite.github.io/multigroup-vaccine/articles/experiments/simulate_utah.md):

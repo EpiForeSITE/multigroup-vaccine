@@ -63,15 +63,15 @@
 
 
 <dt id="arg-initr">initR<a class="anchor" aria-label="anchor" href="#arg-initr"></a></dt>
-<dd><p>initial number of each group already infected and removed (included in size result)</p></dd>
+<dd><p>initial number of each group already infected and removed for each simulation (included in final size result); if a matrix, row i is used for simulation i</p></dd>
 
 
 <dt id="arg-initi">initI<a class="anchor" aria-label="anchor" href="#arg-initi"></a></dt>
-<dd><p>initial number of each group infectious</p></dd>
+<dd><p>initial number of each group infectious for each simulation; if a matrix, row i is used for simulation i</p></dd>
 
 
 <dt id="arg-initv">initV<a class="anchor" aria-label="anchor" href="#arg-initv"></a></dt>
-<dd><p>initial number of each group vaccinated</p></dd>
+<dd><p>initial number of each group immune due to vaccination or prior-outbreak infection for each simulation (not included in final size result); if a matrix, row i is used for simulation i</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -84,16 +84,16 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">getFinalSizeDist</span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span>, transmrates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0.2</span>, <span class="fl">2</span> ,<span class="fl">2</span><span class="op">)</span>, recoveryrate <span class="op">=</span> <span class="fl">0.3</span>,</span></span>
 <span class="r-in"><span>popsize <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">150</span><span class="op">)</span>, initR <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span>, initI <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>, initV <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       [,1] [,2]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]    0    2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]    0    1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]    0    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]    2    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]    0    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]    0    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]    2    8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,]    0    3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]   32   56</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]    3    6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]    5    8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]   27   40</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]   30   41</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]   26   47</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]    0    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,]    0    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]   41   62</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]    0    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]   40   68</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -105,7 +105,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

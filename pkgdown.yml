@@ -1,5 +1,5 @@
 pandoc: 3.8.3
-pkgdown: 2.2.0
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   experiments/age_dist_R0: experiments/age_dist_R0.html
@@ -8,7 +8,8 @@ articles:
   measles_agemodel: measles_agemodel.html
   run_model_on_command_line: run_model_on_command_line.html
   experiments/shortcreek_age_school: experiments/shortcreek_age_school.html
-last_built: 2026-06-14T20:06Z
+  experiments/simulate_utah: experiments/simulate_utah.html
+last_built: 2026-07-14T04:53Z
 urls:
   reference: https://epiforesite.github.io/multigroup-vaccine/reference
   article: https://epiforesite.github.io/multigroup-vaccine/articles

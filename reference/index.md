@@ -16,6 +16,8 @@
   : Calculate final outbreak size or distribution of a multigroup
   transmission model for a given basic reproduction number,
   contact/transmission assumptions, and initial conditions
+- [`getAllCountiesData()`](https://epiforesite.github.io/multigroup-vaccine/reference/getAllCountiesData.md)
+  : Get Census Data for All Counties in a State
 - [`getCensusData()`](https://epiforesite.github.io/multigroup-vaccine/reference/getCensusData.md)
   : Get Census Population Data by Age and County
 - [`getCensusDataPath()`](https://epiforesite.github.io/multigroup-vaccine/reference/getCensusDataPath.md)
