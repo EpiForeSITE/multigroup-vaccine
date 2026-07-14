@@ -9,7 +9,8 @@ contactMatrixAgeSchool(
   agepops,
   schoolagegroups,
   schoolpops,
-  schportion
+  schportion,
+  schoolids = NULL
 )
 }
 \arguments{
@@ -21,7 +22,9 @@ contactMatrixAgeSchool(
 
 \item{schoolpops}{population size of each school}
 
-\item{schportion}{portion of within-age-group contacts that are exclusively within school}
+\item{schportion}{portion of within-age-group contacts that are exclusively within each school}
+
+\item{schoolids}{optional id string for each school, used in row and column names of contact matrix}
 }
 \value{
 a square matrix with the contact rate of each group (row) with members of each

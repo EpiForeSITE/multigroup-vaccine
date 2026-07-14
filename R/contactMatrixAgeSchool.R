@@ -3,14 +3,22 @@
 #' @param agepops population size of each age group
 #' @param schoolagegroups index of the age group covered by each school
 #' @param schoolpops population size of each school
-#' @param schportion portion of within-age-group contacts that are exclusively within school
+#' @param schportion portion of within-age-group contacts that are exclusively within each school
+#' @param schoolids optional id string for each school, used in row and column names of contact matrix
 #' @returns a square matrix with the contact rate of each group (row) with members of each
 #' other group (column)
 #' @examples
 #' contactMatrixAgeSchool(agelims = c(0, 5, 18), agepops = c(500, 1300, 8200),
 #' schoolagegroups = c(2, 2), schoolpops = c(600, 700), schportion = 0.7)
 #' @export
-contactMatrixAgeSchool <- function(agelims, agepops, schoolagegroups, schoolpops, schportion) {
+contactMatrixAgeSchool <- function(agelims, agepops, schoolagegroups, schoolpops, schportion, schoolids = NULL) {
+  if(length(schportion) == length(schoolpops)){
+    eps <- schportion
+  }else if(length(schportion) == 1){
+    eps <- rep(schportion, length(schoolpops))
+  }else{
+    stop("Argument schportion must be a single value or a vector the same length as schoolpops")
+  }
   cmp <- contactMatrixPolymod(agelims, agepops)
   ngrps <- length(agepops) + length(schoolpops) - length(unique(schoolagegroups))
   cmps <- matrix(0, ngrps, ngrps)
@@ -21,7 +29,12 @@ contactMatrixAgeSchool <- function(agelims, agepops, schoolagegroups, schoolpops
   ipost <- (ngrps-npost+1):ngrps
   isch <- (npre+1):(npre+nsch)
   nm <- colnames(cmp)
-  grpnames <- c(nm[1:npre], paste0(nm[schoolagegroups],"s",1:length(schoolagegroups)), nm[(nrow(cmp)-npost+1):nrow(cmp)])
+  if(is.null(schoolids)){
+    schoolgrpnames <- paste0(nm[schoolagegroups], "s", 1:length(schoolagegroups))
+  }else{
+    schoolgrpnames <- paste0(nm[schoolagegroups], "_", schoolids)
+  }
+  grpnames <- c(nm[1:npre], schoolgrpnames, nm[(nrow(cmp)-npost+1):nrow(cmp)])
   rownames(cmps) <- colnames(cmps) <- grpnames
   cmps[ipre, ipre] <- cmp[1:npre, 1:npre]
   cmps[ipost, ipost] <- cmp[(nrow(cmp)-npost+1):nrow(cmp), (nrow(cmp)-npost+1):nrow(cmp)]
@@ -39,8 +52,11 @@ contactMatrixAgeSchool <- function(agelims, agepops, schoolagegroups, schoolpops
       cmps[nrow(cmps) - i + 1, npre + inds] <- cmp[nrow(cmp) - i + 1, s] * schoolpops[inds] / agepops[s]
       cmps[npre + inds, nrow(cmps)-i+1] <- cmp[s, nrow(cmp)-i+1]
     }
-    cmps[npre + inds, npre + inds] <- contactMatrixPropPref(schoolpops[inds], rep(cmp[s, s], nums), rep(schportion, nums))
-
+    if(nums > 1){
+      cmps[npre + inds, npre + inds] <- contactMatrixPropPref(schoolpops[inds], rep(cmp[s, s], nums), eps[inds])
+    }else{
+      cmps[npre + inds, npre + inds] <- cmp[s, s]
+    }
     if(length(sag) > 1){
       for(ss in sag[sag != s]){
         for(j in which(schoolagegroups == ss)){
