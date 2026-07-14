@@ -42,7 +42,7 @@ Suggests:
     plotly,
     scales,
     stringr,
-    purr
+    purrr
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
