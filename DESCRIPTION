@@ -36,6 +36,13 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
+    ggplot2,
+    dplyr,
+    tidyr,
+    plotly,
+    scales,
+    stringr,
+    purrr
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
