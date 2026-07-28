@@ -44,7 +44,7 @@ First we read the school data, which contains relative school enrollment data, t
 ```{r load-data, cache=FALSE}
 
 # Load raw data
-school_data <- read.csv(file.path("../../data-raw/school_district_schoolID_data_Utah_2025.csv"))
+school_data <- read.csv(file.path("../../data-raw/school_district_schoolID_data_Utah_2025real.csv"))
 ```
 
 ## Set up model elements used in simulation
@@ -231,4 +231,21 @@ if (nrow(sim_long) > 0) {
 ```
 
 
+```{r district-group-risk-summary}
+nsims <- 100000
+district <- "Granite"
+R0 <- 7
+sim <- multigroup.vaccine:::simulateOutbreaks(model,
+                                              R0=7, 
+                                              district_name = district,
+                                              initmode = "random",
+                                              nsims = 100000)
+mean_inf <- colSums(sim$final_size) / nsims
+percent_init <- tabulate(sim$init_group, ncol(sim$final_size)) / nsims * 100
+percent_inf <- colSums(sim$final_size > 0) / nsims * 100
+
+df <- data.frame(group = sim$group_names, percent_init, percent_inf, mean_inf)
+df <- df[order(-df$mean_inf), ]
+knitr::kable(df, digits = 2, row.names = FALSE)
+```
 
