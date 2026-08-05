@@ -292,6 +292,7 @@ health_district_risk_by_group <- function(hd_sims, model){
     group[inds] <- sim$group_names
     population[inds] <- sd_info$population
     nonimmune[inds] <- sd_info$population - round(sd_info$population * sd_info$immune)
+    nsims <- nrow(sim$final_size)
     mean_group_inf[inds] <- colSums(sim$final_size) / nsims
     prob_group_init[inds] <- tabulate(sim$init_group, ncol(sim$final_size)) / nsims
     prob_group_inf[inds] <- colSums(sim$final_size > 0) / nsims
