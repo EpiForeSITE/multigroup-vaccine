@@ -240,12 +240,40 @@ sim <- multigroup.vaccine:::simulateOutbreaks(model,
                                               district_name = district,
                                               initmode = "random",
                                               nsims = 100000)
-mean_inf <- colSums(sim$final_size) / nsims
-percent_init <- tabulate(sim$init_group, ncol(sim$final_size)) / nsims * 100
-percent_inf <- colSums(sim$final_size > 0) / nsims * 100
 
-df <- data.frame(group = sim$group_names, percent_init, percent_inf, mean_inf)
-df <- df[order(-df$mean_inf), ]
-knitr::kable(df, digits = 2, row.names = FALSE)
+getGroupStats <- function(sim){
+  nsims <- length(sim$init_group)
+  
+  mean_group_inf <- colSums(sim$final_size) / nsims
+  percent_group_init <- tabulate(sim$init_group, ncol(sim$final_size)) / nsims * 100
+  percent_group_inf <- colSums(sim$final_size > 0) / nsims * 100
+  
+  dfgrp <- data.frame(group = sim$group_names, percent_group_init, percent_group_inf, mean_group_inf)
+  dfgrp[order(-dfgrp$mean_group_inf), ]
+}
+
+dfGranite <- getGroupStats(sim)
+knitr::kable(dfGranite, digits = 2, row.names = FALSE)
 ```
 
+Function for simulating each school district in a given health district
+
+```{r health-district-function}
+sch <- read.csv(system.file("extdata", "Utah_school_county_health_districts.csv", package = "multigroup.vaccine"))
+
+health_district_sims <- function(health_district_name, model, R0, nsims){
+  stopifnot(health_district_name %in% sch$Health.District)
+  school_districts <- sch$School.District[sch$Health.District == health_district_name]
+  
+  hd_sims <- vector("list", length(school_districts))
+  names(hd_sims) <- school_districts
+  
+  for(sd in school_districts){
+    hd_sims[[sd]] <- multigroup.vaccine:::simulateOutbreaks(model,
+                                                            R0 = R0, 
+                                                            district_name = sd,
+                                                            initmode = "random",
+                                                            nsims = nsims)
+  }
+}
+```
