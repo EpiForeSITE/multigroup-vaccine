@@ -39,11 +39,14 @@ library(purrr)
 
 ## Data Initialization
 
-First we read the school data, which contains relative school enrollment data, the level of each school, vaccination rates for each school, and rates of prior infection with measles. The file "school_district_schoolID_data_Utah_2025.csv" must be read from your local machine.
+First we read the school data, which contains relative school enrollment data, the level of each school, vaccination rates for each school, and rates of prior infection with measles. 
+
+Not the file "school_district_schoolID_data_Utah_2025.csv" contains randomized vaccination data and is not accurate. Those with access to the real data should replace this file.
 
 ```{r load-data, cache=FALSE}
 
 # Load raw data
+#school_data <- read.csv(file.path("../../data-raw/school_district_schoolID_data_Utah_2025real.csv"))
 school_data <- read.csv(file.path("../../data-raw/school_district_schoolID_data_Utah_2025.csv"))
 ```
 
@@ -230,5 +233,93 @@ if (nrow(sim_long) > 0) {
 }
 ```
 
+## Function for simulating each school district in a given health district
 
+```{r health-district-function}
+sch <- read.csv(system.file("extdata", "Utah_school_county_health_districts.csv", package = "multigroup.vaccine"))
 
+health_district_sims <- function(health_district_name, model, R0, nsims){
+  stopifnot(health_district_name %in% sch$Health.District)
+  school_districts <- sch$School.District[sch$Health.District == health_district_name]
+  
+  hd_sims <- vector("list", length(school_districts))
+  names(hd_sims) <- school_districts
+  
+  for(sd in school_districts){
+    hd_sims[[sd]] <- multigroup.vaccine:::simulateOutbreaks(model,
+                                                            R0 = R0, 
+                                                            district_name = sd,
+                                                            initmode = "random",
+                                                            nsims = nsims)
+  }
+  hd_sims
+}
+
+health_district_risk_by_school_district <- function(hd_sims, model){
+  sd_names <- paste0(names(hd_sims), " School District")
+  
+  sd_population <- sd_nonimmune <- sd_mean_inf <- sd_prob10 <- sd_prob100 <- rep(0, length(sd_names))
+  for(i in seq_along(sd_names)){
+    sd_info <- model$district_school_df[model$district_school_df$district == names(hd_sims)[i], ]
+    sd_final_size <- rowSums(hd_sims[[i]]$final_size)
+    nsims <- length(sd_final_size)
+    sd_population[i] <- sum(sd_info$population)
+    sd_nonimmune[i] <- sum(sd_info$population - round(sd_info$immune * sd_info$population))
+    sd_mean_inf[i] <- mean(sd_final_size)
+    sd_prob10[i] <- sum(sd_final_size >= 10) / nsims
+    sd_prob100[i] <- sum(sd_final_size >= 100) / nsims
+  }
+  data.frame(school_district = sd_names,
+             population = sd_population,
+             nonimmune = sd_nonimmune,
+             mean_infections = sd_mean_inf,
+             prob_10plus_infections = sd_prob10,
+             prob_100plus_infections = sd_prob100)
+}
+
+health_district_risk_by_group <- function(hd_sims, model){
+  
+  ngroups <- sum(model$district_school_df$district %in% names(hd_sims))
+  
+  school_district <- group <- population <- nonimmune <- mean_group_inf <- prob_group_init <- prob_group_inf <- rep(0, ngroups)
+  ind <- 1L
+  for(i in seq_along(hd_sims)){
+    sim <- hd_sims[[i]]
+    sd_info <- model$district_school_df[model$district_school_df$district == names(hd_sims)[i], ]
+    inds <- ind:(ind + nrow(sd_info) - 1)
+    
+    school_district[inds] <- sd_info$district
+    group[inds] <- sim$group_names
+    population[inds] <- sd_info$population
+    nonimmune[inds] <- sd_info$population - round(sd_info$population * sd_info$immune)
+    nsims <- nrow(sim$final_size)
+    mean_group_inf[inds] <- colSums(sim$final_size) / nsims
+    prob_group_init[inds] <- tabulate(sim$init_group, ncol(sim$final_size)) / nsims
+    prob_group_inf[inds] <- colSums(sim$final_size > 0) / nsims
+    
+    ind <- ind + nrow(sd_info)
+  }
+  data.frame(school_district = school_district,
+             group = group,
+             population = population,
+             nonimmune = nonimmune,
+             mean_infections = mean_group_inf,
+             prob_group_init = prob_group_init,
+             prob_group_inf = prob_group_inf)
+}
+```
+
+## Example school district summary for Weber-Morgan Health District
+
+```{r health-district-example}
+hd_sims <- health_district_sims("Weber-Morgan", model, R0 = 7, nsims = 100000) 
+school_district_risk <- health_district_risk_by_school_district(hd_sims, model)
+school_district_risk
+```
+
+## Example group-specific summary for Weber-Morgan Health District
+
+```{r health-district-group-example}
+group_risk <- health_district_risk_by_group(hd_sims, model)
+group_risk
+```
