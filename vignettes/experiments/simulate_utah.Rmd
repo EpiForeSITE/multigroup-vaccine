@@ -336,6 +336,6 @@ county_model$county_names
 Then simulate an outbreak in one of the above counties:
 
 ```{r county-simulation}
-multigroup.vaccine:::simulateCountyOutbreaks(county_model, R0 = 7, county_name = "Salt Lake", initmode = "random", nsims = 20)
+multigroup.vaccine:::simulateCountyOutbreaks(county_model, R0 = 7, county_name = "San Juan", initmode = "random", nsims = 20)
 ```
 
