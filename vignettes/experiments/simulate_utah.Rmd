@@ -1,6 +1,6 @@
 ---
 title: "Measles Outbreak Simulator for Utah"
-date: "July 2026"
+date: "August 2026"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Measles Outbreak Simulator for Utah}
@@ -323,3 +323,19 @@ school_district_risk
 group_risk <- health_district_risk_by_group(hd_sims, model)
 group_risk
 ```
+
+## County version
+
+Functions are also available to simulate outbreaks in Utah at the level of counties rather than school districts. First we set up the model:
+
+```{r county-model}
+county_model <- multigroup.vaccine:::UtahCountyModel(school_data)
+county_model$county_names
+```
+
+Then simulate an outbreak in one of the above counties:
+
+```{r county-simulation}
+multigroup.vaccine:::simulateCountyOutbreaks(county_model, R0 = 7, county_name = "Salt Lake", initmode = "random", nsims = 20)
+```
+
