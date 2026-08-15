@@ -2,6 +2,17 @@ url: https://epiforesite.github.io/multigroup-vaccine
 template:
   bootstrap: 5
 
+authors:
+  "Damon Toth":
+    href: "https://orcid.org/0000-0001-7393-4814"
+  "Jake Wagoner":
+    href: "https://github.com/JakeWags"
+  "Willy Ray":
+    href: "https://github.com/WillyRay"
+  "George Vega Yon":
+    href: "https://ggvy.cl"
+    html: "<img src='https://ggvy.cl/img/george-g-vega-yon-university-of-utah.webp' width=72 alt=''>"
+
 articles:
 - title: Tutorials
   contents:
