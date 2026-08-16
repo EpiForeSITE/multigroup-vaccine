@@ -7,6 +7,11 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+<!-- how-to-cite -->
+> **How to cite.** If you use **multigroup.vaccine** in published work, please cite it — run
+> `citation("multigroup.vaccine")` in R for the full entry.
+<!-- how-to-cite -->
+
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
