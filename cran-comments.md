@@ -1,5 +1,5 @@
 ## Test environments
-* local macOS install, R 4.4.1
+* local windows install, R 4.6.0
 * GitHub Actions:
   * macOS-latest (release)
   * windows-latest (release)
@@ -8,12 +8,10 @@
   * ubuntu-latest (oldrel-1)
 
 ## R CMD check results
-There were no ERRORs or WARNINGs.
+There were no ERRORs, WARNINGs, or NOTEs.
 
-There was 1 NOTE:
-* New submission
-
-This is a new submission to CRAN.
+This is a maintenance release to maintain compatibility with new
+versions of the `socialmixr` package.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.
