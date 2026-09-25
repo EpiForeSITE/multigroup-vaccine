@@ -1,5 +1,14 @@
 # multigroup.vaccine
 
+> \[!NOTE\] **How to cite multigroup.vaccine.** If you use
+> **multigroup.vaccine** in published work, please cite it:
+>
+> Toth D, Wagoner J, Ray W, Vega Yon G. *multigroup.vaccine: Analyze
+> Outbreak Models of Multi-Group Populations with Vaccination*.
+> <doi:%5B10.32614/CRAN.package.multigroup.vaccine>\](<https://doi.org/10.32614/CRAN.package.multigroup.vaccine>)
+>
+> Run `citation("multigroup.vaccine")` in R for the BibTeX entry.
+
 ## Overview
 
 `multigroup.vaccine` models infectious disease dynamics in populations

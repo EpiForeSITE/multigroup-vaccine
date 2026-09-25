@@ -1,5 +1,9 @@
 # Getting Started Example
 
+> **How to cite.** If you use **multigroup.vaccine** in published work,
+> please cite it — run `citation("multigroup.vaccine")` in R for the
+> full entry.
+
 This vignette walks through a first example of setting up a multi-group
 epidemic model and calculating useful quantities for analysis using
 functions in this R package. After installing the package (see

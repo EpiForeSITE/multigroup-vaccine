@@ -1,5 +1,9 @@
 # Using Census Data Functions
 
+> **How to cite.** If you use **multigroup.vaccine** in published work,
+> please cite it — run `citation("multigroup.vaccine")` in R for the
+> full entry.
+
 ## Introduction
 
 This vignette demonstrates how to use the census data functions in the

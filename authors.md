@@ -21,14 +21,16 @@
 ## Citation
 
 Toth D, Wagoner J, Ray W, Vega Yon G (2026). *multigroup.vaccine:
-Analyze Outbreak Models of Multi-Group Populations with Vaccination*. R
-package version 0.1.1,
+Analyze Outbreak Models of Multi-Group Populations with Vaccination*.
+[doi:10.32614/CRAN.package.multigroup.vaccine](https://doi.org/10.32614/CRAN.package.multigroup.vaccine).
+R package version 0.1.1,
 <https://epiforesite.github.io/multigroup-vaccine/>.
 
     @Manual{,
-      title = {multigroup.vaccine: Analyze Outbreak Models of Multi-Group Populations with Vaccination},
+      title = {{{multigroup.vaccine: Analyze Outbreak Models of Multi-Group Populations with Vaccination}}},
       author = {Damon Toth and Jake Wagoner and Willy Ray and George {Vega Yon}},
       year = {2026},
       note = {R package version 0.1.1},
       url = {https://epiforesite.github.io/multigroup-vaccine/},
+      doi = {10.32614/CRAN.package.multigroup.vaccine},
     }

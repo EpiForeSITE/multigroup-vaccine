@@ -1,5 +1,9 @@
 # Measles Age-Structured Model
 
+> **How to cite.** If you use **multigroup.vaccine** in published work,
+> please cite it — run `citation("multigroup.vaccine")` in R for the
+> full entry.
+
 ``` r
 
 library(multigroup.vaccine)

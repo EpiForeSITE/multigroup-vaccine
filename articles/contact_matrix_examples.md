@@ -1,5 +1,9 @@
 # Contact Matrix Examples
 
+> **How to cite.** If you use **multigroup.vaccine** in published work,
+> please cite it — run `citation("multigroup.vaccine")` in R for the
+> full entry.
+
 This vignette demonstrates how to set up contact matrices for age- and
 school-structured models using examples.
 
