@@ -29,16 +29,20 @@ getFinalSizeDist(n, transmrates, recoveryrate, popsize, initR, initI, initV)
 
 - initR:
 
-  initial number of each group already infected and removed (included in
-  size result)
+  initial number of each group already infected and removed for each
+  simulation (included in final size result); if a matrix, row i is used
+  for simulation i
 
 - initI:
 
-  initial number of each group infectious
+  initial number of each group infectious for each simulation; if a
+  matrix, row i is used for simulation i
 
 - initV:
 
-  initial number of each group vaccinated
+  initial number of each group immune due to vaccination or
+  prior-outbreak infection for each simulation (not included in final
+  size result); if a matrix, row i is used for simulation i
 
 ## Value
 
@@ -53,12 +57,12 @@ popsize = c(100, 150), initR = c(0, 0), initI = c(0, 1), initV = c(10, 10))
 #>       [,1] [,2]
 #>  [1,]    0    1
 #>  [2,]    0    1
-#>  [3,]    0    1
-#>  [4,]   33   38
-#>  [5,]    0    1
-#>  [6,]    1    1
+#>  [3,]   27   40
+#>  [4,]   30   41
+#>  [5,]   26   47
+#>  [6,]    0    1
 #>  [7,]    0    1
-#>  [8,]    0    1
-#>  [9,]   37   58
-#> [10,]   26   35
+#>  [8,]   41   62
+#>  [9,]    0    1
+#> [10,]   40   68
 ```

@@ -16,6 +16,8 @@
   : Calculate final outbreak size or distribution of a multigroup
   transmission model for a given basic reproduction number,
   contact/transmission assumptions, and initial conditions
+- [`getAllCountiesData()`](https://epiforesite.github.io/multigroup-vaccine/reference/getAllCountiesData.md)
+  : Get Census Data for All Counties in a State
 - [`getCensusData()`](https://epiforesite.github.io/multigroup-vaccine/reference/getCensusData.md)
   : Get Census Population Data by Age and County
 - [`getCensusDataPath()`](https://epiforesite.github.io/multigroup-vaccine/reference/getCensusDataPath.md)
@@ -49,6 +51,10 @@
   passed to the ode() function from deSolve package
 - [`run_my_app()`](https://epiforesite.github.io/multigroup-vaccine/reference/run_my_app.md)
   : Runs the shiny app
+- [`simodeSIR()`](https://epiforesite.github.io/multigroup-vaccine/reference/simodeSIR.md)
+  : Calculate time trajectory of solution to a
+  Susceptible-Infectious-Removed (SIR) system by numerically solving the
+  multi-group ordinary differential equations
 - [`transmissionRates()`](https://epiforesite.github.io/multigroup-vaccine/reference/transmissionRates.md)
   : Calculate transmission rate matrix for multi-group model with
   specified R0

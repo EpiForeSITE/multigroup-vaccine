@@ -10,7 +10,7 @@ single-year age data with optional sex disaggregation.
 getCensusData(
   state_fips,
   county_name,
-  year = 2024,
+  year = 2025,
   age_groups = NULL,
   by_sex = FALSE,
   csv_path = NULL,
@@ -31,7 +31,7 @@ getCensusData(
 
 - year:
 
-  Census estimate year: 2020-2024 for July 1 estimates, or 2020.1 for
+  Census estimate year: 2020-2025 for July 1 estimates, or 2020.1 for
   April 1, 2020 base
 
 - age_groups:
@@ -103,17 +103,17 @@ A list containing:
 ``` r
 # Use the included example data (recommended for package examples)
 slc_data <- getCensusData(
-  state_fips = "49", 
+  state_fips = "49",
   county_name = "Salt Lake County",
-  year = 2024,
+  year = 2025,
   csv_path = getCensusDataPath()
 )
 
 # Get age groups without sex disaggregation
 slc_grouped <- getCensusData(
   state_fips = "49",
-  county_name = "Salt Lake County", 
-  year = 2024,
+  county_name = "Salt Lake County",
+  year = 2025,
   age_groups = c(0, 5, 18, 65),
   csv_path = getCensusDataPath()
 )
@@ -122,7 +122,7 @@ slc_grouped <- getCensusData(
 slc_by_sex <- getCensusData(
   state_fips = "49",
   county_name = "Salt Lake County",
-  year = 2024, 
+  year = 2025,
   age_groups = c(0, 5, 18, 65),
   by_sex = TRUE,
   csv_path = getCensusDataPath()
@@ -133,14 +133,14 @@ slc_by_sex <- getCensusData(
 slc_web <- getCensusData(
   state_fips = "49",
   county_name = "Salt Lake County",
-  year = 2024
+  year = 2025
 )
 
 # Use caching to avoid repeated downloads
 slc_cached <- getCensusData(
   state_fips = "49",
   county_name = "Salt Lake County",
-  year = 2024,
+  year = 2025,
   cache_dir = "~/census_cache"
 )
 # }
