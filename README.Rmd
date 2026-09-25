@@ -16,6 +16,16 @@ knitr::opts_chunk$set(
 # multigroup.vaccine
 
 <!-- badges: start -->
+
+<!-- how-to-cite -->
+> [!NOTE]
+> **How to cite multigroup.vaccine.** If you use **multigroup.vaccine** in published work, please cite it:
+>
+> Toth D, Wagoner J, Ray W, Vega Yon G. *multigroup.vaccine: Analyze Outbreak Models of Multi-Group Populations with Vaccination*. doi:[10.32614/CRAN.package.multigroup.vaccine](https://doi.org/10.32614/CRAN.package.multigroup.vaccine)
+>
+> Run `citation("multigroup.vaccine")` in R for the BibTeX entry.
+<!-- how-to-cite -->
+
 ```{=markdown}
 [![ForeSITE Group](https://github.com/EpiForeSITE/software/raw/e82ed88f75e0fe5c0a1a3b38c2b94509f122019c/docs/assets/foresite-software-badge.svg)](https://github.com/EpiForeSITE)
 [![R-CMD-check](https://github.com/EpiForeSITE/multigroup-vaccine/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/EpiForeSITE/multigroup-vaccine/actions/workflows/R-CMD-check.yaml)

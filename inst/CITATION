@@ -1,9 +1,27 @@
+# Year resolution: CRAN sets Date/Publication on the installed package; fall
+# back to DESCRIPTION's Date, then to the current year, so the package entry
+# never renders as "(????)".
+year <- if (!is.null(meta$`Date/Publication`)) {
+  substr(meta$`Date/Publication`, 1, 4)
+} else if (!is.null(meta$Date)) {
+  substr(meta$Date, 1, 4)
+} else {
+  format(Sys.Date(), "%Y")
+}
+note <- sprintf("R package version %s", meta$Version)
+
 bibentry(
   bibtype = "Manual",
-  title = "multigroup.vaccine: Analyze Outbreak Models of Multi-Group Populations with Vaccination",
-  author = c(person("Damon", "Toth"), person("Jake", "Wagoner"), person("Willy", "Ray"),
-  person("George", "Vega Yon")),
-  year = "2026",
-  note = "R package version 0.1.1",
-  url = "https://epiforesite.github.io/multigroup-vaccine/"
+  title   = "{{multigroup.vaccine: Analyze Outbreak Models of Multi-Group Populations with Vaccination}}",
+  author  = c(
+    person("Damon", "Toth", comment = c(ORCID = "0000-0001-7393-4814")),
+    person("Jake", "Wagoner", comment = c(ORCID = "0009-0000-5053-2281")),
+    person("Willy", "Ray"),
+    person("George", "Vega Yon", comment = c(ORCID = "0000-0002-3171-0844"))
+  ),
+  year    = year,
+  note    = note,
+  url     = "https://epiforesite.github.io/multigroup-vaccine/",
+  doi     = "10.32614/CRAN.package.multigroup.vaccine",
+  header  = "To cite multigroup.vaccine in publications use:"
 )
