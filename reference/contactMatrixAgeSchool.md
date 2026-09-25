@@ -10,8 +10,7 @@ contactMatrixAgeSchool(
   agepops,
   schoolagegroups,
   schoolpops,
-  schportion,
-  schoolids = NULL
+  schportion
 )
 ```
 
@@ -35,13 +34,8 @@ contactMatrixAgeSchool(
 
 - schportion:
 
-  portion of within-age-group contacts that are exclusively within each
+  portion of within-age-group contacts that are exclusively within
   school
-
-- schoolids:
-
-  optional id string for each school, used in row and column names of
-  contact matrix
 
 ## Value
 

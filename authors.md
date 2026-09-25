@@ -2,16 +2,14 @@
 
 ## Authors
 
-- **[Damon Toth](https://orcid.org/0000-0001-7393-4814)**. Author,
-  maintainer, copyright holder.
+- **Damon Toth**. Author, maintainer, copyright holder.
   [](https://orcid.org/0000-0001-7393-4814)
 
-- **[Jake Wagoner](https://github.com/JakeWags)**. Author.
-  [](https://orcid.org/0009-0000-5053-2281)
+- **Jake Wagoner**. Author. [](https://orcid.org/0009-0000-5053-2281)
 
-- **[Willy Ray](https://github.com/WillyRay)**. Author.
+- **Willy Ray**. Author.
 
-- **[George Vega Yon](https://ggvy.cl)**. Contributor.
+- **George Vega Yon**. Contributor.
   [](https://orcid.org/0000-0002-3171-0844)
 
 - **Centers for Disease Control and Prevention's Center for Forecasting

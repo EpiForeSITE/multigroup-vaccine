@@ -6,7 +6,6 @@
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/articles/contact_matrix_examples.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/articles/experiments/age_dist_R0.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/articles/experiments/shortcreek_age_school.html</loc></url>
-<url><loc>https://epiforesite.github.io/multigroup-vaccine/articles/experiments/simulate_utah.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/articles/index.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/articles/measles_agemodel.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/articles/run_model_on_command_line.html</loc></url>
@@ -19,7 +18,6 @@
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/contactMatrixPropPref.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/disaggregateCityAges.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/finalsize.html</loc></url>
-<url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/getAllCountiesData.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/getCensusData.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/getCensusDataPath.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/getCityData.html</loc></url>
@@ -35,7 +33,6 @@
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/processCensusDataBySex.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/processCensusDataTotal.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/run_my_app.html</loc></url>
-<url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/simodeSIR.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/transmissionRates.html</loc></url>
 <url><loc>https://epiforesite.github.io/multigroup-vaccine/reference/vaxrepnum.html</loc></url>
 </urlset>

@@ -9,7 +9,7 @@ reproduction number, contact/transmission assumptions, and initial conditions"><
 
     <a class="navbar-brand me-2" href="../index.html">multigroup.vaccine</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -126,29 +126,29 @@ reproduction number, contact/transmission assumptions, and initial conditions</p
 <span class="r-in"><span><span class="fu">finalsize</span><span class="op">(</span><span class="va">popsize</span>, <span class="va">R0</span>, <span class="va">contactmatrix</span>, <span class="va">relsusc</span>, <span class="va">reltransm</span>, <span class="va">initR</span>, <span class="va">initI</span>, <span class="va">initV</span>,</span></span>
 <span class="r-in"><span>method <span class="op">=</span> <span class="st">"stochastic"</span>, nsims <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       [,1] [,2]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]  394   96</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]  411   97</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]  433   99</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]    3    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]  422  106</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]    3    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]    2    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]    1    0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]    1    0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]    1    0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,]  426  115</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]    2    0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]    2    0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]    2    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]    2    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,]    1    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]    3    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]    1    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]  426  105</span>
 <span class="r-in"><span><span class="co"># All "escaped" outbreaks set to deterministic final size:</span></span></span>
 <span class="r-in"><span><span class="fu">finalsize</span><span class="op">(</span><span class="va">popsize</span>, <span class="va">R0</span>, <span class="va">contactmatrix</span>, <span class="va">relsusc</span>, <span class="va">reltransm</span>, <span class="va">initR</span>, <span class="va">initI</span>, <span class="va">initV</span>,</span></span>
 <span class="r-in"><span>method <span class="op">=</span> <span class="st">"hybrid"</span>, nsims <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       [,1] [,2]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]  412  103</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]    1    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]    1    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]    1    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]  412  103</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]    1    0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]  412  103</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]    1    0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,]    1    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]  412  103</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]    3    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]  412  103</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,]    1    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]    1    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]    1    0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [10,]  412  103</span>
 </code></pre></div>
     </div>
@@ -157,7 +157,7 @@ reproduction number, contact/transmission assumptions, and initial conditions</p
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by <a href="https://orcid.org/0000-0001-7393-4814" class="external-link">Damon Toth</a>, <a href="https://github.com/JakeWags" class="external-link">Jake Wagoner</a>, <a href="https://github.com/WillyRay" class="external-link">Willy Ray</a>, Centers for Disease Control and Prevention’s Center for Forecasting and Outbreak Analytics.</p>
+  <p>Developed by Damon Toth, Jake Wagoner, Willy Ray, Centers for Disease Control and Prevention’s Center for Forecasting and Outbreak Analytics.</p>
 </div>
 
 <div class="pkgdown-footer-right">

@@ -26,7 +26,7 @@ utah_csv <- getCensusDataPath()
 slc_data <- getCensusData(
   state_fips = "49",
   county_name = "Salt Lake County",
-  year = 2025,
+  year = 2024,
   csv_path = getCensusDataPath()
 )
 # }
