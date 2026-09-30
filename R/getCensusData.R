@@ -706,7 +706,6 @@ getStateFIPS <- function(state_name) {
 #' @param verbose Logical, if TRUE prints messages about age aggregation. Default is FALSE.
 #' @return A list containing:
 #'   \item{city}{City name}
-#'   \item{year}{Data year}
 #'   \item{total_pop}{Total population}
 #'   \item{age_pops}{Vector of populations by age group}
 #'   \item{age_labels}{Labels for each age group}
@@ -780,7 +779,6 @@ getCityData <- function(city_name, csv_path, age_groups = c(0,5,10,15,20,25,30,3
     result <- disaggregateCityAges(acs_age_pops)
     return(list(
       city = city_name,
-      year = 2023,
       total_pop = total_pop,
       age_pops = result$age_pops,
       age_labels = result$age_labels,
@@ -794,7 +792,6 @@ getCityData <- function(city_name, csv_path, age_groups = c(0,5,10,15,20,25,30,3
 
   return(list(
     city = city_name,
-    year = 2023,
     total_pop = total_pop,
     age_pops = grouped$pops,
     age_labels = grouped$labels,
