@@ -44,6 +44,7 @@ Suggests:
     stringr,
     purrr
 Config/testthat/edition: 3
+Config/Needs/website: brand.yml
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)
 URL: https://epiforesite.github.io/multigroup-vaccine/
