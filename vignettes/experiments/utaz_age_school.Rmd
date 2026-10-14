@@ -1,8 +1,8 @@
 ---
-title: "Short Creek model with age and school structure"
+title: "Utah/Arizona border community model with age and school structure"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Short Creek model with age and school structure}
+  %\VignetteIndexEntry{Utah/Arizona border community model with age and school structure}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -27,7 +27,7 @@ table {
   width: 100%;
 }
 ```
-This is an experimental model to estimate the size of a measles outbreak in the community informally known as Short Creek that spans the Utah / Arizona border. We incorporate some real vaccination data from publicly available sources, and population age structure and composition from US census data. Vaccination rates for some schools and for the non-school-aged population were imputed based on assumptions and are not based on actual vaccination information for those age groups.
+This is an experimental model to estimate the size of a measles outbreak in a community spanning the Utah / Arizona border. We incorporate some real vaccination data from publicly available sources and population age structure and composition from US census data. Vaccination rates for some schools and for the non-school-aged population were imputed based on assumptions and are not based on actual vaccination information for those age groups.
  
 ```{r setup}
 library(multigroup.vaccine)
