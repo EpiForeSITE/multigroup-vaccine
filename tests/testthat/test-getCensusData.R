@@ -279,7 +279,6 @@ test_that("getCityData loads Hildale data correctly", {
 
   expect_type(data, "list")
   expect_equal(data$city, "Hildale city, Utah")
-  expect_equal(data$year, 2023)
   expect_true(data$total_pop > 0)
   expect_true(length(data$age_pops) > 0)
   expect_equal(length(data$age_pops), length(data$age_labels))
@@ -296,7 +295,6 @@ test_that("getCityData loads Colorado City data correctly", {
 
   expect_type(data, "list")
   expect_equal(data$city, "Colorado City town, Arizona")
-  expect_equal(data$year, 2023)
   expect_true(data$total_pop > 0)
 })
 

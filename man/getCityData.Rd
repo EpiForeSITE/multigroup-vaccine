@@ -24,7 +24,6 @@ getCityData(
 \value{
 A list containing:
 \item{city}{City name}
-\item{year}{Data year}
 \item{total_pop}{Total population}
 \item{age_pops}{Vector of populations by age group}
 \item{age_labels}{Labels for each age group}
