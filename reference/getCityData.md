@@ -45,10 +45,6 @@ A list containing:
 
   City name
 
-- year:
-
-  Data year
-
 - total_pop:
 
   Total population

@@ -15,7 +15,7 @@
 
 - [Age distribution effect on
   R0](https://epiforesite.github.io/multigroup-vaccine/articles/experiments/age_dist_R0.md):
-- [Short Creek model with age and school
-  structure](https://epiforesite.github.io/multigroup-vaccine/articles/experiments/shortcreek_age_school.md):
+- [Utah/Arizona border community model with age and school
+  structure](https://epiforesite.github.io/multigroup-vaccine/articles/experiments/utaz_age_school.md):
 - [Measles Outbreak Simulator for
   Utah](https://epiforesite.github.io/multigroup-vaccine/articles/experiments/simulate_utah.md):
