@@ -1,0 +1,57 @@
+cff-version: 1.2.0
+message: 'To cite package "multigroup.vaccine" in publications use:'
+type: software
+license: MIT
+title: 'multigroup.vaccine: Analyze Outbreak Models of Multi-Group Populations with
+  Vaccination'
+version: 0.1.1
+identifiers:
+- type: doi
+  value: 10.32614/CRAN.package.multigroup.vaccine
+abstract: Model infectious disease dynamics in populations with multiple subgroups
+  having different vaccination rates, transmission characteristics, and contact patterns.
+  Calculate final and intermediate outbreak sizes, form age-structured contact models
+  with automatic fetching of U.S. census data, and explore vaccination scenarios with
+  an interactive 'shiny' dashboard for a model with two subgroups, as described in
+  Nguyen et al. (2024) <https://doi.org/10.1016/j.jval.2024.03.039> and Duong et al.
+  (2026) <https://doi.org/10.1093/ofid/ofaf695.217>.
+authors:
+- family-names: Toth
+  given-names: Damon
+  email: damon.toth@hsc.utah.edu
+  orcid: https://orcid.org/0000-0001-7393-4814
+- family-names: Wagoner
+  given-names: Jake
+  email: jakew@sci.utah.edu
+  orcid: https://orcid.org/0009-0000-5053-2281
+- family-names: Ray
+  given-names: Willy
+  email: william.ray@hsc.utah.edu
+preferred-citation:
+  type: manual
+  title: 'multigroup.vaccine: Analyze Outbreak Models of Multi-Group Populations with
+    Vaccination'
+  authors:
+  - family-names: Toth
+    given-names: Damon
+    email: damon.toth@hsc.utah.edu
+    orcid: https://orcid.org/0000-0001-7393-4814
+  - family-names: Wagoner
+    given-names: Jake
+    email: jakew@sci.utah.edu
+    orcid: https://orcid.org/0009-0000-5053-2281
+  - family-names: Ray
+    given-names: Willy
+    email: william.ray@hsc.utah.edu
+  - family-names: Vega Yon
+    given-names: George
+  year: '2026'
+  notes: R package version 0.1.1
+  url: https://epiforesite.github.io/multigroup-vaccine/
+repository: https://CRAN.R-project.org/package=multigroup.vaccine
+url: https://epiforesite.github.io/multigroup-vaccine/
+contact:
+- family-names: Toth
+  given-names: Damon
+  email: damon.toth@hsc.utah.edu
+  orcid: https://orcid.org/0000-0001-7393-4814
